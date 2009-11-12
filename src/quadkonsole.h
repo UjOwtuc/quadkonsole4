@@ -1,6 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault   *
- *   nomis80@nomis80.org   *
+ *   Copyright (C) 2005 by Simon Perreault                                 *
+ *   nomis80@nomis80.org                                                   *
+ *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,58 +24,56 @@
 #ifndef _QUADKONSOLE_H_
 #define _QUADKONSOLE_H_
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <KDE/KXmlGuiWindow>
+#include <KDE/KParts/MainWindow>
+#include <KDE/KLibLoader>
 
-#include <dcopclient.h>
-#include <kparts/mainwindow.h>
+#include <QtCore/QEvent>
+#include <QtGui/QClipboard>
 
 #include <vector>
 
-class KLibFactory;
-class MouseMoveFilter;
 class QGridLayout;
+
 
 /**
  * @short Application Main Window
  * @author Simon Perreault <nomis80@nomis80.org>
  * @version 2.0
  */
-class QuadKonsole : public KParts::MainWindow
+class QuadKonsole : public KXmlGuiWindow
 {
-    Q_OBJECT
-public:
-    /**
-     * Default Constructor
-     */
-    QuadKonsole( int rows, int columns, bool clickfocus,
-            const QCStringList& cmds = QCStringList() );
+	Q_OBJECT
+	public:
+		/**
+		* Default Constructor
+		*/
+		QuadKonsole( int rows, int columns, const QStringList &cmds=QStringList() );
 
-    ~QuadKonsole();
+		~QuadKonsole();
 
-protected:
-    virtual void customEvent( QCustomEvent* e );
+	protected:
+		virtual void customEvent( QEvent* e );
 
-private slots:
-    void partDestroyed();
-    void focusKonsoleRight();
-    void focusKonsoleLeft();
-    void focusKonsoleUp();
-    void focusKonsoleDown();
-    void pasteSelection();
-    void pasteClipboard();
+	public slots:
+		void partDestroyed ( void );
+		void focusKonsoleRight( void );
+		void focusKonsoleLeft ( void );
+		void focusKonsoleUp ( void );
+		void focusKonsoleDown ( void );
+		void pasteSelection ( void );
+		void pasteClipboard ( void );
 
-private:
-    KParts::ReadOnlyPart* createPart( int row, int column, const QCString& cmd );
-    void emitPaste( bool mode );
+	private:
+		KParts::ReadOnlyPart* createPart( int row, int column, const QStringList& cmd );
+		void emitPaste( QClipboard::Mode mode );
 
-    typedef std::vector<KParts::ReadOnlyPart*> PartVector;
-    PartVector mKonsoleParts;
+		typedef std::vector<KParts::ReadOnlyPart*> PartVector;
+		PartVector mKonsoleParts;
 
-    MouseMoveFilter* mFilter;
-    KLibFactory* mFactory;
-    QGridLayout* mLayout;
+		KLibFactory* mFactory;
+		QGridLayout* mLayout;
 };
 
 #endif // _QUADKONSOLE_H_
+

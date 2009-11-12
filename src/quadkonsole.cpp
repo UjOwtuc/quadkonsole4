@@ -1,6 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault   *
- *   nomis80@nomis80.org   *
+ *   Copyright (C) 2005 by Simon Perreault                                 *
+ *   nomis80@nomis80.org                                                   *
+ *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,257 +23,283 @@
 
 #include "quadkonsole.h"
 
-#include "mousemovefilter.h"
-
-#include <kdebug.h>
+#include <KDE/KDebug>
 #include <kde_terminal_interface.h>
-#include <kiconloader.h>
-#include <klibloader.h>
-#include <klocale.h>
-#include <kparts/mainwindow.h>
+#include <KDE/KIconLoader>
+#include <KDE/KLibLoader>
+#include <KDE/KLocale>
+#include <KDE/KXmlGuiWindow>
+#include <KDE/KActionCollection>
+#include <KDE/KMenuBar>
+#include <KDE/KMenu>
 
-#include <qaction.h>
-#include <qapplication.h>
-#include <qclipboard.h>
-#include <qlayout.h>
+#include <QtGui/QAction>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
+#include <QtGui/QLayout>
 
 #include <algorithm>
 
+#include "quadkonsole.moc"
 
-QuadKonsole::QuadKonsole( int rows, int columns, bool clickfocus,
-        const QCStringList& cmds )
-    : KParts::MainWindow( 0, "QuadKonsole" )
-    , mFilter(0)
+
+QuadKonsole::QuadKonsole ( int rows, int columns, const QStringList &cmds )
+	: KXmlGuiWindow()
 {
-    if ( rows < 1 ) {
-        kdError() << "Number of rows must be at last one." << endl;
-        exit(1);
-    }
-    if ( columns < 1 ) {
-        kdError() << "Number of columns must be at least one." << endl;
-        exit(1);
-    }
+	if (rows < 1)
+	{
+		kdError() << "Number of rows must be at last one." << endl;
+		exit(1);
+	}
+	if (columns < 1)
+	{
+		kdError() << "Number of columns must be at least one." << endl;
+		exit(1);
+	}
 
-    QWidget* centralWidget = new QWidget( this, "central widget" );
-    mLayout = new QGridLayout( centralWidget, rows, columns, 0, 1 );
-    setCentralWidget(centralWidget);
+	QWidget* centralWidget = new QWidget(this, 0);
+	mLayout = new QGridLayout(centralWidget);
+	setCentralWidget(centralWidget);
 
-    if ( !clickfocus ) {
-        mFilter = new MouseMoveFilter(this);
-    }
+	// Try to find libkonsolepart
+	mFactory = KPluginLoader("libkonsolepart").factory();
+	if (mFactory)
+	{
+		// Create the parts
+		for (int i=0; i<rows; ++i)
+		{
+			for (int j=0; j<columns; ++j)
+			{
+				mKonsoleParts.push_back(createPart(i, j, cmds));
+			}
+		}
+	}
+	else
+	{
+		kdFatal() << "No libkonsolepart found !" << endl;
+	}
 
-    // Try to find libkonsolepart
-    mFactory = KLibLoader::self()->factory( "libkonsolepart" );
-    if (mFactory) {
-        // Create the parts
-        QCStringList::const_iterator cmd = cmds.constBegin();
-        for ( int i = 0; i < rows; ++i ) {
-            for ( int j = 0; j < columns; ++j ) {
-                mKonsoleParts.push_back( createPart(i, j,
-                            cmd != cmds.end() ? *cmd++ : QCString()) );
-            }
-        }
-    }
-    else {
-        kdFatal() << "No libkonsolepart found !" << endl;
-    }
+	// KAction's did not work before adding them to a (invisible) KMenuBar
+	// for a standard menubar uncomment this:
+	// KMenuBar *mb = menuBar();
+	KMenuBar *mb = new KMenuBar(this);
 
-    QAction* goRight = new QAction( QString::null, CTRL + SHIFT + Key_Right, this );
-    connect( goRight, SIGNAL(activated()), this, SLOT(focusKonsoleRight()) );
+	KMenu *m = new KMenu("QuadKonsole", mb);
+	mb->addMenu(m);
+	mb->show();
+	m->show();
 
-    QAction* goLeft = new QAction( QString::null, CTRL + SHIFT + Key_Left, this );
-    connect( goLeft, SIGNAL(activated()), this, SLOT(focusKonsoleLeft()) );
+	KAction* goRight = new KAction(KIcon("arrow-right"), "Right", this);
+	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
+	m->addAction(goRight);
+	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
 
-    QAction* goUp = new QAction( QString::null, CTRL + SHIFT + Key_Up, this );
-    connect( goUp, SIGNAL(activated()), this, SLOT(focusKonsoleUp()) );
+	KAction* goLeft = new KAction(KIcon("arrow-left"), "Left", this);
+	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
+	m->addAction(goLeft);
+	connect(goLeft, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleLeft()));
 
-    QAction* goDown = new QAction( QString::null, CTRL + SHIFT + Key_Down, this );
-    connect( goDown, SIGNAL(activated()), this, SLOT(focusKonsoleDown()) );
+	KAction* goUp = new KAction(KIcon("arrow-up"), "Up", this);
+	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
+	m->addAction(goUp);
+	connect(goUp, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleUp()));
 
-    QAction* pasteClipboard = new QAction( QString::null, SHIFT + Key_Insert, this );
-    connect( pasteClipboard, SIGNAL(activated()), this, SLOT(pasteClipboard()) );
+	KAction* goDown = new KAction(KIcon("arrow-down"), "Down", this);
+	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
+	m->addAction(goDown);
+	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
 
-    QAction* pasteSelection = new QAction( QString::null, CTRL + SHIFT + Key_Insert, this );
-    connect( pasteSelection, SIGNAL(activated()), this, SLOT(pasteSelection()) );
+	KAction* pasteClipboard = new KAction(KIcon("edit-paste"), "Paste &clipboard", this);
+	pasteClipboard->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert));
+	m->addAction(pasteClipboard);
+	connect(pasteClipboard, SIGNAL(triggered(bool)), this, SLOT(pasteClipboard()));
 
-    setIcon( DesktopIcon("konsole") );
+//	KAction* pasteSelection = new KAction(KIcon("edit-paste"), "Paste &selection", this);
+//	pasteSelection->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
+//	m->addAction(pasteSelection);
+//	connect(pasteSelection, SIGNAL(triggered(bool)), this, SLOT(pasteSelection()));
 }
 
-QuadKonsole::~QuadKonsole()
+
+QuadKonsole::~QuadKonsole ( void )
 {
-    for ( PartVector::const_iterator i = mKonsoleParts.begin(); i !=
-            mKonsoleParts.end(); ++i ) {
-        delete *i;
-    }
+	for (PartVector::const_iterator i=mKonsoleParts.begin(); i!=mKonsoleParts.end(); ++i)
+	{
+		delete *i;
+	}
 }
 
-void QuadKonsole::pasteSelection()
+
+void QuadKonsole::pasteSelection ( void )
 {
-    emitPaste(true);
+	emitPaste(QClipboard::Selection);
 }
 
-void QuadKonsole::pasteClipboard()
+
+void QuadKonsole::pasteClipboard ( void )
 {
-    emitPaste(false);
+	emitPaste(QClipboard::Clipboard);
 }
 
-void QuadKonsole::emitPaste(bool mode)
+
+void QuadKonsole::emitPaste ( QClipboard::Mode mode )
 {
-    bool oldMode = QApplication::clipboard()->selectionModeEnabled();
-    QApplication::clipboard()->setSelectionMode( mode );
-    QString text = QApplication::clipboard()->text();
-    for ( PartVector::iterator part = mKonsoleParts.begin(); part !=
-            mKonsoleParts.end(); ++part )
-    {
-        if ( (*part)->widget()->hasFocus() ) {
-            TerminalInterface* t = static_cast<TerminalInterface*>(
-                    (*part)->qt_cast( "TerminalInterface" ) );
-            t->sendInput(text);
-            break;
-        }
-    }
-    QApplication::clipboard()->setSelectionMode( oldMode );
+	QString text = QApplication::clipboard()->text(mode);
+	for (PartVector::iterator part=mKonsoleParts.begin(); part!=mKonsoleParts.end(); ++part)
+	{
+		if ((*part)->widget()->hasFocus())
+		{
+			TerminalInterface* t = qobject_cast<TerminalInterface*>(*part);
+			t->sendInput(text);
+			break;
+		}
+	}
 }
 
-KParts::ReadOnlyPart* QuadKonsole::createPart( int row, int column,
-        const QCString& cmd )
+
+KParts::ReadOnlyPart* QuadKonsole::createPart( int row, int column, const QStringList& )
 {
-    // Create a part
-    KParts::ReadOnlyPart* part =
-        dynamic_cast<KParts::ReadOnlyPart*>( mFactory->create(this,
-                    QString("konsolepart-%1-%2").arg(row).arg(column),
-                    "KParts::ReadOnlyPart") );
-    connect( part, SIGNAL(destroyed()), SLOT(partDestroyed()) );
+	// Create a part
+	KParts::ReadOnlyPart* part = dynamic_cast<KParts::ReadOnlyPart*>(mFactory->create<QObject>(this, this));
+	connect(part, SIGNAL(destroyed()), SLOT(partDestroyed()));
 
-    // Execute cmd
-    TerminalInterface* t = static_cast<TerminalInterface*>(
-            part->qt_cast("TerminalInterface") );
-    if ( !cmd.isEmpty() && t ) {
-        QString shell( getenv("SHELL") );
-        QStrList l;
-        l.append( QStringList::split('/', shell).last() );
-        l.append("-c");
-        l.append(cmd);
-        t->startProgram( shell, l );
-    }
+	// Execute cmd
+	TerminalInterface* t = qobject_cast<TerminalInterface*>(part);
+	if (t)
+		t->showShellInDir(QString());
+	else
+	{
+		kdError() << "could not get TerminalInterface for part row=" << row << " column=" << column << endl;
+		exit(1);
+	}
 
-    // Make this part's widget activate on mouse over
-    if (mFilter) {
-        part->widget()->setMouseTracking(true);
-        part->widget()->installEventFilter(mFilter);
-    }
+	// Add widget to layout
+	part->widget()->setParent(centralWidget());
+	mLayout->addWidget(part->widget(), row, column);
+	part->widget()->show();
 
-    // Add widget to layout
-    part->widget()->reparent( centralWidget(), QPoint(0,0) );
-    mLayout->addWidget( part->widget(), row, column );
-    part->widget()->show();
-
-    return part;
+	return part;
 }
 
-class PartDeletedEvent : public QCustomEvent
+
+class PartDeletedEvent : public QEvent
 {
-    public:
-        PartDeletedEvent( int row, int column )
-            : QCustomEvent( QEvent::User + 1 )
-            , mRow(row)
-            , mColumn(column)
-        {
-        }
+	public:
+		PartDeletedEvent ( int row, int column )
+			: QEvent(QEvent::User),
+			mRow(row),
+			mColumn(column)
+		{}
 
-        inline int row() const { return mRow; }
-        inline int column() const { return mColumn; }
+		inline int row ( void ) const { return mRow; }
+		inline int column ( void ) const { return mColumn; }
 
-    private:
-        int mRow, mColumn;
+	private:
+		int mRow, mColumn;
 };
 
-void QuadKonsole::partDestroyed()
+
+void QuadKonsole::partDestroyed ( void )
 {
-    kdDebug() << k_funcinfo << endl;
+	kdDebug() << k_funcinfo << endl;
 
-    PartVector::iterator part = std::find( mKonsoleParts.begin(),
-            mKonsoleParts.end(), sender() );
-    if ( part != mKonsoleParts.end() ) {
-        *part = 0;
+	PartVector::iterator part = std::find(mKonsoleParts.begin(), mKonsoleParts.end(), sender());
+	if (part != mKonsoleParts.end())
+	{
+		*part = 0;
 
-        // A terminal emulator has been destroyed. Plan to start a new one.
-        int index = part - mKonsoleParts.begin();
-        int row = index / mLayout->numCols();
-        int col = index % mLayout->numCols();
+		// A terminal emulator has been destroyed. Plan to start a new one.
+		int index = part - mKonsoleParts.begin();
+		int row = index / mLayout->columnCount();
+		int col = index % mLayout->columnCount();
 
-        QApplication::postEvent( this, new PartDeletedEvent(row, col) );
-    }
+		QApplication::postEvent(this, new PartDeletedEvent(row, col));
+	}
 }
 
-void QuadKonsole::customEvent( QCustomEvent* e )
-{
-    kdDebug() << k_funcinfo << endl;
 
-    if ( e->type() == QEvent::User + 1 ) {
-        // Start a new part.
-        PartDeletedEvent* pde = static_cast<PartDeletedEvent*>(e);
-        mKonsoleParts[ pde->row() * mLayout->numCols() + pde->column() ] =
-            createPart( pde->row(), pde->column(), QCString() );
-    }
+void QuadKonsole::customEvent ( QEvent* e )
+{
+	kdDebug() << k_funcinfo << endl;
+
+	if (e->type() == QEvent::User)
+	{
+		// Start a new part.
+		PartDeletedEvent* pde = static_cast<PartDeletedEvent*>(e);
+		mKonsoleParts[pde->row() * mLayout->columnCount() + pde->column()] = createPart(pde->row(), pde->column(), QStringList());
+		mKonsoleParts[pde->row() * mLayout->columnCount() + pde->column()]->widget()->setFocus();
+	}
 }
 
-void QuadKonsole::focusKonsoleRight()
+
+void QuadKonsole::focusKonsoleRight ( void )
 {
-    for ( PartVector::iterator part = mKonsoleParts.begin(); part !=
-            mKonsoleParts.end(); ++part ) {
-        if ( (*part)->widget()->hasFocus() ) {
-            ++part;
-            if ( part == mKonsoleParts.end() ) {
-                part = mKonsoleParts.begin();
-            }
-            (*part)->widget()->setFocus();
-            break;
-        }
-    }
+	for (PartVector::iterator part = mKonsoleParts.begin(); part != mKonsoleParts.end(); ++part)
+	{
+		if ((*part)->widget()->hasFocus())
+		{
+			++part;
+			if (part == mKonsoleParts.end())
+			{
+				part = mKonsoleParts.begin();
+			}
+			(*part)->widget()->setFocus();
+			break;
+		}
+	}
 }
 
-void QuadKonsole::focusKonsoleLeft()
+
+void QuadKonsole::focusKonsoleLeft ( void )
 {
-    for ( PartVector::reverse_iterator part = mKonsoleParts.rbegin(); part !=
-            mKonsoleParts.rend(); ++part ) {
-        if ( (*part)->widget()->hasFocus() ) {
-            ++part;
-            if ( part == mKonsoleParts.rend() ) {
-                part = mKonsoleParts.rbegin();
-            }
-            (*part)->widget()->setFocus();
-            break;
-        }
-    }
+	for (PartVector::reverse_iterator part=mKonsoleParts.rbegin(); part!=mKonsoleParts.rend(); ++part)
+	{
+		if ((*part)->widget()->hasFocus())
+		{
+			++part;
+			if (part == mKonsoleParts.rend())
+			{
+				part = mKonsoleParts.rbegin();
+			}
+			(*part)->widget()->setFocus();
+			break;
+		}
+	}
 }
 
-void QuadKonsole::focusKonsoleUp()
+
+void QuadKonsole::focusKonsoleUp ( void )
 {
-    for ( int i = 0; i < mLayout->numRows() * mLayout->numCols(); ++i ) {
-        if ( mKonsoleParts[i]->widget()->hasFocus() ) {
-            i -= mLayout->numCols();
-            if ( i < 0) {
-                i += mLayout->numRows() * mLayout->numCols();
-            }
-            mKonsoleParts[i]->widget()->setFocus();
-            break;
-        }
-    }
+	for (int i=0; i<mLayout->rowCount() * mLayout->columnCount(); ++i)
+	{
+		if (mKonsoleParts[i]->widget()->hasFocus())
+		{
+			i -= mLayout->columnCount();
+			if (i < 0)
+			{
+				i += mLayout->rowCount() * mLayout->columnCount();
+			}
+			mKonsoleParts[i]->widget()->setFocus();
+			break;
+		}
+	}
 }
 
-void QuadKonsole::focusKonsoleDown()
+
+void QuadKonsole::focusKonsoleDown ( void )
 {
-    for ( int i = 0; i < mLayout->numRows() * mLayout->numCols(); ++i ) {
-        if ( mKonsoleParts[i]->widget()->hasFocus() ) {
-            i += mLayout->numCols();
-            if ( i >= mLayout->numRows() * mLayout->numCols()) {
-                i -= mLayout->numRows() * mLayout->numCols();
-            }
-            mKonsoleParts[i]->widget()->setFocus();
-            break;
-        }
-    }
+	for (int i=0; i<mLayout->rowCount() * mLayout->columnCount(); ++i)
+	{
+		if (mKonsoleParts[i]->widget()->hasFocus())
+		{
+			i += mLayout->columnCount();
+			if ( i >= mLayout->rowCount() * mLayout->columnCount())
+			{
+				i -= mLayout->rowCount() * mLayout->columnCount();
+			}
+			mKonsoleParts[i]->widget()->setFocus();
+			break;
+		}
+	}
 }
 
-#include "quadkonsole.moc"

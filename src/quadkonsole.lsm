@@ -1,0 +1,16 @@
+Begin3
+Title:          QuadKonsole -- Some description
+Version:        2.0
+Entered-date:   
+Description:    
+Keywords:       KDE Qt
+Author:         Simon Perreault <nomis80@nomis80.org>
+Maintained-by:  Simon Perreault <nomis80@nomis80.org>
+Home-page:      
+Alternate-site: 
+Primary-site:   ftp://ftp.kde.org/pub/kde/unstable/apps/utils
+                xxxxxx  quadkonsole-2.0.tar.gz
+                xxx     quadkonsole-2.0.lsm
+Platform:       Linux. Needs KDE
+Copying-policy: GPL
+End

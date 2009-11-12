@@ -1,0 +1,34 @@
+2008-03-30  Simon Perreault  <nomis80@nomis80.org>
+
+	* Released 2.0.3.
+
+2007-07-19  Simon Perreault  <nomis80@nomis80.org>
+
+	* Added --cmd switch.
+
+2007-07-19  Richard Weinberger
+
+	* Added icon.
+
+2007-03-26  Simon Perreault  <nomis80@nomis80.org>
+
+	* Released 2.0.2.
+
+2006-10-10  Jonas Hurrelmann  <j@outpo.st>
+
+	* Keyboard paste support.
+
+2006-09-22  Norbert Thiebaud  <nthiebau@tampabay.rr.com>
+
+	* Fix up and down keys when using more than 2 columns.
+
+2006-03-07  Simon Perreault  <nomis80@nomis80.org>
+
+	* Compilation fixes.
+	* Icon in "System Tools" subdirectory.
+	* Removed empty manual.
+	* Released 2.0.1.
+
+2005-03-28  Simon Perreault  <nomis80@nomis80.org>
+
+	* Finished 2.0 rewrite.

@@ -1,0 +1,15 @@
+QuadKonsole embeds Konsole kparts in a grid layout. The number of rows and
+columns of Konsoles is 2 by 2 by default, but can be specified on the
+command-line. The settings of the Konsoles can be accessed using the right mouse
+button and can be saved. These settings apply to the system globally, to all
+Konsole kparts. Konsole widgets get focus as soon as the mouse hovers on them
+(focus follows mouse). This can be disabled on the command-line. What else...
+mmm... Try removing the window border or going full screen using the window menu
+(Alt-F3) for even more screen real-estate.
+
+Use CTRL + SHIFT + arrow key to move from konsole to konsole.
+
+Type "quadkonsole --help" for info about switches. There are some interesting
+ones...
+
+Send me mail at nomis80@nomis80.org!

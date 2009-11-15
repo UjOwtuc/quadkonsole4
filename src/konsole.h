@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 by Karsten Borgwaldt                               *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,53 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifndef KONSOLE_H
+#define KONSOLE_H
 
-#ifndef _QUADKONSOLE_H_
-#define _QUADKONSOLE_H_
+#include <KDE/KParts/ReadOnlyPart>
 
-#include "konsole.h"
-
-#include <KDE/KXmlGuiWindow>
-#include <KDE/KParts/MainWindow>
-#include <KDE/KLibLoader>
-
-#include <QtCore/QEvent>
-#include <QtGui/QClipboard>
-
-#include <vector>
-
-class QGridLayout;
+#include <QtGui/QWidget>
+#include <QtGui/QGridLayout>
+#include <QtGui/QDockWidget>
 
 
 /**
- * @short Application Main Window
- * @author Simon Perreault <nomis80@nomis80.org>
- * @version 2.0
+ * @short Contains a terminal emulator
+ * @author Karsten Borgwaldt <kb@kb.ccchl.de>
+ * @version 2.1
  */
-class QuadKonsole : public KXmlGuiWindow
+class Konsole : public QWidget
 {
 	Q_OBJECT
+
 	public:
-		/**
-		* Default Constructor
-		*/
-		QuadKonsole( int rows, int columns, const QStringList &cmds=QStringList() );
-		~QuadKonsole();
+		Konsole ( QWidget *parent, QGridLayout *layout, int row, int column );
+		~Konsole ( void );
+
+		void sendInput ( const QString &text );
+		QWidget *widget ( void ) { if (m_part) { return m_part->widget(); } return 0; }
 
 	public slots:
-		void focusKonsoleRight( void );
-		void focusKonsoleLeft ( void );
-		void focusKonsoleUp ( void );
-		void focusKonsoleDown ( void );
-		void pasteClipboard ( void );
+		void partDestroyed ( void );
 
 	private:
-		void emitPaste( QClipboard::Mode mode );
+		void createPart ( void );
 
-		typedef std::vector<Konsole*> PartVector;
-		PartVector mKonsoleParts;
-		QGridLayout* mLayout;
+		QGridLayout *m_layout;
+		KParts::ReadOnlyPart *m_part;
+		int m_row;
+		int m_column;
 };
 
-#endif // _QUADKONSOLE_H_
-
+#endif // KONSOLE_H

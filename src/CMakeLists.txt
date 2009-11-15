@@ -1,6 +1,7 @@
 set(quadkonsole_SRCS
    quadkonsole.cpp
    main.cpp
+   konsole.cpp
  )
 
 kde4_add_executable(quadkonsole ${quadkonsole_SRCS})

@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 by Karsten Borgwaldt                               *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,53 +18,72 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-#ifndef _QUADKONSOLE_H_
-#define _QUADKONSOLE_H_
-
 #include "konsole.h"
 
-#include <KDE/KXmlGuiWindow>
-#include <KDE/KParts/MainWindow>
+#include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KLibLoader>
+#include <KDE/KDebug>
+#include <kde_terminal_interface.h>
 
-#include <QtCore/QEvent>
-#include <QtGui/QClipboard>
-
-#include <vector>
-
-class QGridLayout;
+#include <QtGui/QGridLayout>
 
 
-/**
- * @short Application Main Window
- * @author Simon Perreault <nomis80@nomis80.org>
- * @version 2.0
- */
-class QuadKonsole : public KXmlGuiWindow
+namespace
 {
-	Q_OBJECT
-	public:
-		/**
-		* Default Constructor
-		*/
-		QuadKonsole( int rows, int columns, const QStringList &cmds=QStringList() );
-		~QuadKonsole();
+	KLibFactory *factory = 0;
+}
 
-	public slots:
-		void focusKonsoleRight( void );
-		void focusKonsoleLeft ( void );
-		void focusKonsoleUp ( void );
-		void focusKonsoleDown ( void );
-		void pasteClipboard ( void );
 
-	private:
-		void emitPaste( QClipboard::Mode mode );
+Konsole::Konsole ( QWidget *parent, QGridLayout *layout, int row, int column )
+	: QWidget(parent),
+	m_layout(layout),
+	m_row(row),
+	m_column(column)
+{
+	createPart();
+}
 
-		typedef std::vector<Konsole*> PartVector;
-		PartVector mKonsoleParts;
-		QGridLayout* mLayout;
-};
 
-#endif // _QUADKONSOLE_H_
+Konsole::~Konsole ( void )
+{
+	if (m_part)
+		delete m_part;
+}
 
+
+
+void Konsole::sendInput(const QString& text)
+{
+	TerminalInterface *t = qobject_cast< TerminalInterface* >(m_part);
+	if (t)
+		t->sendInput(text);
+}
+
+
+void Konsole::partDestroyed ( void )
+{
+	createPart();
+	m_part->widget()->setFocus();
+}
+
+
+void Konsole::createPart ( void )
+{
+	if (factory == 0)
+	{
+		factory = KPluginLoader("libkonsolepart").factory();
+	}
+	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(this, this));
+	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
+	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
+	if (t)
+		t->showShellInDir(QString());
+	else
+	{
+		kdError() << "could not get TerminalInterface" << endl;
+		exit(1);
+	}
+
+	m_part->widget()->setParent(this);
+	m_layout->addWidget(m_part->widget(), m_row, m_column);
+}

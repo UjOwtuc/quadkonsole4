@@ -1,4 +1,4 @@
-project(quadkonsole)
+project(quadkonsole4)
 
 find_package(KDE4 REQUIRED)
 include (KDE4Defaults)

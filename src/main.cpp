@@ -29,11 +29,11 @@
 #include <KDE/KLocale>
 
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
-static const char version[] = "2.1";
+static const char version[] = "0.1";
 
 int main(int argc, char **argv)
 {
-	KAboutData about("quadkonsole", 0, ki18n("quadkonsole"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault"), KLocalizedString(), 0, "nomis80@nomis80.org");
+	KAboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault\n(C) 2009 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
 	about.addAuthor(ki18n("Simon Perreault"), KLocalizedString(), "nomis80@nomis80.org");
 	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
 	KCmdLineArgs::init(argc, argv, &about);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
 	args->clear();
 
-	app.setWindowIcon(KIcon("quadkonsole"));
+	app.setWindowIcon(KIcon("quadkonsole4"));
 
 	// mainWin has WDestructiveClose flag by default, so it will delete itself.
 	return app.exec();

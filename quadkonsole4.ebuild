@@ -7,8 +7,8 @@ EAPI="2"
 inherit kde4-base
 
 DESCRIPTION="Quadkonsole provides a grid of Konsole terminals."
-HOMEPAGE="http://nomis80.org/quadkonsole/"
-SRC_URI="http://nomis80.org/${PN}/${P}.tar.lzma"
+HOMEPAGE="http://kb.ccchl.de/quadkonsole4/"
+SRC_URI="http://kb.ccchl.de/${PN}/${P}.tar.lzma"
 
 LICENSE="GPL-2"
 SLOT="0"

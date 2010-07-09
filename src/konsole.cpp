@@ -25,8 +25,9 @@
 #include <KDE/KDebug>
 #include <kde_terminal_interface.h>
 
-#include <QtGui/QGridLayout>
+#include <QtGui/QSplitter>
 
+#include <iostream>
 
 namespace
 {
@@ -34,7 +35,7 @@ namespace
 }
 
 
-Konsole::Konsole ( QWidget *parent, QGridLayout *layout, int row, int column )
+Konsole::Konsole ( QWidget *parent, QSplitter *layout, int row, int column )
 	: QWidget(parent),
 	m_layout(layout),
 	m_row(row),
@@ -62,6 +63,7 @@ void Konsole::sendInput(const QString& text)
 
 void Konsole::partDestroyed ( void )
 {
+	emit destroyed();
 	createPart();
 	m_part->widget()->setFocus();
 }
@@ -85,5 +87,12 @@ void Konsole::createPart ( void )
 	}
 
 	m_part->widget()->setParent(this);
-	m_layout->addWidget(m_part->widget(), m_row, m_column);
+	m_layout->insertWidget(m_column, m_part->widget());
+
+	int width = m_layout->geometry().width() / m_layout->count();
+	QList<int> sizes;
+	for (int i=0; i<m_layout->count(); ++i)
+		sizes.append(width);
+	m_layout->setSizes(sizes);
 }
+

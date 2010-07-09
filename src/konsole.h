@@ -24,7 +24,7 @@
 #include <KDE/KParts/ReadOnlyPart>
 
 #include <QtGui/QWidget>
-#include <QtGui/QGridLayout>
+#include <QtGui/QSplitter>
 #include <QtGui/QDockWidget>
 
 
@@ -38,11 +38,14 @@ class Konsole : public QWidget
 	Q_OBJECT
 
 	public:
-		Konsole ( QWidget *parent, QGridLayout *layout, int row, int column );
+		Konsole ( QWidget *parent, QSplitter *layout, int row, int column );
 		~Konsole ( void );
 
 		void sendInput ( const QString &text );
 		QWidget *widget ( void ) { if (m_part) { return m_part->widget(); } return 0; }
+
+	signals:
+		void destroyed ( void );
 
 	public slots:
 		void partDestroyed ( void );
@@ -50,7 +53,7 @@ class Konsole : public QWidget
 	private:
 		void createPart ( void );
 
-		QGridLayout *m_layout;
+		QSplitter *m_layout;
 		KParts::ReadOnlyPart *m_part;
 		int m_row;
 		int m_column;

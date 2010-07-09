@@ -32,6 +32,7 @@
 
 #include <QtCore/QEvent>
 #include <QtGui/QClipboard>
+#include <QtGui/QSplitter>
 
 #include <vector>
 
@@ -65,7 +66,8 @@ class QuadKonsole : public KXmlGuiWindow
 
 		typedef std::vector<Konsole*> PartVector;
 		PartVector mKonsoleParts;
-		QGridLayout* mLayout;
+		QSplitter *mRows;
+		std::vector<QSplitter *> mRowLayouts;
 };
 
 #endif // _QUADKONSOLE_H_

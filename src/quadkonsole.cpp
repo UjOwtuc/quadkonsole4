@@ -61,24 +61,31 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 	}
 
 	QWidget* centralWidget = new QWidget(this, 0);
-
-	mLayout = new QGridLayout(centralWidget);
+	QGridLayout *grid = new QGridLayout(centralWidget);
+	mRows = new QSplitter(Qt::Vertical, centralWidget);
+	mRows->setChildrenCollapsible(false);
+	grid->addWidget(mRows, 0, 0);
 	setCentralWidget(centralWidget);
 	actionCollection()->addAssociatedWidget(centralWidget);
 
 	for (int i = 0; i < rows; ++i)
 	{
+		QSplitter *row = new QSplitter(Qt::Horizontal, centralWidget);
+		row->setChildrenCollapsible(false);
+		mRowLayouts.push_back(row);
+		mRows->addWidget(row);
+		mRows->setStretchFactor(i, 1);
 		for (int j = 0; j < columns; ++j)
 		{
 			//mKonsoleParts.push_back(new Konsole(centralWidget, mLayout, i, j));
-			Konsole *part = new Konsole(centralWidget, mLayout, i, j);
+			Konsole *part = new Konsole(centralWidget, mRowLayouts[i], i, j);
 			actionCollection()->addAssociatedWidget(part->widget());
 			mKonsoleParts.push_back(part);
+			mRowLayouts[i]->setStretchFactor(j, 1);
 		}
 	}
 
 	KAction* goRight = new KAction(KIcon("arrow-right"), "Right", this);
-
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
 	actionCollection()->addAction("go right", goRight);
 	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
@@ -146,11 +153,8 @@ void QuadKonsole::focusKonsoleRight(void)
 		if ((*part)->widget()->hasFocus())
 		{
 			++part;
-
 			if (part == mKonsoleParts.end())
-			{
 				part = mKonsoleParts.begin();
-			}
 
 			(*part)->widget()->setFocus();
 			break;
@@ -166,11 +170,8 @@ void QuadKonsole::focusKonsoleLeft(void)
 		if ((*part)->widget()->hasFocus())
 		{
 			++part;
-
 			if (part == mKonsoleParts.rend())
-			{
 				part = mKonsoleParts.rbegin();
-			}
 
 			(*part)->widget()->setFocus();
 			break;
@@ -181,19 +182,15 @@ void QuadKonsole::focusKonsoleLeft(void)
 
 void QuadKonsole::focusKonsoleUp(void)
 {
-	for (int i = 0; i < mLayout->rowCount() * mLayout->columnCount(); ++i)
+	for (unsigned int i = 0; i < mRowLayouts.size() * mRowLayouts[0]->count(); ++i)
 	{
 		if (mKonsoleParts[i]->widget()->hasFocus())
 		{
-			i -= mLayout->columnCount();
+			int index = i - mRowLayouts[0]->count();
+			if (index < 0)
+				index += mRowLayouts.size() * mRowLayouts[0]->count();
 
-			if (i < 0)
-			{
-				i += mLayout->rowCount() * mLayout->columnCount();
-			}
-
-			mKonsoleParts[i]->widget()->setFocus();
-
+			mKonsoleParts[index]->widget()->setFocus();
 			break;
 		}
 	}
@@ -202,20 +199,17 @@ void QuadKonsole::focusKonsoleUp(void)
 
 void QuadKonsole::focusKonsoleDown(void)
 {
-	for (int i = 0; i < mLayout->rowCount() * mLayout->columnCount(); ++i)
+	for (unsigned int i = 0; i < mRowLayouts.size() * mRowLayouts[0]->count(); ++i)
 	{
 		if (mKonsoleParts[i]->widget()->hasFocus())
 		{
-			i += mLayout->columnCount();
+			int index = i + mRowLayouts[0]->count();
+			if (index >= static_cast<int>(mRowLayouts.size() * mRowLayouts[0]->count()))
+				index -= mRowLayouts.size() * mRowLayouts[0]->count();
 
-			if (i >= mLayout->rowCount() * mLayout->columnCount())
-			{
-				i -= mLayout->rowCount() * mLayout->columnCount();
-			}
-
-			mKonsoleParts[i]->widget()->setFocus();
-
+			mKonsoleParts[index]->widget()->setFocus();
 			break;
 		}
 	}
 }
+

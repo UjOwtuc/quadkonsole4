@@ -104,6 +104,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 	pasteClipboard->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert));
 	actionCollection()->addAction("pasteClipboard", pasteClipboard);
 	connect(pasteClipboard, SIGNAL(triggered(bool)), this, SLOT(pasteClipboard()));
+
+	setWindowIcon(KIcon("quadkonsole4"));
 }
 
 

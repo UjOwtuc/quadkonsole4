@@ -41,6 +41,7 @@ Konsole::Konsole ( QWidget *parent, QSplitter *layout, int row, int column )
 	m_row(row),
 	m_column(column)
 {
+	m_part = 0;
 	createPart();
 }
 
@@ -63,7 +64,9 @@ void Konsole::sendInput(const QString& text)
 
 void Konsole::partDestroyed ( void )
 {
-	emit destroyed();
+	if (m_part)
+		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
+// 	emit destroyed();
 	createPart();
 	m_part->widget()->setFocus();
 }

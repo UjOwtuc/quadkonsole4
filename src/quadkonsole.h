@@ -59,6 +59,7 @@ class QuadKonsole : public KXmlGuiWindow
 		void focusKonsoleLeft ( void );
 		void focusKonsoleUp ( void );
 		void focusKonsoleDown ( void );
+		void reparent();
 		void pasteClipboard ( void );
 
 	private:
@@ -68,6 +69,20 @@ class QuadKonsole : public KXmlGuiWindow
 		PartVector mKonsoleParts;
 		QSplitter *mRows;
 		std::vector<QSplitter *> mRowLayouts;
+};
+
+class ExternalMainWindow : public KXmlGuiWindow
+{
+	Q_OBJECT
+	public:
+		ExternalMainWindow(KParts::ReadOnlyPart* part);
+		~ExternalMainWindow();
+
+	private slots:
+		void close();
+
+	private:
+		KParts::ReadOnlyPart* m_part;
 };
 
 #endif // _QUADKONSOLE_H_

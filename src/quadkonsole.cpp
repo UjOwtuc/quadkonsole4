@@ -41,8 +41,34 @@
 #include <QtGui/QLayout>
 
 #include <algorithm>
+#include <cerrno>
 
 #include "quadkonsole.moc"
+
+
+ExternalMainWindow::ExternalMainWindow(KParts::ReadOnlyPart* part)
+	: KXmlGuiWindow(),
+	m_part(part)
+{
+	setCentralWidget(m_part->widget());
+	m_part->widget()->setParent(this);
+	showNormal();
+	setWindowIcon(KIcon("quadkonsole4"));
+
+	connect(m_part, SIGNAL(destroyed()), SLOT(close()));
+}
+
+
+ExternalMainWindow::~ExternalMainWindow()
+{
+// 	delete m_part;
+}
+
+
+void ExternalMainWindow::close()
+{
+	deleteLater();
+}
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
@@ -104,6 +130,11 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
+
+	KAction* reparent = new KAction(KIcon("document-new"), "Reparent", this);
+	reparent->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
+	actionCollection()->addAction("reparent", reparent);
+	connect(reparent, SIGNAL(triggered(bool)), this, SLOT(reparent()));
 
 	// The whole paste clipboard action does not work
 	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
@@ -210,6 +241,21 @@ void QuadKonsole::focusKonsoleDown(void)
 				index -= mRowLayouts.size() * mRowLayouts[0]->count();
 
 			mKonsoleParts[index]->widget()->setFocus();
+			break;
+		}
+	}
+}
+
+
+void QuadKonsole::reparent()
+{
+	kDebug() << "reparent" << endl;
+	for (unsigned int i = 0; i < mRowLayouts.size() * mRowLayouts[0]->count(); ++i)
+	{
+		if (mKonsoleParts[i]->widget()->hasFocus())
+		{
+			ExternalMainWindow* external = new ExternalMainWindow(mKonsoleParts[i]->part());
+			mKonsoleParts[i]->partDestroyed();
 			break;
 		}
 	}

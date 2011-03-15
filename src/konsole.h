@@ -42,6 +42,8 @@ class Konsole : public QWidget
 		~Konsole ( void );
 
 		void sendInput ( const QString &text );
+		QString foregroundProcessName();
+
 		KParts::ReadOnlyPart* part() { return m_part; }
 		QWidget *widget ( void ) { if (m_part) { return m_part->widget(); } return 0; }
 

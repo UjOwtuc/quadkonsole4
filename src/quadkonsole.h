@@ -33,6 +33,7 @@
 #include <QtCore/QEvent>
 #include <QtGui/QClipboard>
 #include <QtGui/QSplitter>
+#include <QtCore/QTimer>
 
 #include <vector>
 
@@ -80,8 +81,10 @@ class ExternalMainWindow : public KXmlGuiWindow
 
 	private slots:
 		void close();
+		void updateTitle();
 
 	private:
+		QTimer m_updateTimer;
 		KParts::ReadOnlyPart* m_part;
 };
 

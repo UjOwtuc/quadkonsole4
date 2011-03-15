@@ -23,7 +23,7 @@
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KLibLoader>
 #include <KDE/KDebug>
-#include <kde_terminal_interface.h>
+#include <kde_terminal_interface_v2.h>
 
 #include <QtGui/QSplitter>
 
@@ -56,9 +56,18 @@ Konsole::~Konsole ( void )
 
 void Konsole::sendInput(const QString& text)
 {
-	TerminalInterface *t = qobject_cast< TerminalInterface* >(m_part);
+	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_part);
 	if (t)
 		t->sendInput(text);
+}
+
+
+QString Konsole::foregroundProcessName()
+{
+	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_part);
+	if (t)
+		return t->foregroundProcessName();
+	return "";
 }
 
 

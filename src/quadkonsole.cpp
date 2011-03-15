@@ -25,7 +25,7 @@
 #include "konsole.h"
 
 #include <KDE/KDebug>
-#include <kde_terminal_interface.h>
+#include <kde_terminal_interface_v2.h>
 #include <KDE/KIconLoader>
 #include <KDE/KLibLoader>
 #include <KDE/KLocale>
@@ -53,9 +53,12 @@ ExternalMainWindow::ExternalMainWindow(KParts::ReadOnlyPart* part)
 	setCentralWidget(m_part->widget());
 	m_part->widget()->setParent(this);
 	showNormal();
+	setWindowTitle("QuadKonsole4 - External");
 	setWindowIcon(KIcon("quadkonsole4"));
 
 	connect(m_part, SIGNAL(destroyed()), SLOT(close()));
+	connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateTitle()));
+	m_updateTimer.start(1300);
 }
 
 
@@ -68,6 +71,20 @@ ExternalMainWindow::~ExternalMainWindow()
 void ExternalMainWindow::close()
 {
 	deleteLater();
+}
+
+
+void ExternalMainWindow::updateTitle()
+{
+	QString title;
+	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_part);
+	if (t)
+		title = t->foregroundProcessName();
+
+	if (title.length() == 0)
+		title = "External";
+
+	setWindowTitle("QuadKonsole4 - " + title);
 }
 
 

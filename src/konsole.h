@@ -38,26 +38,32 @@ class Konsole : public QWidget
 	Q_OBJECT
 
 	public:
-		Konsole ( QWidget *parent, QSplitter *layout, int row, int column );
-		~Konsole ( void );
+		Konsole(QWidget *parent, QSplitter *layout, int row, int column);
+		Konsole(QWidget *parent, KParts::ReadOnlyPart* part);
+		~Konsole();
 
-		void sendInput ( const QString &text );
+		void sendInput(const QString &text);
+		void setLayout(QSplitter* layout, int row, int column);
 		QString foregroundProcessName();
 
 		KParts::ReadOnlyPart* part() { return m_part; }
-		QWidget *widget ( void ) { if (m_part) { return m_part->widget(); } return 0; }
+		QWidget* widget() { if (m_part) { return m_part->widget(); } return 0; }
 
 	signals:
-		void destroyed ( void );
+		void destroyed();
+		void partCreated();
 
 	public slots:
-		void partDestroyed ( void );
+		void partDestroyed();
+
+	private slots:
+		void partCreateCompleted();
 
 	private:
-		void createPart ( void );
+		void createPart();
 
-		QSplitter *m_layout;
-		KParts::ReadOnlyPart *m_part;
+		QSplitter* m_layout;
+		KParts::ReadOnlyPart* m_part;
 		int m_row;
 		int m_column;
 };

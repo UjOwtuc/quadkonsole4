@@ -52,7 +52,7 @@ class QuadKonsole : public KXmlGuiWindow
 		/**
 		* Default Constructor
 		*/
-		QuadKonsole( int rows, int columns, const QStringList &cmds=QStringList() );
+		QuadKonsole(int rows, int columns, const QStringList &cmds=QStringList());
 		~QuadKonsole();
 
 	public slots:
@@ -62,30 +62,17 @@ class QuadKonsole : public KXmlGuiWindow
 		void focusKonsoleDown ( void );
 		void reparent();
 		void pasteClipboard ( void );
+		void resetLayouts();
 
 	private:
+		QuadKonsole(KParts::ReadOnlyPart* part);
+		void setupUi(int rows, int columns);
 		void emitPaste( QClipboard::Mode mode );
 
 		typedef std::vector<Konsole*> PartVector;
 		PartVector mKonsoleParts;
 		QSplitter *mRows;
 		std::vector<QSplitter *> mRowLayouts;
-};
-
-class ExternalMainWindow : public KXmlGuiWindow
-{
-	Q_OBJECT
-	public:
-		ExternalMainWindow(KParts::ReadOnlyPart* part);
-		~ExternalMainWindow();
-
-	private slots:
-		void close();
-		void updateTitle();
-
-	private:
-		QTimer m_updateTimer;
-		KParts::ReadOnlyPart* m_part;
 };
 
 #endif // _QUADKONSOLE_H_

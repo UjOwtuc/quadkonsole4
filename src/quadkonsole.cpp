@@ -20,7 +20,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 #include "quadkonsole.h"
 #include "konsole.h"
 
@@ -45,51 +44,41 @@
 
 #include "quadkonsole.moc"
 
-
-ExternalMainWindow::ExternalMainWindow(KParts::ReadOnlyPart* part)
-	: KXmlGuiWindow(),
-	m_part(part)
-{
-	setCentralWidget(m_part->widget());
-	m_part->widget()->setParent(this);
-	showNormal();
-	setWindowTitle("QuadKonsole4 - External");
-	setWindowIcon(KIcon("quadkonsole4"));
-
-	connect(m_part, SIGNAL(destroyed()), SLOT(close()));
-	connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateTitle()));
-	m_updateTimer.start(1300);
-}
-
-
-ExternalMainWindow::~ExternalMainWindow()
-{
-// 	delete m_part;
-}
-
-
-void ExternalMainWindow::close()
-{
-	deleteLater();
-}
-
-
-void ExternalMainWindow::updateTitle()
-{
-	QString title;
-	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_part);
-	if (t)
-		title = t->foregroundProcessName();
-
-	if (title.length() == 0)
-		title = "External";
-
-	setWindowTitle("QuadKonsole4 - " + title);
-}
-
-
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 		: KXmlGuiWindow()
+{
+	setupUi(rows, columns);
+}
+
+
+QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
+		: KXmlGuiWindow()
+{
+	Konsole* k = new Konsole(this, part);
+	mKonsoleParts.push_back(k);
+	setupUi(1, 1);
+	k->setLayout(mRowLayouts[0], 0, 0);
+	showNormal();
+}
+
+
+QuadKonsole::~QuadKonsole(void)
+{
+	for (PartVector::const_iterator i = mKonsoleParts.begin(); i != mKonsoleParts.end(); ++i)
+	{
+		delete *i;
+	}
+}
+
+
+void QuadKonsole::pasteClipboard ( void )
+{
+	mKonsoleParts.front()->sendInput("input ...");
+	emitPaste(QClipboard::Clipboard);
+}
+
+
+void QuadKonsole::setupUi(int rows, int columns)
 {
 	if (rows < 1)
 	{
@@ -120,13 +109,21 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 		mRows->setStretchFactor(i, 1);
 		for (int j = 0; j < columns; ++j)
 		{
-			//mKonsoleParts.push_back(new Konsole(centralWidget, mLayout, i, j));
-			Konsole *part = new Konsole(centralWidget, mRowLayouts[i], i, j);
+			Konsole* part;
+			if (mKonsoleParts.size() > static_cast<unsigned long>(i*columns + j))
+				part = mKonsoleParts[i*columns + j];
+			else
+			{
+				part = new Konsole(centralWidget, mRowLayouts[i], i, j);
+				mKonsoleParts.push_back(part);
+			}
+
 			actionCollection()->addAssociatedWidget(part->widget());
-			mKonsoleParts.push_back(part);
 			mRowLayouts[i]->setStretchFactor(j, 1);
+			connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
 		}
 	}
+	kDebug() << "finished setting up layouts for " << mKonsoleParts.size() << " parts" << endl;
 
 	KAction* goRight = new KAction(KIcon("arrow-right"), "Right", this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
@@ -164,23 +161,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
 }
 
 
-QuadKonsole::~QuadKonsole(void)
-{
-	for (PartVector::const_iterator i = mKonsoleParts.begin(); i != mKonsoleParts.end(); ++i)
-	{
-		delete *i;
-	}
-}
-
-
-void QuadKonsole::pasteClipboard ( void )
-{
-	mKonsoleParts.front()->sendInput("input ...");
-	emitPaste(QClipboard::Clipboard);
-}
-
-
-void QuadKonsole::emitPaste ( QClipboard::Mode mode )
+void QuadKonsole::emitPaste(QClipboard::Mode mode)
 {
 	QString text = QApplication::clipboard()->text(mode);
 	for (PartVector::iterator part=mKonsoleParts.begin(); part!=mKonsoleParts.end(); ++part)
@@ -196,7 +177,7 @@ void QuadKonsole::emitPaste ( QClipboard::Mode mode )
 }
 
 
-void QuadKonsole::focusKonsoleRight(void)
+void QuadKonsole::focusKonsoleRight()
 {
 	for (PartVector::iterator part = mKonsoleParts.begin(); part != mKonsoleParts.end(); ++part)
 	{
@@ -213,7 +194,7 @@ void QuadKonsole::focusKonsoleRight(void)
 }
 
 
-void QuadKonsole::focusKonsoleLeft(void)
+void QuadKonsole::focusKonsoleLeft()
 {
 	for (PartVector::reverse_iterator part = mKonsoleParts.rbegin(); part != mKonsoleParts.rend(); ++part)
 	{
@@ -230,7 +211,7 @@ void QuadKonsole::focusKonsoleLeft(void)
 }
 
 
-void QuadKonsole::focusKonsoleUp(void)
+void QuadKonsole::focusKonsoleUp()
 {
 	for (unsigned int i = 0; i < mRowLayouts.size() * mRowLayouts[0]->count(); ++i)
 	{
@@ -266,15 +247,36 @@ void QuadKonsole::focusKonsoleDown(void)
 
 void QuadKonsole::reparent()
 {
-	kDebug() << "reparent" << endl;
+	kDebug() << "reparent rows=" << mRowLayouts.size() << " row[0].columns=" << mRowLayouts[0]->count() << endl;
 	for (unsigned int i = 0; i < mRowLayouts.size() * mRowLayouts[0]->count(); ++i)
 	{
 		if (mKonsoleParts[i]->widget()->hasFocus())
 		{
-			ExternalMainWindow* external = new ExternalMainWindow(mKonsoleParts[i]->part());
+			QuadKonsole* external = new QuadKonsole(mKonsoleParts[i]->part());
+			actionCollection()->removeAssociatedWidget(mKonsoleParts[i]->widget());
 			mKonsoleParts[i]->partDestroyed();
 			break;
 		}
+	}
+}
+
+
+void QuadKonsole::resetLayouts()
+{
+	kDebug() << "resetting layouts" << endl;
+	QList<int> sizes;
+	int width = mRows->height() / mRows->count();
+	for (int i=0; i<mRows->count(); ++i)
+		sizes.append(width);
+	mRows->setSizes(sizes);
+
+	std::vector<QSplitter*>::iterator it;
+	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
+	{
+		width = (*it)->width() / (*it)->count();
+		for (int i=0; i<(*it)->count(); ++i)
+			sizes.append(width);
+		(*it)->setSizes(sizes);
 	}
 }
 

@@ -35,7 +35,7 @@ namespace
 }
 
 
-Konsole::Konsole ( QWidget *parent, QSplitter *layout, int row, int column )
+Konsole::Konsole(QWidget *parent, QSplitter *layout, int row, int column)
 	: QWidget(parent),
 	m_layout(layout),
 	m_row(row),
@@ -46,10 +46,26 @@ Konsole::Konsole ( QWidget *parent, QSplitter *layout, int row, int column )
 }
 
 
-Konsole::~Konsole ( void )
+Konsole::Konsole(QWidget *parent, KParts::ReadOnlyPart* part)
+	: QWidget(parent),
+	m_layout(0),
+	m_row(0),
+	m_column(0)
+{
+	m_part = part;
+	part->setParent(this);
+	m_part->widget()->setParent(this);
+	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
+}
+
+
+Konsole::~Konsole()
 {
 	if (m_part)
+	{
+		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
 		delete m_part;
+	}
 }
 
 
@@ -62,6 +78,20 @@ void Konsole::sendInput(const QString& text)
 }
 
 
+void Konsole::setLayout(QSplitter* layout, int row, int column)
+{
+	if (m_layout)
+	{
+		kDebug() << "changing layout is not supported yet" << endl;
+		return;
+	}
+	m_row = row;
+	m_column = column;
+	m_layout = layout;
+	m_layout->insertWidget(column, m_part->widget());
+}
+
+
 QString Konsole::foregroundProcessName()
 {
 	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_part);
@@ -71,7 +101,7 @@ QString Konsole::foregroundProcessName()
 }
 
 
-void Konsole::partDestroyed ( void )
+void Konsole::partDestroyed()
 {
 	if (m_part)
 		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
@@ -81,8 +111,15 @@ void Konsole::partDestroyed ( void )
 }
 
 
-void Konsole::createPart ( void )
+void Konsole::createPart()
 {
+	// copied parts could have no layout for some nanoseconds
+	if (m_layout == 0)
+	{
+		kDebug() << "no layout, cannot create a new part" << endl;
+		return;
+	}
+
 	if (factory == 0)
 	{
 		factory = KPluginLoader("libkonsolepart").factory();
@@ -101,10 +138,19 @@ void Konsole::createPart ( void )
 	m_part->widget()->setParent(this);
 	m_layout->insertWidget(m_column, m_part->widget());
 
-	int width = m_layout->geometry().width() / m_layout->count();
-	QList<int> sizes;
-	for (int i=0; i<m_layout->count(); ++i)
-		sizes.append(width);
-	m_layout->setSizes(sizes);
+//	int width = m_layout->geometry().width() / m_layout->count();
+//	QList<int> sizes;
+//	for (int i=0; i<m_layout->count(); ++i)
+//		sizes.append(width);
+//	m_layout->setSizes(sizes);
+
+	connect(m_part, SIGNAL(completed()), SLOT(partCreateCompleted()));
+}
+
+
+void Konsole::partCreateCompleted()
+{
+	kDebug() << "emitting partCreated()" << endl;
+	emit partCreated();
 }
 

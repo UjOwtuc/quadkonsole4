@@ -1,7 +1,5 @@
 project(quadkonsole4)
 
-cmake_policy(SET CMP0017 NEW)
-
 find_package(KDE4 REQUIRED)
 include (KDE4Defaults)
 include (FindKDE4Internal)

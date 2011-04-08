@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,12 +21,13 @@
 #ifndef KONSOLE_H
 #define KONSOLE_H
 
-#include <KDE/KParts/ReadOnlyPart>
-
 #include <QtGui/QWidget>
-#include <QtGui/QSplitter>
-#include <QtGui/QDockWidget>
 
+class QSplitter;
+namespace KParts
+{
+	class ReadOnlyPart;
+}
 
 /**
  * @short Contains a terminal emulator
@@ -38,16 +39,16 @@ class Konsole : public QWidget
 	Q_OBJECT
 
 	public:
-		Konsole(QWidget *parent, QSplitter *layout, int row, int column);
-		Konsole(QWidget *parent, KParts::ReadOnlyPart* part);
+		Konsole(QWidget* parent, QSplitter* layout, int row, int column);
+		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
 		~Konsole();
 
-		void sendInput(const QString &text);
+		void sendInput(const QString& text);
 		void setLayout(QSplitter* layout, int row, int column);
 		QString foregroundProcessName();
 
 		KParts::ReadOnlyPart* part() { return m_part; }
-		QWidget* widget() { if (m_part) { return m_part->widget(); } return 0; }
+		QWidget* widget();
 
 	signals:
 		void destroyed();
@@ -55,9 +56,6 @@ class Konsole : public QWidget
 
 	public slots:
 		void partDestroyed();
-
-	private slots:
-		void partCreateCompleted();
 
 	private:
 		void createPart();

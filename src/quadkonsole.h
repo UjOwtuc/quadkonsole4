@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,21 +24,20 @@
 #ifndef _QUADKONSOLE_H_
 #define _QUADKONSOLE_H_
 
-#include "konsole.h"
-
 #include <KDE/KXmlGuiWindow>
-#include <KDE/KParts/MainWindow>
-#include <KDE/KLibLoader>
 
-#include <QtCore/QEvent>
 #include <QtGui/QClipboard>
-#include <QtGui/QSplitter>
-#include <QtCore/QTimer>
 
 #include <vector>
 
+class Konsole;
 class QGridLayout;
+class QSplitter;
 
+namespace KParts
+{
+	class ReadOnlyPart;
+}
 
 /**
  * @short Application Main Window
@@ -52,27 +51,40 @@ class QuadKonsole : public KXmlGuiWindow
 		/**
 		* Default Constructor
 		*/
-		QuadKonsole(int rows, int columns, const QStringList &cmds=QStringList());
+		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList());
 		~QuadKonsole();
 
 	public slots:
-		void focusKonsoleRight( void );
-		void focusKonsoleLeft ( void );
-		void focusKonsoleUp ( void );
-		void focusKonsoleDown ( void );
+		void focusKonsoleRight();
+		void focusKonsoleLeft();
+		void focusKonsoleUp();
+		void focusKonsoleDown();
 		void reparent();
-		void pasteClipboard ( void );
+		void pasteClipboard();
 		void resetLayouts();
+		void toggleMenu();
+		void optionsPreferences();
+		void settingsChanged();
+		void quit();
+		void insertHorizontal();
+		void insertVertical();
+		void removePart();
+
+	protected:
+		bool queryClose();
+		Konsole* getFocusPart();
+		void getFocusCoords(int& row, int& col);
 
 	private:
 		QuadKonsole(KParts::ReadOnlyPart* part);
+		void setupActions();
 		void setupUi(int rows, int columns);
-		void emitPaste( QClipboard::Mode mode );
+		void emitPaste(QClipboard::Mode mode);
 
 		typedef std::vector<Konsole*> PartVector;
 		PartVector mKonsoleParts;
-		QSplitter *mRows;
-		std::vector<QSplitter *> mRowLayouts;
+		QSplitter* mRows;
+		std::vector<QSplitter*> mRowLayouts;
 };
 
 #endif // _QUADKONSOLE_H_

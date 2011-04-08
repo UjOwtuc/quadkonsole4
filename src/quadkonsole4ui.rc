@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gui name="quadkonsole4"
+     version="1"
+     xmlns="http://www.kde.org/standards/kxmlgui/1.0"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.kde.org/standards/kxmlgui/1.0
+                         http://www.kde.org/standards/kxmlgui/1.0/kxmlgui.xsd">
+	<MenuBar>
+		<Menu name="file">
+			<Action name="reparent" />
+			<Action name="reset layouts" />
+		</Menu>
+		<Menu name="move">
+			<Action name="go left" />
+			<Action name="go right" />
+			<Action name="go up" />
+			<Action name="go down" />
+		</Menu>
+		<Menu name="settings">
+			<Action name="toggle menu" />
+		</Menu>
+	</MenuBar>
+
+	<ToolBar name="mainToolBar">
+		<text>Main Toolbar</text>
+		<Action name="reparent" />
+		<Action name="reset layouts" />
+	</ToolBar>
+</gui>

@@ -1,3 +1,8 @@
+2011-04-08  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Added menu bar and config window.
+	* Added shortcuts (remove widget, insert horizontal/vertical).
+
 2009-11-16  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Released 0.1.

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -33,7 +33,7 @@ static const char version[] = "0.1";
 
 int main(int argc, char **argv)
 {
-	KAboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault\n(C) 2009 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
+	KAboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault\n(C) 2009 - 2011 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
 	about.addAuthor(ki18n("Simon Perreault"), KLocalizedString(), "nomis80@nomis80.org");
 	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
 	KCmdLineArgs::init(argc, argv, &about);
@@ -46,8 +46,13 @@ int main(int argc, char **argv)
 	KApplication app;
 
 	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-	int rows = args->getOption("rows").toInt();
-	int columns = args->getOption("columns").toInt();
+	int rows = 0;
+	int columns = 0;
+
+	if (args->isSet("rows"))
+		rows = args->getOption("rows").toInt();
+	if (args->isSet("columns"))
+		columns = args->getOption("columns").toInt();
 	//QStringList cmds = args->getOptionList("cmd");
 
 	QuadKonsole* mainWin = new QuadKonsole(rows, columns);
@@ -55,10 +60,6 @@ int main(int argc, char **argv)
 	mainWin->showMaximized();
 
 	args->clear();
-
-	app.setWindowIcon(KIcon("quadkonsole4"));
-
-	// mainWin has WDestructiveClose flag by default, so it will delete itself.
 	return app.exec();
 }
 

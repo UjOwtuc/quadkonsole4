@@ -1,0 +1,4 @@
+File=quadkonsole4.kcfg
+ClassName=Settings
+Singleton=true
+SetUserTexts=true

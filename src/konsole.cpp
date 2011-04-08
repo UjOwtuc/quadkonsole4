@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Karsten Borgwaldt                               *
+ *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -105,7 +105,7 @@ void Konsole::partDestroyed()
 {
 	if (m_part)
 		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
-// 	emit destroyed();
+
 	createPart();
 	m_part->widget()->setFocus();
 }
@@ -138,19 +138,14 @@ void Konsole::createPart()
 	m_part->widget()->setParent(this);
 	m_layout->insertWidget(m_column, m_part->widget());
 
-//	int width = m_layout->geometry().width() / m_layout->count();
-//	QList<int> sizes;
-//	for (int i=0; i<m_layout->count(); ++i)
-//		sizes.append(width);
-//	m_layout->setSizes(sizes);
-
-	connect(m_part, SIGNAL(completed()), SLOT(partCreateCompleted()));
-}
-
-
-void Konsole::partCreateCompleted()
-{
-	kDebug() << "emitting partCreated()" << endl;
 	emit partCreated();
 }
 
+
+QWidget* Konsole::widget()
+{
+	if (m_part)
+		return m_part->widget();
+
+	return 0;
+}

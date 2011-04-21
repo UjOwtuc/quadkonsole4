@@ -29,7 +29,7 @@
 #include <KDE/KLocale>
 
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
-static const char version[] = "0.1";
+static const char version[] = "0.2";
 
 int main(int argc, char **argv)
 {
@@ -45,21 +45,29 @@ int main(int argc, char **argv)
 	KCmdLineArgs::addCmdLineOptions(options);
 	KApplication app;
 
-	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-	int rows = 0;
-	int columns = 0;
+	if (app.isSessionRestored())
+	{
+		kRestoreMainWindows<QuadKonsole>();
+	}
+	else
+	{
+		KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+		int rows = 0;
+		int columns = 0;
 
-	if (args->isSet("rows"))
-		rows = args->getOption("rows").toInt();
-	if (args->isSet("columns"))
-		columns = args->getOption("columns").toInt();
-	//QStringList cmds = args->getOptionList("cmd");
+		if (args->isSet("rows"))
+			rows = args->getOption("rows").toInt();
+		if (args->isSet("columns"))
+			columns = args->getOption("columns").toInt();
+		//QStringList cmds = args->getOptionList("cmd");
 
-	QuadKonsole* mainWin = new QuadKonsole(rows, columns);
-	app.setTopWidget(mainWin);
-	mainWin->showMaximized();
+		QuadKonsole* mainWin = new QuadKonsole(rows, columns);
+		app.setTopWidget(mainWin);
+		mainWin->showMaximized();
 
-	args->clear();
+		args->clear();
+	}
+
 	return app.exec();
 }
 

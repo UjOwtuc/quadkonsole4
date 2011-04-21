@@ -5,15 +5,6 @@
       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 	<kcfgfile name="quadkonsole4rc" />
 	<group name="General">
-		<entry name="showMenubar" type="Bool">
-			<label>Show menu bar</label>
-			<default>true</default>
-		</entry>
-		<entry name="showToolbar" type="Bool">
-			<label>Show toolbar</label>
-			<default>false</default>
-		</entry>
-
 		<entry name="numRows" type="UInt" min="1">
 			<label>Number of rows</label>
 			<default>2</default>
@@ -23,6 +14,12 @@
 			<label>Number of columns</label>
 			<default>2</default>
 			<min>1</min>
+		</entry>
+	</group>
+	<group name="Shutdown">
+		<entry name="queryClose" type="bool">
+			<label>Ask before terminating running processes</label>
+			<default>true</default>
 		</entry>
 	</group>
 </kcfg>

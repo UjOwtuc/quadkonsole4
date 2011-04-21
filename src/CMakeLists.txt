@@ -6,6 +6,7 @@ set(quadkonsole4_SRCS
 
 kde4_add_ui_files(quadkonsole4_SRCS
 	prefs_base.ui
+	prefs_shutdown.ui
 )
 
 kde4_add_kcfg_files(quadkonsole4_SRCS

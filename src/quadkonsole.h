@@ -48,9 +48,7 @@ class QuadKonsole : public KXmlGuiWindow
 {
 	Q_OBJECT
 	public:
-		/**
-		* Default Constructor
-		*/
+		QuadKonsole();
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList());
 		~QuadKonsole();
 
@@ -69,6 +67,9 @@ class QuadKonsole : public KXmlGuiWindow
 		void insertHorizontal();
 		void insertVertical();
 		void removePart();
+
+	private slots:
+		void updateColumnIds(int row);
 
 	protected:
 		bool queryClose();

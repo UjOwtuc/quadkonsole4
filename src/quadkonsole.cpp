@@ -50,10 +50,20 @@
 #include <cerrno>
 
 #include "ui_prefs_base.h"
+#include "ui_prefs_shutdown.h"
 
 #include "quadkonsole.moc"
 
-QuadKonsole::QuadKonsole(int rows, int columns, const QStringList &cmds)
+
+QuadKonsole::QuadKonsole()
+	: KXmlGuiWindow()
+{
+	setupActions();
+	setupUi(Settings::numRows(), Settings::numCols());
+}
+
+
+QuadKonsole::QuadKonsole(int rows, int columns, const QStringList&)
 		: KXmlGuiWindow()
 {
 	if (rows == 0)
@@ -74,7 +84,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 	setupActions();
 	setupUi(1, 1);
-	k->setLayout(mRowLayouts[0], 0, 0);
+	k->setLayout(mRowLayouts[0], 0);
 	showNormal();
 }
 
@@ -123,23 +133,23 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("reparent", reparent);
 	connect(reparent, SIGNAL(triggered(bool)), this, SLOT(reparent()));
 
-	KAction *insertHorizontal = new KAction(KIcon(""), i18n("Insert &horizontal"), this);
+	KAction *insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
 	connect(insertHorizontal, SIGNAL(triggered(bool)), this, SLOT(insertHorizontal()));
 
-	KAction *insertVertical = new KAction(KIcon(""), i18n("Insert &vertical"), this);
+	KAction *insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
 	connect(insertVertical, SIGNAL(triggered(bool)), this, SLOT(insertVertical()));
 
-	KAction* removePart = new KAction(KIcon(""), i18n("Re&move part"), this);
+	KAction* removePart = new KAction(KIcon("view-left-close"), i18n("Re&move part"), this);
 	removePart->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 	actionCollection()->addAction("remove part", removePart);
 	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removePart()));
 
 	// View
-	KAction *resetLayouts = new KAction(KIcon(""), i18n("R&eset layouts"), this);
+	KAction *resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
 
@@ -163,13 +173,13 @@ void QuadKonsole::setupUi(int rows, int columns)
 	if (rows < 1)
 	{
 		kdError() << "Number of rows must be at last one." << endl;
-		exit(1);
+		qApp->quit();
 	}
 
 	if (columns < 1)
 	{
 		kdError() << "Number of columns must be at least one." << endl;
-		exit(1);
+		qApp->quit();
 	}
 
 	QWidget* centralWidget = new QWidget(this, 0);
@@ -195,7 +205,7 @@ void QuadKonsole::setupUi(int rows, int columns)
 				part = mKonsoleParts[i*columns + j];
 			else
 			{
-				part = new Konsole(centralWidget, mRowLayouts[i], i, j);
+				part = new Konsole(centralWidget, mRowLayouts[i], j);
 				mKonsoleParts.push_back(part);
 			}
 
@@ -208,13 +218,9 @@ void QuadKonsole::setupUi(int rows, int columns)
 	setWindowIcon(KIcon("quadkonsole4"));
 
 	setupGUI();
+
+	// unused
 	statusBar()->hide();
-
-	if (! Settings::showToolbar())
-		toolBar()->hide();
-
-	if (! Settings::showMenubar())
-		menuBar()->hide();
 }
 
 
@@ -339,7 +345,12 @@ void QuadKonsole::optionsPreferences()
 	QWidget* generalSettings = new QWidget;
 	Ui::prefs_base prefs_base;
 	prefs_base.setupUi(generalSettings);
-	dialog->addPage(generalSettings, i18n("General"), "general_settings");
+	dialog->addPage(generalSettings, i18n("General"), "general_settings", "quadkonsole4");
+
+	QWidget* shutdownSettings = new QWidget;
+	Ui::prefs_shutdown prefs_shutdown;
+	prefs_shutdown.setupUi(shutdownSettings);
+	dialog->addPage(shutdownSettings, i18n("Shutdown"), "shutdown_settings", "application-exit");
 
 	connect(dialog, SIGNAL(settingsChanged(QString)), this, SLOT(settingsChanged()));
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -349,15 +360,6 @@ void QuadKonsole::optionsPreferences()
 
 void QuadKonsole::settingsChanged()
 {
-	if (Settings::showMenubar())
-		menuBar()->show();
-	else
-		menuBar()->hide();
-
-	if (Settings::showToolbar())
-		toolBar()->show();
-	else
-		toolBar()->hide();
 }
 
 
@@ -367,18 +369,48 @@ void QuadKonsole::quit()
 }
 
 
+void QuadKonsole::updateColumnIds(int row)
+{
+	// update column attributes of all widgets in this row
+	for (int i=0; i<mRowLayouts[row]->count(); ++i)
+	{
+		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
+		{
+			if ((*it)->widget() == mRowLayouts[row]->widget(i))
+				(*it)->setColumn(i);
+		}
+	}
+}
+
+
 bool QuadKonsole::queryClose()
 {
-	if (mKonsoleParts.size() == 1)
-		return true;
-
-	switch (KMessageBox::questionYesNo(this, i18n("Are you sure you want to exit QuadKonsole4?"), QString(), KStandardGuiItem::yes(), KStandardGuiItem::no(), "QuadKonsole4::close"))
+	if (Settings::queryClose())
 	{
-		case KMessageBox::Yes :
-			return true;
-		default :
-			return false;
+		QStringList processes;
+		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
+		{
+			QString process = (*it)->foregroundProcessName();
+			if (process.size())
+			{
+				processes << process;
+			}
+		}
+
+		if (processes.count())
+		{
+			QString warning = i18n("The followin processes are still running. Are you sure you want to exit QuadKonsole4?");
+			switch (KMessageBox::questionYesNoList(this, warning, processes))
+			{
+				case KMessageBox::Yes :
+					return true;
+				default :
+					return false;
+			}
+		}
 	}
+
+	return true;
 }
 
 
@@ -389,6 +421,7 @@ Konsole* QuadKonsole::getFocusPart()
 		if ((*it)->widget()->hasFocus())
 			return *it;
 	}
+	kDebug() << "could not find focus" << endl;
 	return 0;
 }
 
@@ -405,6 +438,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 			}
 		}
 	}
+	kDebug() << "could not find focus" << endl;
 	row = -1;
 	col = -1;
 }
@@ -416,11 +450,13 @@ void QuadKonsole::insertHorizontal()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		Konsole* part = new Konsole(centralWidget(), mRowLayouts[row], row, col);
+		Konsole* part = new Konsole(centralWidget(), mRowLayouts[row], col);
 		mKonsoleParts.push_back(part);
 		actionCollection()->addAssociatedWidget(part->widget());
 		connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
 		part->widget()->setFocus();
+
+		updateColumnIds(row);
 		resetLayouts();
 	}
 }
@@ -440,7 +476,7 @@ void QuadKonsole::insertVertical()
 		it += row;
 		mRowLayouts.insert(it, newRow);
 
-		Konsole* part = new Konsole(centralWidget(), newRow, row, col);
+		Konsole* part = new Konsole(centralWidget(), newRow, col);
 		mKonsoleParts.push_back(part);
 		actionCollection()->addAssociatedWidget(part->widget());
 		connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
@@ -477,8 +513,12 @@ void QuadKonsole::removePart()
 		}
 
 		if (mKonsoleParts.empty())
-			deleteLater();
+			quit();
 		else
-			mKonsoleParts.front()->widget()->setFocus();
+		{
+			row = row % mRowLayouts.size();
+			col = col % mRowLayouts[row]->count();
+			mRowLayouts[row]->widget(col)->setFocus();
+		}
 	}
 }

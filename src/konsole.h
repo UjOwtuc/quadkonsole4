@@ -39,12 +39,13 @@ class Konsole : public QWidget
 	Q_OBJECT
 
 	public:
-		Konsole(QWidget* parent, QSplitter* layout, int row, int column);
+		Konsole(QWidget* parent, QSplitter* layout, int column);
 		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
 		~Konsole();
 
 		void sendInput(const QString& text);
-		void setLayout(QSplitter* layout, int row, int column);
+		void setLayout(QSplitter* layout, int column);
+		void setColumn(int column) { m_column = column; };
 		QString foregroundProcessName();
 
 		KParts::ReadOnlyPart* part() { return m_part; }
@@ -62,7 +63,6 @@ class Konsole : public QWidget
 
 		QSplitter* m_layout;
 		KParts::ReadOnlyPart* m_part;
-		int m_row;
 		int m_column;
 };
 

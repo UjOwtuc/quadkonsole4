@@ -35,10 +35,9 @@ namespace
 }
 
 
-Konsole::Konsole(QWidget *parent, QSplitter *layout, int row, int column)
+Konsole::Konsole(QWidget *parent, QSplitter *layout, int column)
 	: QWidget(parent),
 	m_layout(layout),
-	m_row(row),
 	m_column(column)
 {
 	m_part = 0;
@@ -49,7 +48,6 @@ Konsole::Konsole(QWidget *parent, QSplitter *layout, int row, int column)
 Konsole::Konsole(QWidget *parent, KParts::ReadOnlyPart* part)
 	: QWidget(parent),
 	m_layout(0),
-	m_row(0),
 	m_column(0)
 {
 	m_part = part;
@@ -69,23 +67,23 @@ Konsole::~Konsole()
 }
 
 
-
 void Konsole::sendInput(const QString& text)
 {
 	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_part);
 	if (t)
 		t->sendInput(text);
+	else
+		kDebug() << "Part is no TerminalInterfaceV2" << endl;
 }
 
 
-void Konsole::setLayout(QSplitter* layout, int row, int column)
+void Konsole::setLayout(QSplitter* layout, int column)
 {
 	if (m_layout)
 	{
 		kDebug() << "changing layout is not supported yet" << endl;
 		return;
 	}
-	m_row = row;
 	m_column = column;
 	m_layout = layout;
 	m_layout->insertWidget(column, m_part->widget());
@@ -97,6 +95,9 @@ QString Konsole::foregroundProcessName()
 	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_part);
 	if (t)
 		return t->foregroundProcessName();
+	else
+		kDebug() << "Part is no TerminalInterfaceV2" << endl;
+
 	return "";
 }
 
@@ -126,7 +127,7 @@ void Konsole::createPart()
 	}
 	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(this, this));
 	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
-	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
+	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)
 		t->showShellInDir(QString());
 	else

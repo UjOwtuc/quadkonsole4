@@ -21,74 +21,29 @@
  ***************************************************************************/
 
 
-#ifndef _QUADKONSOLE_H_
-#define _QUADKONSOLE_H_
+#include "mousemovefilter.h"
 
-#include <KDE/KXmlGuiWindow>
+#include <QtCore/QObject>
+#include <QtCore/QEvent>
+#include <QtGui/QWidget>
 
-#include <QtGui/QClipboard>
 
-#include <vector>
+MouseMoveFilter::MouseMoveFilter(QObject* parent)
+	: QObject(parent)
+{}
 
-class Konsole;
-class QGridLayout;
-class QSplitter;
-class MouseMoveFilter;
 
-namespace KParts
+bool MouseMoveFilter::eventFilter(QObject* o, QEvent* e)
 {
-	class ReadOnlyPart;
+	if (e->type() == QEvent::MouseMove)
+	{
+		QWidget* w = dynamic_cast<QWidget*>(o);
+		if (w)
+			w->setFocus();
+	}
+
+	// do not suppress event
+	return false;
 }
 
-/**
- * @short Application Main Window
- * @author Simon Perreault <nomis80@nomis80.org>
- * @version 2.0
- */
-class QuadKonsole : public KXmlGuiWindow
-{
-	Q_OBJECT
-	public:
-		QuadKonsole();
-		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList());
-		~QuadKonsole();
-
-	public slots:
-		void focusKonsoleRight();
-		void focusKonsoleLeft();
-		void focusKonsoleUp();
-		void focusKonsoleDown();
-		void reparent();
-		void pasteClipboard();
-		void resetLayouts();
-		void toggleMenu();
-		void optionsPreferences();
-		void settingsChanged();
-		void quit();
-		void insertHorizontal();
-		void insertVertical();
-		void removePart();
-
-	private slots:
-		void updateColumnIds(int row);
-
-	protected:
-		bool queryClose();
-		Konsole* getFocusPart();
-		void getFocusCoords(int& row, int& col);
-
-	private:
-		QuadKonsole(KParts::ReadOnlyPart* part);
-		void setupActions();
-		void setupUi(int rows, int columns);
-		void emitPaste(QClipboard::Mode mode);
-
-		typedef std::vector<Konsole*> PartVector;
-		PartVector mKonsoleParts;
-		QSplitter* mRows;
-		std::vector<QSplitter*> mRowLayouts;
-		MouseMoveFilter* mFilter;
-};
-
-#endif // _QUADKONSOLE_H_
-
+#include "mousemovefilter.moc"

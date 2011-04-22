@@ -5,6 +5,10 @@
       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 	<kcfgfile name="quadkonsole4rc" />
 	<group name="General">
+		<entry name="sloppyFocus" type="bool">
+			<label>Focus follows mouse</label>
+			<default>false</default>
+		</entry>
 		<entry name="numRows" type="UInt" min="1">
 			<label>Number of rows</label>
 			<default>2</default>

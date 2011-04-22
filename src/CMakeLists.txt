@@ -2,6 +2,7 @@ set(quadkonsole4_SRCS
 	quadkonsole.cpp
 	main.cpp
 	konsole.cpp
+	mousemovefilter.cpp
 )
 
 kde4_add_ui_files(quadkonsole4_SRCS

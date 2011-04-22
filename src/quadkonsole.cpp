@@ -22,6 +22,7 @@
 
 #include "quadkonsole.h"
 #include "konsole.h"
+#include "mousemovefilter.h"
 #include "settings.h"
 
 #include <KDE/KDebug>
@@ -40,6 +41,7 @@
 #include <KDE/KConfigDialog>
 #include <KDE/KMessageBox>
 
+#include <QtGui/QMouseEvent>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
@@ -52,11 +54,10 @@
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
 
-#include "quadkonsole.moc"
-
 
 QuadKonsole::QuadKonsole()
-	: KXmlGuiWindow()
+	: KXmlGuiWindow(),
+	mFilter(0)
 {
 	setupActions();
 	setupUi(Settings::numRows(), Settings::numCols());
@@ -64,7 +65,8 @@ QuadKonsole::QuadKonsole()
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList&)
-		: KXmlGuiWindow()
+	: KXmlGuiWindow(),
+	mFilter(0)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -77,7 +79,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList&)
 
 
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
-		: KXmlGuiWindow()
+	: KXmlGuiWindow(),
+	mFilter(0)
 {
 	Konsole* k = new Konsole(this, part);
 	mKonsoleParts.push_back(k);
@@ -91,6 +94,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 QuadKonsole::~QuadKonsole()
 {
+	delete mFilter;
 	for (PartVector::const_iterator i = mKonsoleParts.begin(); i != mKonsoleParts.end(); ++i)
 	{
 		delete *i;
@@ -106,6 +110,12 @@ void QuadKonsole::pasteClipboard()
 
 void QuadKonsole::setupActions()
 {
+	if (Settings::sloppyFocus())
+	{
+		mFilter = new MouseMoveFilter(this);
+		qApp->installEventFilter(mFilter);
+	}
+
 	// Movement
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("&Right"), this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
@@ -345,12 +355,12 @@ void QuadKonsole::optionsPreferences()
 	QWidget* generalSettings = new QWidget;
 	Ui::prefs_base prefs_base;
 	prefs_base.setupUi(generalSettings);
-	dialog->addPage(generalSettings, i18n("General"), "general_settings", "quadkonsole4");
+	dialog->addPage(generalSettings, i18n("General"), "quadkonsole4");
 
 	QWidget* shutdownSettings = new QWidget;
 	Ui::prefs_shutdown prefs_shutdown;
 	prefs_shutdown.setupUi(shutdownSettings);
-	dialog->addPage(shutdownSettings, i18n("Shutdown"), "shutdown_settings", "application-exit");
+	dialog->addPage(shutdownSettings, i18n("Shutdown"), "application-exit");
 
 	connect(dialog, SIGNAL(settingsChanged(QString)), this, SLOT(settingsChanged()));
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -360,6 +370,16 @@ void QuadKonsole::optionsPreferences()
 
 void QuadKonsole::settingsChanged()
 {
+	if (Settings::sloppyFocus() && mFilter == 0)
+	{
+		mFilter = new MouseMoveFilter;
+		qApp->installEventFilter(mFilter);
+	}
+	else if (! Settings::sloppyFocus())
+	{
+		delete mFilter;
+		mFilter = 0;
+	}
 }
 
 
@@ -522,3 +542,5 @@ void QuadKonsole::removePart()
 		}
 	}
 }
+
+#include "quadkonsole.moc"

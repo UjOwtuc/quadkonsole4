@@ -64,7 +64,7 @@ QuadKonsole::QuadKonsole()
 }
 
 
-QuadKonsole::QuadKonsole(int rows, int columns, const QStringList&)
+QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 	: KXmlGuiWindow(),
 	mFilter(0)
 {
@@ -75,6 +75,13 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList&)
 
 	setupActions();
 	setupUi(rows, columns);
+
+	if (cmds.size())
+	{
+		int max = std::min(cmds.size(), static_cast<int>(mKonsoleParts.size()));
+		for (int i=0; i<max; ++i)
+			mKonsoleParts[i]->sendInput(cmds[i] + "\n");
+	}
 }
 
 

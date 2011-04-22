@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	KCmdLineOptions options;
 	options.add("rows <rows>", ki18n("Number of rows of terminal emulators"), "2");
 	options.add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
-	//options.add("cmd <command>", ki18n("Run command (may be used multiple times)"));
+	options.add("cmd <command>", ki18n("Run command (may be used multiple times)"));
 	KCmdLineArgs::addCmdLineOptions(options);
 	KApplication app;
 
@@ -59,9 +59,9 @@ int main(int argc, char **argv)
 			rows = args->getOption("rows").toInt();
 		if (args->isSet("columns"))
 			columns = args->getOption("columns").toInt();
-		//QStringList cmds = args->getOptionList("cmd");
+		QStringList cmds = args->getOptionList("cmd");
 
-		QuadKonsole* mainWin = new QuadKonsole(rows, columns);
+		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds);
 		app.setTopWidget(mainWin);
 		mainWin->showMaximized();
 

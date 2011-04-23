@@ -145,10 +145,10 @@ void QuadKonsole::setupActions()
 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
 
 	// Adding and removing parts
-	KAction* reparent = new KAction(KIcon("document-new"), i18n("Re&parent"), this);
-	reparent->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
-	actionCollection()->addAction("reparent", reparent);
-	connect(reparent, SIGNAL(triggered(bool)), this, SLOT(reparent()));
+	KAction* detach = new KAction(KIcon("document-new"), i18n("De&tach"), this);
+	detach->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
+	actionCollection()->addAction("detach", detach);
+	connect(detach, SIGNAL(triggered(bool)), this, SLOT(detach()));
 
 	KAction *insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
@@ -312,7 +312,7 @@ void QuadKonsole::focusKonsoleDown()
 }
 
 
-void QuadKonsole::reparent()
+void QuadKonsole::detach()
 {
 	Konsole* part = getFocusPart();
 	QuadKonsole* external = new QuadKonsole(part->part());

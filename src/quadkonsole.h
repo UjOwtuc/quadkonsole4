@@ -58,7 +58,7 @@ class QuadKonsole : public KXmlGuiWindow
 		void focusKonsoleLeft();
 		void focusKonsoleUp();
 		void focusKonsoleDown();
-		void reparent();
+		void detach();
 		void pasteClipboard();
 		void resetLayouts();
 		void toggleMenu();

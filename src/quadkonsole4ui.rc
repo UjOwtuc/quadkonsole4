@@ -7,7 +7,7 @@
                          http://www.kde.org/standards/kxmlgui/1.0/kxmlgui.xsd">
 	<MenuBar>
 		<Menu name="file">
-			<Action name="reparent" />
+			<Action name="detach" />
 			<Action name="reset layouts" />
 		</Menu>
 		<Menu name="move">
@@ -23,7 +23,7 @@
 
 	<ToolBar name="mainToolBar">
 		<text>Main Toolbar</text>
-		<Action name="reparent" />
+		<Action name="detach" />
 		<Action name="reset layouts" />
 	</ToolBar>
 </gui>

@@ -94,7 +94,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 	setupActions();
 	setupUi(1, 1);
-	k->setLayout(mRowLayouts[0], 0);
+	k->setParent(mRowLayouts[0]->widget(0));
 	showNormal();
 }
 
@@ -211,23 +211,17 @@ void QuadKonsole::setupUi(int rows, int columns)
 
 	for (int i = 0; i < rows; ++i)
 	{
-		QSplitter *row = new QSplitter(Qt::Horizontal, centralWidget);
+		QSplitter* row = new QSplitter(Qt::Horizontal, centralWidget);
 		row->setChildrenCollapsible(false);
 		mRowLayouts.push_back(row);
 		mRows->addWidget(row);
 		for (int j = 0; j < columns; ++j)
 		{
-			Konsole* part;
+			Konsole* part = 0;
 			if (mKonsoleParts.size() > static_cast<unsigned long>(i*columns + j))
 				part = mKonsoleParts[i*columns + j];
-			else
-			{
-				part = new Konsole(centralWidget, mRowLayouts[i], j);
-				mKonsoleParts.push_back(part);
-			}
 
-			actionCollection()->addAssociatedWidget(part->widget());
-			connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
+			addPart(i, j, part);
 		}
 	}
 	kDebug() << "finished setting up layouts for " << mKonsoleParts.size() << " parts" << endl;
@@ -396,20 +390,6 @@ void QuadKonsole::quit()
 }
 
 
-void QuadKonsole::updateColumnIds(int row)
-{
-	// update column attributes of all widgets in this row
-	for (int i=0; i<mRowLayouts[row]->count(); ++i)
-	{
-		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
-		{
-			if ((*it)->widget() == mRowLayouts[row]->widget(i))
-				(*it)->setColumn(i);
-		}
-	}
-}
-
-
 bool QuadKonsole::queryClose()
 {
 	if (Settings::queryClose())
@@ -426,7 +406,7 @@ bool QuadKonsole::queryClose()
 
 		if (processes.count())
 		{
-			QString warning = i18n("The followin processes are still running. Are you sure you want to exit QuadKonsole4?");
+			QString warning = i18n("The following processes are still running. Are you sure you want to exit QuadKonsole4?");
 			switch (KMessageBox::questionYesNoList(this, warning, processes))
 			{
 				case KMessageBox::Yes :
@@ -471,19 +451,40 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 }
 
 
+Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
+{
+	QWidget* container = new QWidget(this);
+	mRowLayouts[row]->insertWidget(col, container);
+	QBoxLayout* layout = new QBoxLayout(QBoxLayout::Down, container);
+	layout->setSpacing(0);
+	layout->setContentsMargins(0, 0, 0, 0);
+
+	if (part != 0)
+	{
+		part->setLayout(layout);
+	}
+	else
+	{
+		part = new Konsole(container, layout);
+		mKonsoleParts.push_back(part);
+	}
+	actionCollection()->addAssociatedWidget(container);
+	actionCollection()->addAssociatedWidget(part->widget());
+	connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
+
+	return part;
+}
+
+
 void QuadKonsole::insertHorizontal()
 {
 	int row, col;
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		Konsole* part = new Konsole(centralWidget(), mRowLayouts[row], col);
-		mKonsoleParts.push_back(part);
-		actionCollection()->addAssociatedWidget(part->widget());
-		connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
+		Konsole* part = addPart(row, col);
 		part->widget()->setFocus();
 
-		updateColumnIds(row);
 		resetLayouts();
 	}
 }
@@ -503,10 +504,7 @@ void QuadKonsole::insertVertical()
 		it += row;
 		mRowLayouts.insert(it, newRow);
 
-		Konsole* part = new Konsole(centralWidget(), newRow, col);
-		mKonsoleParts.push_back(part);
-		actionCollection()->addAssociatedWidget(part->widget());
-		connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
+		Konsole* part = addPart(row, 0);
 		part->widget()->setFocus();
 		resetLayouts();
 	}
@@ -530,6 +528,7 @@ void QuadKonsole::removePart()
 		}
 
 		delete part;
+		delete mRowLayouts[row]->widget(col);
 		if (mRowLayouts[row]->count() < 1)
 		{
 			QSplitter* splitter = mRowLayouts[row];

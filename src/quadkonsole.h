@@ -69,13 +69,11 @@ class QuadKonsole : public KXmlGuiWindow
 		void insertVertical();
 		void removePart();
 
-	private slots:
-		void updateColumnIds(int row);
-
 	protected:
 		bool queryClose();
 		Konsole* getFocusPart();
 		void getFocusCoords(int& row, int& col);
+		Konsole* addPart(int row, int col, Konsole* part=0);
 
 	private:
 		QuadKonsole(KParts::ReadOnlyPart* part);
@@ -91,4 +89,3 @@ class QuadKonsole : public KXmlGuiWindow
 };
 
 #endif // _QUADKONSOLE_H_
-

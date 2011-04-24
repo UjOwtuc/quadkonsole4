@@ -25,7 +25,7 @@
 #include <KDE/KDebug>
 #include <kde_terminal_interface_v2.h>
 
-#include <QtGui/QSplitter>
+#include <QtGui/QLayout>
 
 #include <iostream>
 
@@ -35,10 +35,10 @@ namespace
 }
 
 
-Konsole::Konsole(QWidget *parent, QSplitter *layout, int column)
+Konsole::Konsole(QWidget* parent, QLayout* layout)
 	: QWidget(parent),
-	m_layout(layout),
-	m_column(column)
+	m_parent(parent),
+	m_layout(layout)
 {
 	m_part = 0;
 	createPart();
@@ -47,12 +47,12 @@ Konsole::Konsole(QWidget *parent, QSplitter *layout, int column)
 
 Konsole::Konsole(QWidget *parent, KParts::ReadOnlyPart* part)
 	: QWidget(parent),
-	m_layout(0),
-	m_column(0)
+	m_parent(parent),
+	m_layout(0)
 {
 	m_part = part;
-	part->setParent(this);
-	m_part->widget()->setParent(this);
+	part->setParent(parent);
+	m_part->widget()->setParent(parent);
 	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
 }
 
@@ -77,16 +77,23 @@ void Konsole::sendInput(const QString& text)
 }
 
 
-void Konsole::setLayout(QSplitter* layout, int column)
+void Konsole::setParent(QWidget* parent)
+{
+	m_parent = parent;
+	m_part->setParent(parent);
+	m_part->widget()->setParent(parent);
+}
+
+
+void Konsole::setLayout(QLayout* layout)
 {
 	if (m_layout)
 	{
 		kDebug() << "changing layout is not supported yet" << endl;
 		return;
 	}
-	m_column = column;
 	m_layout = layout;
-	m_layout->insertWidget(column, m_part->widget());
+	m_layout->addWidget(m_part->widget());
 }
 
 
@@ -114,10 +121,9 @@ void Konsole::partDestroyed()
 
 void Konsole::createPart()
 {
-	// copied parts could have no layout for some nanoseconds
 	if (m_layout == 0)
 	{
-		kDebug() << "no layout, cannot create a new part" << endl;
+		kDebug() << "no layout" << endl;
 		return;
 	}
 
@@ -125,7 +131,7 @@ void Konsole::createPart()
 	{
 		factory = KPluginLoader("libkonsolepart").factory();
 	}
-	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(this, this));
+	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(m_parent, this));
 	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
 	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)
@@ -136,8 +142,9 @@ void Konsole::createPart()
 		exit(1);
 	}
 
-	m_part->widget()->setParent(this);
-	m_layout->insertWidget(m_column, m_part->widget());
+	m_part->widget()->setParent(m_parent);
+	m_layout->addWidget(m_part->widget());
+	m_parent->setFocusProxy(m_part->widget());
 
 	emit partCreated();
 }

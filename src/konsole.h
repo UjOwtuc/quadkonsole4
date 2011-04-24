@@ -23,7 +23,7 @@
 
 #include <QtGui/QWidget>
 
-class QSplitter;
+class QLayout;
 namespace KParts
 {
 	class ReadOnlyPart;
@@ -39,13 +39,14 @@ class Konsole : public QWidget
 	Q_OBJECT
 
 	public:
-		Konsole(QWidget* parent, QSplitter* layout, int column);
+		Konsole(QWidget* parent, QLayout* layout);
 		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
 		~Konsole();
 
 		void sendInput(const QString& text);
-		void setLayout(QSplitter* layout, int column);
-		void setColumn(int column) { m_column = column; };
+		void setParent(QWidget* parent);
+		void setLayout(QLayout* layout);
+
 		QString foregroundProcessName();
 
 		KParts::ReadOnlyPart* part() { return m_part; }
@@ -61,9 +62,9 @@ class Konsole : public QWidget
 	private:
 		void createPart();
 
-		QSplitter* m_layout;
+		QWidget* m_parent;
+		QLayout* m_layout;
 		KParts::ReadOnlyPart* m_part;
-		int m_column;
 };
 
 #endif // KONSOLE_H

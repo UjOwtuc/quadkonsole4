@@ -27,8 +27,6 @@
 
 #include <QtGui/QLayout>
 
-#include <iostream>
-
 namespace
 {
 	KLibFactory *factory = 0;
@@ -157,3 +155,6 @@ QWidget* Konsole::widget()
 
 	return 0;
 }
+
+#include "konsole.moc"
+

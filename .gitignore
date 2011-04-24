@@ -1,7 +1,15 @@
+# vim
 *.swp
+
+# KDevelop
 .kdev4/
+*.kdev4
 build/
+
+# Debian
+debian/files
 debian/quadkonsole4.debhelper.log
 debian/quadkonsole4.substvars
 debian/quadkonsole4/
-quadkonsole.kdev4
+debian/stamp-*
+obj-*/

@@ -1,0 +1,7 @@
+*.swp
+.kdev4/
+build/
+debian/quadkonsole4.debhelper.log
+debian/quadkonsole4.substvars
+debian/quadkonsole4/
+quadkonsole.kdev4

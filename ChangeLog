@@ -1,3 +1,8 @@
+2011-04-26  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Added detach-on-quit option
+	* Fixed dependencies in debian/control
+
 2011-04-08  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Added menu bar and config window.

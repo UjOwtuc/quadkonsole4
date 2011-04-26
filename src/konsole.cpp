@@ -23,8 +23,11 @@
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KLibLoader>
 #include <KDE/KDebug>
+#include <KDE/KLocale>
+#include <KDE/KMessageBox>
 #include <kde_terminal_interface_v2.h>
 
+#include <QtGui/QWidget>
 #include <QtGui/QLayout>
 
 namespace
@@ -34,7 +37,7 @@ namespace
 
 
 Konsole::Konsole(QWidget* parent, QLayout* layout)
-	: QWidget(parent),
+	: QObject(parent),
 	m_parent(parent),
 	m_layout(layout)
 {
@@ -44,7 +47,7 @@ Konsole::Konsole(QWidget* parent, QLayout* layout)
 
 
 Konsole::Konsole(QWidget *parent, KParts::ReadOnlyPart* part)
-	: QWidget(parent),
+	: QObject(parent),
 	m_parent(parent),
 	m_layout(0)
 {
@@ -128,6 +131,8 @@ void Konsole::createPart()
 	if (factory == 0)
 	{
 		factory = KPluginLoader("libkonsolepart").factory();
+		if (factory == 0)
+			KMessageBox::error(m_parent, i18n("Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"));
 	}
 	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(m_parent, this));
 	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));

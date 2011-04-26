@@ -2,12 +2,12 @@ Source: quadkonsole4
 Section: kde
 Priority: extra
 Maintainer: Karsten Borgwaldt <kb@kb.ccchl.de>
-Build-Depends: debhelper (>= 7), cdbs, kdelibs5-dev (>= 4.0.0), konsole (>= 4.0.0), cmake (>= 2.4), quilt
+Build-Depends: debhelper (>= 7), cdbs, kdelibs5-dev (>= 4.0.0), cmake (>= 2.4), quilt
 Standards-Version: 3.8.4
 Homepage: http://kb.ccchl.de/quadkonsole4
 
 Package: quadkonsole4
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: konsole (>= 4.0.0), ${shlibs:Depends}, ${misc:Depends}
 Description: X terminal emulator
  QuadKonsole4 embeds Konsole KParts in a grid layout.

@@ -24,6 +24,7 @@
 #include "konsole.h"
 #include "mousemovefilter.h"
 #include "settings.h"
+#include "closedialog.h"
 
 #include <KDE/KDebug>
 #include <kde_terminal_interface_v2.h>
@@ -48,12 +49,8 @@
 #include <QtGui/QLayout>
 #include <QtGui/QSplitter>
 
-#include <algorithm>
-#include <cerrno>
-
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
-
 
 QuadKonsole::QuadKonsole()
 	: KXmlGuiWindow(),
@@ -207,7 +204,6 @@ void QuadKonsole::setupUi(int rows, int columns)
 	grid->addWidget(mRows, 0, 0);
 
 	setCentralWidget(centralWidget);
-	actionCollection()->addAssociatedWidget(centralWidget);
 
 	for (int i = 0; i < rows; ++i)
 	{
@@ -306,11 +302,16 @@ void QuadKonsole::focusKonsoleDown()
 }
 
 
-void QuadKonsole::detach()
+void QuadKonsole::detach(Konsole* part)
 {
-	Konsole* part = getFocusPart();
+	if (part == 0)
+	{
+		part = getFocusPart();
+		if (part == 0)
+			return;
+	}
+
 	QuadKonsole* external = new QuadKonsole(part->part());
-	actionCollection()->removeAssociatedWidget(part->widget());
 	part->partDestroyed();
 	external->setAttribute(Qt::WA_DeleteOnClose);
 }
@@ -394,25 +395,28 @@ bool QuadKonsole::queryClose()
 {
 	if (Settings::queryClose())
 	{
-		QStringList processes;
-		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
+		CloseDialog dialog(this);
+		for (unsigned int i=0; i<mKonsoleParts.size(); ++i)
 		{
-			QString process = (*it)->foregroundProcessName();
+			QString process = mKonsoleParts[i]->foregroundProcessName();
 			if (process.size())
 			{
-				processes << process;
+				dialog.addProcess(i, process);
 			}
 		}
 
-		if (processes.count())
+		if (dialog.size())
 		{
-			QString warning = i18n("The following processes are still running. Are you sure you want to exit QuadKonsole4?");
-			switch (KMessageBox::questionYesNoList(this, warning, processes))
+			QList<int> doDetach;
+			if (! dialog.exec(doDetach))
+				return false;
+			else
 			{
-				case KMessageBox::Yes :
-					return true;
-				default :
-					return false;
+				QListIterator<int> it(doDetach);
+				while (it.hasNext())
+					detach(mKonsoleParts[it.next()]);
+
+				return true;
 			}
 		}
 	}
@@ -462,14 +466,13 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 	if (part != 0)
 	{
 		part->setLayout(layout);
+		part->setParent(container);
 	}
 	else
 	{
 		part = new Konsole(container, layout);
 		mKonsoleParts.push_back(part);
 	}
-	actionCollection()->addAssociatedWidget(container);
-	actionCollection()->addAssociatedWidget(part->widget());
 	connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
 
 	return part;

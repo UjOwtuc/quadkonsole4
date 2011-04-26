@@ -21,7 +21,7 @@
 #ifndef KONSOLE_H
 #define KONSOLE_H
 
-#include <QtGui/QWidget>
+#include <QtCore/QObject>
 
 class QLayout;
 namespace KParts
@@ -34,17 +34,17 @@ namespace KParts
  * @author Karsten Borgwaldt <kb@kb.ccchl.de>
  * @version 2.1
  */
-class Konsole : public QWidget
+class Konsole : public QObject
 {
 	Q_OBJECT
 
 	public:
 		Konsole(QWidget* parent, QLayout* layout);
 		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
-		~Konsole();
+		virtual ~Konsole();
 
 		void sendInput(const QString& text);
-		void setParent(QWidget* parent);
+		virtual void setParent(QWidget* parent);
 		void setLayout(QLayout* layout);
 
 		QString foregroundProcessName();

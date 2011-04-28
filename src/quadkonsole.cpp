@@ -41,6 +41,7 @@
 #include <KDE/KToolBar>
 #include <KDE/KConfigDialog>
 #include <KDE/KMessageBox>
+#include <KDE/KParts/ReadOnlyPart>
 
 #include <QtGui/QMouseEvent>
 #include <QtGui/QAction>
@@ -92,12 +93,14 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	setupActions();
 	setupUi(1, 1);
 	k->setParent(mRowLayouts[0]->widget(0));
+	actionCollection()->associateWidget(k->widget());
 	showNormal();
 }
 
 
 QuadKonsole::~QuadKonsole()
 {
+	kDebug() << "deleting " << mKonsoleParts.size() << " parts" << endl;
 	delete mFilter;
 	for (PartVector::const_iterator i = mKonsoleParts.begin(); i != mKonsoleParts.end(); ++i)
 	{
@@ -147,12 +150,12 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("detach", detach);
 	connect(detach, SIGNAL(triggered(bool)), this, SLOT(detach()));
 
-	KAction *insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
+	KAction* insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
 	connect(insertHorizontal, SIGNAL(triggered(bool)), this, SLOT(insertHorizontal()));
 
-	KAction *insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
+	KAction* insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
 	connect(insertVertical, SIGNAL(triggered(bool)), this, SLOT(insertVertical()));
@@ -204,6 +207,7 @@ void QuadKonsole::setupUi(int rows, int columns)
 	grid->addWidget(mRows, 0, 0);
 
 	setCentralWidget(centralWidget);
+	actionCollection()->addAssociatedWidget(centralWidget);
 
 	for (int i = 0; i < rows; ++i)
 	{
@@ -311,6 +315,7 @@ void QuadKonsole::detach(Konsole* part)
 			return;
 	}
 
+	actionCollection()->removeAssociatedWidget(part->widget());
 	QuadKonsole* external = new QuadKonsole(part->part());
 	part->partDestroyed();
 	external->setAttribute(Qt::WA_DeleteOnClose);
@@ -449,7 +454,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 			}
 		}
 	}
-	kDebug() << "could not find focus" << endl;
+	kDebug() << "could not find focus in" << mKonsoleParts.size() << "parts" << endl;
 	row = -1;
 	col = -1;
 }
@@ -457,7 +462,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 
 Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 {
-	QWidget* container = new QWidget(this);
+	QWidget* container = new QWidget(centralWidget());
 	mRowLayouts[row]->insertWidget(col, container);
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::Down, container);
 	layout->setSpacing(0);
@@ -467,6 +472,7 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 	{
 		part->setLayout(layout);
 		part->setParent(container);
+		container->setFocusProxy(part->widget());
 	}
 	else
 	{
@@ -474,6 +480,7 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 		mKonsoleParts.push_back(part);
 	}
 	connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
+	actionCollection()->addAssociatedWidget(part->widget());
 
 	return part;
 }

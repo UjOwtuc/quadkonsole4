@@ -54,8 +54,7 @@
 #include "ui_prefs_shutdown.h"
 
 QuadKonsole::QuadKonsole()
-	: KXmlGuiWindow(),
-	mFilter(0)
+	: mFilter(0)
 {
 	setupActions();
 	setupUi(Settings::numRows(), Settings::numCols());
@@ -63,8 +62,7 @@ QuadKonsole::QuadKonsole()
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
-	: KXmlGuiWindow(),
-	mFilter(0)
+	: mFilter(0)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -84,8 +82,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 
 
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
-	: KXmlGuiWindow(),
-	mFilter(0)
+	: mFilter(0)
 {
 	Konsole* k = new Konsole(this, part);
 	mKonsoleParts.push_back(k);
@@ -124,22 +121,22 @@ void QuadKonsole::setupActions()
 	}
 
 	// Movement
-	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("&Right"), this);
+	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
 	actionCollection()->addAction("go right", goRight);
 	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
 
-	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("&Left"), this);
+	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("Go &left"), this);
 	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
 	connect(goLeft, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleLeft()));
 
-	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("&Up"), this);
+	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("Go &up"), this);
 	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
 	connect(goUp, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleUp()));
 
-	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("&Down"), this);
+	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("Go &down"), this);
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
@@ -171,7 +168,7 @@ void QuadKonsole::setupActions()
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
 
 	// The whole paste clipboard action does not work
-	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
+	// KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
 	KAction *pasteClipboard = new KAction(KIcon("edit-paste"), i18n("Paste &clipboard"), this);
 	pasteClipboard->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert));
 	actionCollection()->addAction("pasteClipboard", pasteClipboard);
@@ -202,7 +199,7 @@ void QuadKonsole::setupUi(int rows, int columns)
 	QWidget* centralWidget = new QWidget(this, 0);
 	QGridLayout* grid = new QGridLayout(centralWidget);
 
-	mRows = new QSplitter(Qt::Vertical, centralWidget);
+	mRows = new QSplitter(Qt::Vertical);
 	mRows->setChildrenCollapsible(false);
 	grid->addWidget(mRows, 0, 0);
 
@@ -211,7 +208,7 @@ void QuadKonsole::setupUi(int rows, int columns)
 
 	for (int i = 0; i < rows; ++i)
 	{
-		QSplitter* row = new QSplitter(Qt::Horizontal, centralWidget);
+		QSplitter* row = new QSplitter(Qt::Horizontal);
 		row->setChildrenCollapsible(false);
 		mRowLayouts.push_back(row);
 		mRows->addWidget(row);
@@ -462,7 +459,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 
 Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 {
-	QWidget* container = new QWidget(centralWidget());
+	QWidget* container = new QWidget;
 	mRowLayouts[row]->insertWidget(col, container);
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::Down, container);
 	layout->setSpacing(0);
@@ -506,7 +503,7 @@ void QuadKonsole::insertVertical()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		QSplitter *newRow = new QSplitter(Qt::Horizontal, centralWidget());
+		QSplitter *newRow = new QSplitter(Qt::Horizontal);
 		newRow->setChildrenCollapsible(false);
 		mRows->insertWidget(row, newRow);
 

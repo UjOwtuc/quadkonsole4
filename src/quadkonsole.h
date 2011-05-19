@@ -24,7 +24,7 @@
 #ifndef _QUADKONSOLE_H_
 #define _QUADKONSOLE_H_
 
-#include <KDE/KXmlGuiWindow>
+#include <KDE/KParts/MainWindow>
 
 #include <QtGui/QClipboard>
 
@@ -45,7 +45,7 @@ namespace KParts
  * @author Simon Perreault <nomis80@nomis80.org>
  * @version 2.0
  */
-class QuadKonsole : public KXmlGuiWindow
+class QuadKonsole : public KParts::MainWindow
 {
 	Q_OBJECT
 	public:

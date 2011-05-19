@@ -21,7 +21,7 @@
 #include "konsole.h"
 
 #include <KDE/KParts/ReadOnlyPart>
-#include <KDE/KLibLoader>
+#include <KDE/KService>
 #include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
@@ -32,7 +32,7 @@
 
 namespace
 {
-	KLibFactory *factory = 0;
+	KService::Ptr service;
 }
 
 
@@ -113,7 +113,10 @@ QString Konsole::foregroundProcessName()
 void Konsole::partDestroyed()
 {
 	if (m_part)
+	{
 		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
+		m_part = 0;
+	}
 
 	createPart();
 	m_part->widget()->setFocus();
@@ -128,13 +131,16 @@ void Konsole::createPart()
 		return;
 	}
 
-	if (factory == 0)
+	if (service.isNull())
 	{
-		factory = KPluginLoader("libkonsolepart").factory();
-		if (factory == 0)
+		service = KService::serviceByDesktopPath("konsolepart.desktop");
+		if (service.isNull())
+		{
 			KMessageBox::error(m_parent, i18n("Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"));
+			return;
+		}
 	}
-	m_part = dynamic_cast<KParts::ReadOnlyPart*>(factory->create<QObject>(m_parent, this));
+	m_part = service->createInstance<KParts::ReadOnlyPart>(this);
 	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
 	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)

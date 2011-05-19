@@ -60,6 +60,7 @@ class QuadKonsole : public KParts::MainWindow
 		void focusKonsoleDown();
 		void detach(Konsole* part=0);
 		void pasteClipboard();
+		void pasteSelection();
 		void resetLayouts();
 		void toggleMenu();
 		void optionsPreferences();

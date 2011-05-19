@@ -112,6 +112,12 @@ void QuadKonsole::pasteClipboard()
 }
 
 
+void QuadKonsole::pasteSelection()
+{
+	emitPaste(QClipboard::Selection);
+}
+
+
 void QuadKonsole::setupActions()
 {
 	if (Settings::sloppyFocus())
@@ -163,16 +169,15 @@ void QuadKonsole::setupActions()
 	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removePart()));
 
 	// View
-	KAction *resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
+	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
 
-	// The whole paste clipboard action does not work
-	// KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
-	KAction *pasteClipboard = new KAction(KIcon("edit-paste"), i18n("Paste &clipboard"), this);
-	pasteClipboard->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Insert));
-	actionCollection()->addAction("pasteClipboard", pasteClipboard);
-	connect(pasteClipboard, SIGNAL(triggered(bool)), this, SLOT(pasteClipboard()));
+	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
+	KAction *pasteSelection = new KAction(KIcon("edit-paste"), i18n("Paste &selection"), this);
+	pasteSelection->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
+	actionCollection()->addAction("pasteSelection", pasteSelection);
+	connect(pasteSelection, SIGNAL(triggered(bool)), this, SLOT(pasteSelection()));
 
 	// Standard actions
 	KStandardAction::preferences(this, SLOT(optionsPreferences()), actionCollection());
@@ -234,6 +239,7 @@ void QuadKonsole::setupUi(int rows, int columns)
 
 void QuadKonsole::emitPaste(QClipboard::Mode mode)
 {
+	kDebug() << "pasting" << mode << endl;
 	QString text = QApplication::clipboard()->text(mode);
 	Konsole* part = getFocusPart();
 	if (part)

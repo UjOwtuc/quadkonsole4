@@ -42,11 +42,9 @@ and use `&George.N.Ugnacious; &George.N.Ugnacious.mail;' in the author element.
 <date>2011-04-19</date>
 <releaseinfo>0.02.00</releaseinfo>
 
-<!-- TODO -->
 <abstract>
 <para>
-&kmyapplication; is an application specially designed to do nothing you would
-ever want.
+&kmyapplication; embeds multiple Konsole KParts in one window. It provides several shortcuts to switch focus, create or remove KParts. You can also detach a Konsole into a new &kmyapplication; main window.
 </para>
 </abstract>
 
@@ -58,32 +56,17 @@ Please at least include KDE, the KDE package it is in, the name
 <keyword>KDE</keyword>
 <keyword>kdeutils</keyword>
 <keyword>Kapp</keyword>
-<keyword>nothing</keyword>
-<keyword>nothing else</keyword>
+<keyword>Konsole</keyword>
 </keywordset>
 
 </bookinfo>
 
-<!-- The contents of the documentation begin here.  Label
-each chapter so with the id attribute. This is necessary for two reasons: it
-allows you to easily reference the chapter from other chapters of your
-document, and if there is no ID, the name of the generated HTML files will vary
-from time to time making it hard to manage for maintainers and for the CVS
-system. Any chapter labelled (OPTIONAL) may be left out at the author's
-discretion. Other chapters should not be left out in order to maintain a
-consistent documentation style across all KDE apps. -->
-
 <chapter id="introduction">
 <title>Introduction</title>
 
-<!-- The introduction chapter contains a brief introduction for the
-application that explains what it does and where to report
-problems. Basically a long version of the abstract.  Don't include a
-revision history. (see installation appendix comment) -->
-
 <para>
-&kmyapplication; is a program that lets you do absolutely nothing. Please report
-any problems or feature requests to the &kde; mailing lists.
+&kmyapplication; embeds multiple Konsole KParts in one window. Please report
+any problems or feature requests to quadkonsole4@kb.ccchl.de.
 </para>
 </chapter>
 
@@ -93,11 +76,11 @@ any problems or feature requests to the &kde; mailing lists.
 <!-- This chapter should tell the user how to use your app. You should use as
 many sections (Chapter, Sect1, Sect3, etc...) as is necessary to fully document
 your application. -->
-
 <para>
+&kmyapplication; is written to provide all Features of Konsole while still displaying multiple instances of it. All configuration and shortcuts of Konsole should work. There are several command line options to change the startup behaviour for a single instance of &kmyapplication;. To permanently change the settings for any startup, see configuration options.
+</para>
 
-<!-- Note that all graphics should be in .png format. Do not use gifs because of
-patent issues. -->
+<!--para>
 
 <screenshot>
 <screeninfo>Here's a screenshot of &kmyapplication;</screeninfo>
@@ -113,39 +96,11 @@ patent issues. -->
 	  </textobject>
 	</mediaobject>
 </screenshot>
-</para>
+</para-->
 
-
-<sect1 id="kapp-features">
-<title>More &kmyapplication; features</title>
-
-<para>It slices! It dices! and it comes with a free toaster!</para>
-<para>
-The Squiggle Tool <guiicon><inlinemediaobject>
-	  <imageobject>
-	    <imagedata fileref="squiggle.png" format="PNG"/>
-	  </imageobject>
-	  <imageobject>
-	    <imagedata fileref="squiggle.eps" format="EPS"/>
-	  </imageobject>
-	  <textobject>
-	    <phrase>Squiggle</phrase>
-	  </textobject>
-</inlinemediaobject></guiicon> is used to draw squiggly lines all over
-the &kmyapplication; main window. It's not a bug, it's a feature!
-</para>
-
-</sect1>
 </chapter>
-
 <chapter id="commands">
 <title>Command Reference</title>
-
-<!-- (OPTIONAL, BUT RECOMMENDED) This chapter should list all of the
-application windows and their menubar and toolbar commands for easy reference.
-Also include any keys that have a special function but have no equivalent in the
-menus or toolbars. This may not be necessary for small apps or apps with no tool
-or menu bars. -->
 
 <sect1 id="kapp-mainwindow">
 <title>The main &kmyapplication; window</title>
@@ -154,26 +109,15 @@ or menu bars. -->
 <title>The File Menu</title>
 <para>
 <variablelist>
+
 <varlistentry>
 <term><menuchoice>
-<shortcut>
-<keycombo action="simul">&Ctrl;<keycap>N</keycap></keycombo>
-</shortcut>
 <guimenu>File</guimenu>
-<guimenuitem>New</guimenuitem>
+<guimenuitem>Reset layouts</guimenuitem>
 </menuchoice></term>
-<listitem><para><action>Creates a new document</action></para></listitem>
+<listitem><para><action>Distributes the available space among all KParts equally</action></para></listitem>
 </varlistentry>
-<varlistentry>
-<term><menuchoice>
-<shortcut>
-<keycombo action="simul">&Ctrl;<keycap>S</keycap></keycombo>
-</shortcut>
-<guimenu>File</guimenu>
-<guimenuitem>Save</guimenuitem>
-</menuchoice></term>
-<listitem><para><action>Saves the document</action></para></listitem>
-</varlistentry>
+
 <varlistentry>
 <term><menuchoice>
 <shortcut>
@@ -187,6 +131,55 @@ or menu bars. -->
 </variablelist>
 </para>
 
+</sect2>
+
+<sect2>
+<title>The <guimenu>Edit</guimenu> Menu</title>
+<para>
+<variablelist>
+
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl;<keycap>V</keycap></keycombo>
+</shortcut>
+<guimenu>Edit</guimenu>
+<guimenuitem>Paste</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Paste the current copy buffer. The paste actions still have problems. You should use Konsole's own paste selection/copy actions instead.</action></para></listitem>
+</varlistentry>
+
+</variablelist></para>
+</sect2>
+
+<sect2>
+<title>The <guimenu>Move</guimenu> Menu</title>
+<para>
+<variablelist>
+
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl; &Shift;<keycap>Left</keycap></keycombo>
+</shortcut>
+<guimenu>Move</guimenu>
+<guimenuitem>Move left</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Move the focus to the left</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl; &Shift;<keycap>Right</keycap></keycombo>
+</shortcut>
+<guimenu>Move</guimenu>
+<guimenuitem>Move right</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Move the focus to the right</action></para></listitem>
+</varlistentry>
+
+</variablelist></para>
 </sect2>
 
 <sect2>

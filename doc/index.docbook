@@ -179,16 +179,92 @@ your application. -->
 <listitem><para><action>Move the focus to the right</action></para></listitem>
 </varlistentry>
 
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl; &Shift;<keycap>Up</keycap></keycombo>
+</shortcut>
+<guimenu>Move</guimenu>
+<guimenuitem>Move up</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Move the focus up</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl; &Shift;<keycap>Down</keycap></keycombo>
+</shortcut>
+<guimenu>Move</guimenu>
+<guimenuitem>Move up</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Move the focus down</action></para></listitem>
+</varlistentry>
+
+</variablelist></para>
+</sect2>
+
+<sect2>
+<title>The <guimenu>Settings</guimenu> Menu</title>
+<para>
+<variablelist>
+
+<varlistentry>
+<term><menuchoice>
+<shortcut>
+<keycombo action="simul">&Ctrl; &Shift;<keycap>M</keycap></keycombo>
+</shortcut>
+<guimenu>Settings</guimenu>
+<guimenuitem>Show Menubar</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Toggle visibility of the menubar</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Settings</guimenu>
+<guimenuitem>Show Toolbar</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Toggle visibility of the toolbar</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Settings</guimenu>
+<guimenuitem>Show Statusbar</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Toggle visibility of the statusbar (currently unused)</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Settings</guimenu>
+<guimenuitem>Configure Shortcuts</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Configure the shortcuts. Remember that some actions are provided by the KPart.</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Settings</guimenu>
+<guimenuitem>Configure Toolbars</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Configure the elements shown on the toolbars</action></para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Settings</guimenu>
+<guimenuitem>Configure quadkonsole4</guimenuitem>
+</menuchoice></term>
+<listitem><para><action>Configure the behaviour of &kmyapplication;</action></para></listitem>
+</varlistentry>
+
 </variablelist></para>
 </sect2>
 
 <sect2>
 <title>The <guimenu>Help</guimenu> Menu</title>
-
-<!-- Assuming you have a standard help menu (help, what's this, about -->
-<!-- &kmyapplication;, about KDE) then the documentation is already written. -->
-<!-- The following entity is valid anywhere that a variablelist is -->
-<!-- valid.  -->
 
 &help.menu.documentation;
 
@@ -197,21 +273,13 @@ your application. -->
 </sect1>
 </chapter>
 
-<chapter id="developers">
+<!--chapter id="developers">
 <title>Developer's Guide to &kmyapplication;</title>
-
-<!-- (OPTIONAL) A Programming/Scripting reference chapter should be
-used for apps that use plugins or that provide their own scripting hooks
-and/or development libraries. -->
 
 <para>
 Programming &kmyapplication; plugins is a joy to behold. Just read through the next
 66 pages of API's to learn how!
 </para>
-
-<!-- Use refentries to describe APIs.  Refentries are fairly complicated and you
-should consult the docbook reference for further details. The example below was
-taken from that reference and shortened a bit for readability. -->
 
 <refentry id="re-1007-unmanagechildren-1">
 <refmeta>
@@ -339,52 +407,30 @@ by unmapping it.
 </refsect1>
 </refentry>
 
-</chapter>
+</chapter-->
 
 <chapter id="faq">
 <title>Questions and Answers</title>
-
-<!-- (OPTIONAL but recommended) This chapter should include all of the silly
-(and not-so-silly) newbie questions that fill up your mailbox. This chapter
-should be reserved for BRIEF questions and answers! If one question uses more
-than a page or so then it should probably be part of the
-"Using this Application" chapter instead. You should use links to
-cross-reference questions to the parts of your documentation that answer them.
-This is also a great place to provide pointers to other FAQ's if your users
-must do some complicated configuration on other programs in order for your
-application work. -->
 
 &reporting.bugs;
 &updating.documentation;
 
 <qandaset id="faqlist">
+
 <qandaentry>
 <question>
-<para>My Mouse doesn't work. How do I quit &kmyapplication;?</para>
+<para>Can I use a differen terminal emulator/KPart withing &kmyapplication;?</para>
 </question>
 <answer>
-<para>You silly goose! Check out the <link linkend="commands">Commands
-Section</link> for the answer.</para>
+<para>&kmyapplication; was designed only with Konsole's KPart in mind. But it is possible to embed any KPart in it by changing either the name of the loaded KPart (in konsole.cpp) or by editing your "konsolepart.desktop". The embedded KPart should provide a "TerminalInterfaceV2".
+</para>
 </answer>
 </qandaentry>
-<qandaentry>
-<question>
-<para>Why can't I twiddle my documents?</para>
-</question>
-<answer>
-<para>You can only twiddle your documents if you have the foobar.lib
-installed.</para>
-</answer>
-</qandaentry>
+
 </qandaset>
 </chapter>
 
 <chapter id="credits">
-
-<!-- Include credits for the programmers, documentation writers, and
-contributors here. The license for your software should then be included below
-the credits with a reference to the appropriate license file included in the KDE
-distribution. -->
 
 <title>Credits and License</title>
 
@@ -392,8 +438,12 @@ distribution. -->
 &kmyapplication;
 </para>
 <para>
-Program copyright 2008 John Q. Hacker <email>jqh@kde.org</email>
+	Program Copyright
+	&copy; 2005 Simon Perrault <email>nomis80@nomis80.org</email>
+	&copy; 2009 - 2011 Karsten Borgwaldt <email>kb@kb.ccchl.de</email>
 </para>
+
+<!--
 <para>
 Contributors:
 <itemizedlist>
@@ -403,25 +453,16 @@ Contributors:
 </listitem>
 </itemizedlist>
 </para>
+-->
 
 <para>
-Documentation Copyright &copy; 2008 George N. Ugnacious <email>gnu@kde.org</email>
+Documentation Copyright &copy; 2011 Karsten Borgwaldt <email>kb@kb.ccchl.de</email>
 </para>
 
 <!-- TRANS:CREDIT_FOR_TRANSLATORS -->
 
-&underFDL;               <!-- FDL: do not remove -->
-
-<!-- Determine which license your application is licensed under,
-     and delete all the remaining licenses below:
-
-     (NOTE:  All documentation are licensed under the FDL,
-     regardless of what license the application uses) -->
-
-&underGPL;        	 <!-- GPL License -->
-&underBSDLicense;        <!-- BSD License -->
-&underArtisticLicense;   <!-- BSD Artistic License -->
-&underX11License;        <!-- X11 License  -->
+&underFDL;
+&underGPL;
 
 </chapter>
 
@@ -430,12 +471,7 @@ Documentation Copyright &copy; 2008 George N. Ugnacious <email>gnu@kde.org</emai
 
 <sect1 id="getting-kapp">
 <title>How to obtain &kmyapplication;</title>
-
-<!-- This first entity contains boiler plate for applications that are
-part of KDE CVS.  You should remove it if you are releasing your
-application -->
-
-&install.intro.documentation;
+<para>&kmyapplication; can be found at <ulink url="http://kb.ccchl.de/quadkonsole4">http://kb.ccchl.de/quadkonsole4</ulink>.</para>
 
 </sect1>
 
@@ -454,22 +490,17 @@ information here.
 -->
 
 <para>
-In order to successfully use &kmyapplication;, you need &kde; 1.1. Foobar.lib is
-required in order to support the advanced &kmyapplication; features. &kmyapplication; uses
-about 5 megs of memory to run, but this may vary depending on your
-platform and configuration.
+In order to successfully use &kmyapplication;, you need &kde; 4.x. and Konsole.
 </para>
 
 <para>
-All required libraries as well as &kmyapplication; itself can be found
-on <ulink url="ftp://ftp.kapp.org">The &kmyapplication; home page</ulink>.
+All required libraries can be found
+in <ulink url="ftp://ftp.kapp.org">The &kde; repositories</ulink>.
 </para>
 
-<!-- For a list of updates, you may refer to the application web site
-or the ChangeLog file, or ... -->
 <para>
 You can find a list of changes at <ulink
-url="http://apps.kde.org/kapp">http://apps.kde.org/kapp</ulink>.
+url="http://kb.ccchl.de/quadkonsole4/ChangeLog">http://kb.ccchl.de/quadkonsole4/ChangeLog</ulink>.
 </para>
 </sect1>
 
@@ -484,28 +515,15 @@ url="http://apps.kde.org/kapp">http://apps.kde.org/kapp</ulink>.
 
 </sect1>
 
-<sect1 id="configuration">
+<!--sect1 id="configuration">
 <title>Configuration</title>
 
 <para>Don't forget to tell your system to start the <filename>dtd</filename>
 dicer-toaster daemon first, or &kmyapplication; won't work !</para>
 
-</sect1>
+</sect1-->
 
 </appendix>
 
 &documentation.index;
 </book>
-
-<!--
-Local Variables:
-mode: xml
-sgml-minimize-attributes:nil
-sgml-general-insert-case:lower
-sgml-indent-step:0
-sgml-indent-data:nil
-End:
-
-vim:tabstop=2:shiftwidth=2:expandtab
-kate: space-indent on; indent-width 2; tab-width 2; indent-mode none;
--->

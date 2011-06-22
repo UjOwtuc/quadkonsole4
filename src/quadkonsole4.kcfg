@@ -9,6 +9,10 @@
 			<label>Focus follows mouse</label>
 			<default>false</default>
 		</entry>
+		<entry name="startMaximized" type="bool">
+			<label>Start maximized</label>
+			<default>true</default>
+		</entry>
 		<entry name="numRows" type="UInt" min="1">
 			<label>Number of rows</label>
 			<default>2</default>

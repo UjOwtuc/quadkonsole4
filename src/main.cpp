@@ -22,6 +22,7 @@
 
 
 #include "quadkonsole.h"
+#include "settings.h"
 
 #include <KDE/KApplication>
 #include <KDE/KAboutData>
@@ -63,7 +64,11 @@ int main(int argc, char **argv)
 
 		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds);
 		app.setTopWidget(mainWin);
-		mainWin->showMaximized();
+
+		if (Settings::startMaximized())
+			mainWin->showMaximized();
+		else
+			mainWin->show();
 
 		args->clear();
 	}

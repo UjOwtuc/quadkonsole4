@@ -81,6 +81,7 @@ class QuadKonsole : public KParts::MainWindow
 		void setupActions();
 		void setupUi(int rows, int columns);
 		void emitPaste(QClipboard::Mode mode);
+		void resetLayout(QSplitter* layout, int targetSize);
 
 		typedef std::vector<Konsole*> PartVector;
 		PartVector mKonsoleParts;

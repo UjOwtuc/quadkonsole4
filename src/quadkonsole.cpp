@@ -325,24 +325,40 @@ void QuadKonsole::detach(Konsole* part)
 }
 
 
+void QuadKonsole::resetLayout(QSplitter* layout, int targetSize)
+{
+	bool resize = false;
+	QList<int> currentSizes = layout->sizes();
+	QList<int>::const_iterator it;
+	for (it=currentSizes.begin(); it!=currentSizes.end(); ++it)
+	{
+		if (abs(*it - targetSize) >= 10)
+		{
+			kDebug() << "forcing resize:" << *it << "=>" << targetSize << endl;
+			resize = true;
+			break;
+		}
+	}
+
+	if (resize)
+	{
+		QList<int> sizes;
+		for (int i=0; i<layout->count(); ++i)
+			sizes.append(targetSize);
+		layout->setSizes(sizes);
+	}
+}
+
+
 void QuadKonsole::resetLayouts()
 {
 	kDebug() << "resetting layouts" << endl;
-	QList<int> sizes;
-	int width = mRows->height() / mRows->count();
-	for (int i=0; i<mRows->count(); ++i)
-		sizes.append(width);
-	mRows->setSizes(sizes);
+
+	resetLayout(mRows, mRows->height() / mRows->count());
 
 	std::vector<QSplitter*>::iterator it;
 	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
-	{
-		sizes.clear();
-		width = (*it)->width() / (*it)->count();
-		for (int i=0; i<(*it)->count(); ++i)
-			sizes.append(width);
-		(*it)->setSizes(sizes);
-	}
+		resetLayout(*it, (*it)->width() / (*it)->count());
 }
 
 

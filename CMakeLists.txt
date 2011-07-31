@@ -4,6 +4,10 @@ find_package(KDE4 REQUIRED)
 include (KDE4Defaults)
 include (FindKDE4Internal)
 
+if(CMAKE_BUILD_TYPE STREQUAL "debug")
+	add_definitions(-DDEBUG)
+endif()
+
 include_directories( ${KDE4_INCLUDES} ${QT_INCLUDES} )
 
 add_subdirectory( doc )

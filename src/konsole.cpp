@@ -133,6 +133,7 @@ void Konsole::createPart()
 
 	if (service.isNull())
 	{
+		kDebug() << "loading KPart factory" << endl;
 		service = KService::serviceByDesktopPath("konsolepart.desktop");
 		if (service.isNull())
 		{

@@ -66,15 +66,23 @@ class QuadKonsole : public KParts::MainWindow
 		void optionsPreferences();
 		void settingsChanged();
 		void quit();
-		void insertHorizontal();
-		void insertVertical();
-		void removePart();
+		void insertHorizontal(int row=-1, int col=-1);
+		void insertVertical(int row=-1, int col=-1);
+		void removePart(int row=-1, int col=-1);
+
+#ifdef DEBUG
+	private slots:
+		void saveSession();
+		void restoreSession();
+#endif // DEBUG
 
 	protected:
 		bool queryClose();
 		Konsole* getFocusPart();
 		void getFocusCoords(int& row, int& col);
 		Konsole* addPart(int row, int col, Konsole* part=0);
+		void saveProperties(KConfigGroup& config);
+		void readProperties(const KConfigGroup& config);
 
 	private:
 		QuadKonsole(KParts::ReadOnlyPart* part);

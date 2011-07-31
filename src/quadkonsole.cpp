@@ -53,11 +53,12 @@
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
 
+// Only for restoring a session.
 QuadKonsole::QuadKonsole()
 	: mFilter(0)
 {
 	setupActions();
-	setupUi(Settings::numRows(), Settings::numCols());
+	setupUi(0, 0);
 }
 
 
@@ -68,6 +69,19 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 		rows = Settings::numRows();
 	if (columns == 0)
 		columns = Settings::numCols();
+
+	if (rows < 1)
+	{
+		kdError() << "Number of rows must be at last one." << endl;
+		qApp->quit();
+	}
+
+	if (columns < 1)
+	{
+		kdError() << "Number of columns must be at least one." << endl;
+		qApp->quit();
+	}
+
 
 	setupActions();
 	setupUi(rows, columns);
@@ -184,23 +198,23 @@ void QuadKonsole::setupActions()
 	KStandardAction::quit(this, SLOT(quit()), actionCollection());
 	KToggleAction* toggleMenu = KStandardAction::showMenubar(this, SLOT(toggleMenu()), actionCollection());
 	toggleMenu->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
+
+	// Debug
+#ifdef DEBUG
+	kDebug() << "adding debugging actions" << endl;
+	KAction* saveSession = new KAction(KIcon("document-save"), i18n("Save session"), this);
+	actionCollection()->addAction("saveSession", saveSession);
+	connect(saveSession, SIGNAL(triggered(bool)), this, SLOT(saveSession()));
+
+	KAction* restoreSession = new KAction(KIcon("document-open"), i18n("Restore session"), this);
+	actionCollection()->addAction("restoreSession", restoreSession);
+	connect(restoreSession, SIGNAL(triggered(bool)), this, SLOT(restoreSession()));
+#endif // DEBUG
 }
 
 
 void QuadKonsole::setupUi(int rows, int columns)
 {
-	if (rows < 1)
-	{
-		kdError() << "Number of rows must be at last one." << endl;
-		qApp->quit();
-	}
-
-	if (columns < 1)
-	{
-		kdError() << "Number of columns must be at least one." << endl;
-		qApp->quit();
-	}
-
 	QWidget* centralWidget = new QWidget(this, 0);
 	QGridLayout* grid = new QGridLayout(centralWidget);
 
@@ -449,11 +463,53 @@ bool QuadKonsole::queryClose()
 }
 
 
+void QuadKonsole::saveProperties(KConfigGroup& config)
+{
+	QList<int> rowSizes = mRows->sizes();
+	config.writeEntry("rowSizes", rowSizes);
+	kDebug() << "saving session. rowSizes =" << rowSizes << endl;
+
+	for (unsigned int i=0; i<mRowLayouts.size(); ++i)
+	{
+		kDebug() << QString("row_%1").arg(i) << "=" << mRowLayouts[i]->sizes() << endl;
+		config.writeEntry(QString("row_%1").arg(i), mRowLayouts[i]->sizes());
+	}
+}
+
+
+void QuadKonsole::readProperties(const KConfigGroup& config)
+{
+	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
+	if (rowSizes.empty())
+	{
+		kDebug() << "could not read properties: empty rowSizes" << endl;
+		return;
+	}
+
+	kDebug() << "adjusting number of rows:" << mRowLayouts.size() << "=>" << rowSizes.size() << endl;
+	// adjust number of rows
+	while (mRowLayouts.size() < static_cast<unsigned int>(rowSizes.size()))
+		insertVertical(0, 0);
+
+	for (unsigned int i=0; i<static_cast<unsigned int>(rowSizes.size()); ++i)
+	{
+		kDebug() << "restoring row" << i << endl;
+		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
+		while (mRowLayouts[i]->count() < sizes.size())
+			insertHorizontal(i, 0);
+
+		mRowLayouts[i]->setSizes(sizes);
+	}
+
+	mRows->setSizes(rowSizes);
+}
+
+
 Konsole* QuadKonsole::getFocusPart()
 {
 	for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
 	{
-		if ((*it)->widget()->hasFocus())
+		if ((*it)->widget() && (*it)->widget()->hasFocus())
 			return *it;
 	}
 	kDebug() << "could not find focus" << endl;
@@ -505,10 +561,11 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 }
 
 
-void QuadKonsole::insertHorizontal()
+void QuadKonsole::insertHorizontal(int row, int col)
 {
-	int row, col;
-	getFocusCoords(row, col);
+	if (row == -1 && col == -1)
+		getFocusCoords(row, col);
+
 	if (row >= 0 && col >= 0)
 	{
 		Konsole* part = addPart(row, col);
@@ -519,10 +576,11 @@ void QuadKonsole::insertHorizontal()
 }
 
 
-void QuadKonsole::insertVertical()
+void QuadKonsole::insertVertical(int row, int col)
 {
-	int row, col;
-	getFocusCoords(row, col);
+	if (row == -1 && col == -1)
+		getFocusCoords(row, col);
+
 	if (row >= 0 && col >= 0)
 	{
 		QSplitter *newRow = new QSplitter(Qt::Horizontal);
@@ -540,16 +598,19 @@ void QuadKonsole::insertVertical()
 }
 
 
-void QuadKonsole::removePart()
+void QuadKonsole::removePart(int row, int col)
 {
-	int row, col;
-	getFocusCoords(row, col);
+	if (row == -1 && col == -1)
+		getFocusCoords(row, col);
+
 	if (row >= 0 && col >= 0)
 	{
-		Konsole* part = getFocusPart();
+		// Konsole* part = getFocusPart();
+		Konsole* part = qobject_cast<Konsole*>(mRowLayouts[row]->widget(col));
+
 		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
 		{
-			if ((*it)->widget()->hasFocus())
+			if ((*it) && (*it)->widget() && (*it)->widget()->hasFocus())
 			{
 				mKonsoleParts.erase(it);
 				break;
@@ -577,5 +638,45 @@ void QuadKonsole::removePart()
 		}
 	}
 }
+
+#ifdef DEBUG
+namespace
+{
+	KConfig* master = 0;
+	KConfigGroup* sessionTest = 0;
+}
+
+void QuadKonsole::saveSession()
+{
+	delete master;
+	delete sessionTest;
+
+	master = new KConfig("", KConfig::SimpleConfig);
+	sessionTest = new KConfigGroup(master, "SessionTest");
+
+	saveProperties(*sessionTest);
+}
+
+
+void QuadKonsole::restoreSession()
+{
+	if (sessionTest)
+	{
+		while (mKonsoleParts.size())
+		{
+			delete mKonsoleParts.front();
+			mKonsoleParts.erase(mKonsoleParts.begin());
+		}
+		while (mRowLayouts.size())
+		{
+			delete mRowLayouts.front();
+			mRowLayouts.erase(mRowLayouts.begin());
+		}
+		readProperties(*sessionTest);
+	}
+	else
+		KMessageBox::error(this, "There is no session to be restored. You need to save one before restoring.", "No saved session found");
+}
+#endif // DEBUG
 
 #include "quadkonsole.moc"

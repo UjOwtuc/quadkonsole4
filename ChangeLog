@@ -1,7 +1,30 @@
+2011-07-31  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Improved session support
+
+2011-07-01  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Optimized resizing of layouts
+
+2011-06-22  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Added config option to start normal/maximized
+
 2011-04-26  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Added detach-on-quit option
 	* Fixed dependencies in debian/control
+
+2011-04-23  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Fixed installation of kcfg
+	* Added --cmd option
+	* Reintroduced sloppy focus
+	* Released 0.2.1
+
+2011-04-21  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Released 0.2
 
 2011-04-08  Karsten Borgwaldt  <kb@kb.ccchl.de>
 

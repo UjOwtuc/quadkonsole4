@@ -5,6 +5,11 @@ include (KDE4Defaults)
 include (FindKDE4Internal)
 
 if(CMAKE_BUILD_TYPE STREQUAL "debug")
+	set(ENABLE_DEBUG "On")
+endif()
+
+option(ENABLE_DEBUG "Enable debugging code")
+if(ENABLE_DEBUG)
 	add_definitions(-DDEBUG)
 endif()
 

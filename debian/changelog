@@ -1,3 +1,9 @@
+quadkonsole4 (0.3-1) unstable; urgency=low
+
+  * Version bump
+
+ -- Karsten Borgwaldt <kb@kb.ccchl.de>  Mon,  1 Aug 2011 20:14:26 +0200
+
 quadkonsole4 (0.2.1-1) unstable; urgency=low
 
   * Initial release

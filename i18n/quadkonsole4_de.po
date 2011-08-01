@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the QuadKonsole4 package.
 #
 # Karsten Borgwaldt <k.borgwaldt@soit.de>, 2011.
+# Karsten Borgwaldt <kb@kb.ccchl.de>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-05-18 16:35+0200\n"
-"PO-Revision-Date: 2011-05-18 16:05+0200\n"
-"Last-Translator: Karsten Borgwaldt <k.borgwaldt@soit.de>\n"
+"POT-Creation-Date: 2011-08-01 20:08+0200\n"
+"PO-Revision-Date: 2011-08-01 20:10+0200\n"
+"Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -26,22 +27,22 @@ msgstr "Nicht abtrennen"
 msgid "Detach selected"
 msgstr "Ausgewählte abtrennen"
 
-#: src/konsole.cpp:136
+#: src/konsole.cpp:140
 msgid ""
 "Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
 msgstr ""
 "Konnte Factory für \"libkonsolepart\" nicht erstellen. Ist Konsole "
 "installiert?"
 
-#: src/main.cpp:31
+#: src/main.cpp:32
 msgid "Embeds multiple Konsoles in a grid layout"
 msgstr "Ordnet mehrere Konsolen in einem Gitter an"
 
-#: src/main.cpp:36
+#: src/main.cpp:37
 msgid "quadkonsole4"
 msgstr "quadkonsole4"
 
-#: src/main.cpp:36
+#: src/main.cpp:37
 msgid ""
 "(C) 2005 Simon Perreault\n"
 "(C) 2009 - 2011 Karsten Borgwaldt"
@@ -49,158 +50,126 @@ msgstr ""
 "(C) 2005 Simon Perreault\n"
 "(C) 2009 - 2011 Karsten Borgwaldt"
 
-#: src/main.cpp:37
+#: src/main.cpp:38
 msgid "Simon Perreault"
 msgstr "Simon Perrault"
 
-#: src/main.cpp:38
+#: src/main.cpp:39
 msgid "Karsten Borgwaldt"
 msgstr "Karsten Borgwaldt"
 
-#: src/main.cpp:42
+#: src/main.cpp:43
 msgid "Number of rows of terminal emulators"
 msgstr "Anzahl Zeilen von Terminalemulatoren"
 
-#: src/main.cpp:43
+#: src/main.cpp:44
 msgid "Number of columns of terminal emulators"
 msgstr "Anzahl Spalten von Terminalemulatoren"
 
-#: src/main.cpp:44
+#: src/main.cpp:45
 msgid "Run command (may be used multiple times)"
 msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
 
-#: src/quadkonsole.cpp:124
+#: src/quadkonsole.cpp:144
 msgid "Go &right"
 msgstr "Gehe nach &rechts"
 
-#: src/quadkonsole.cpp:129
+#: src/quadkonsole.cpp:149
 msgid "Go &left"
 msgstr "Gehe nach &links"
 
-#: src/quadkonsole.cpp:134
+#: src/quadkonsole.cpp:154
 msgid "Go &up"
 msgstr "Gehe &hoch"
 
-#: src/quadkonsole.cpp:139
+#: src/quadkonsole.cpp:159
 msgid "Go &down"
 msgstr "Gehe her&unter"
 
-#: src/quadkonsole.cpp:145
+#: src/quadkonsole.cpp:165
 msgid "De&tach"
 msgstr "&Abtrennen"
 
-#: src/quadkonsole.cpp:150
+#: src/quadkonsole.cpp:170
 msgid "Insert &horizontal"
 msgstr "Einfügen: &horizontal"
 
-#: src/quadkonsole.cpp:155
+#: src/quadkonsole.cpp:175
 msgid "Insert &vertical"
 msgstr "Einfügen: &vertikal"
 
-#: src/quadkonsole.cpp:160
+#: src/quadkonsole.cpp:180
 msgid "Re&move part"
 msgstr "Ansicht &entfernen"
 
-#: src/quadkonsole.cpp:166
+#: src/quadkonsole.cpp:186
 msgid "R&eset layouts"
 msgstr "Gitter &zurücksezten"
 
-#: src/quadkonsole.cpp:172
-msgid "Paste &clipboard"
+#: src/quadkonsole.cpp:191
+#, fuzzy
+msgid "Paste &selection"
 msgstr "Zwischenablage &einfügen"
 
-#. i18n: file: src/prefs_base.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
-#: src/quadkonsole.cpp:362 rc.cpp:12
+#: src/quadkonsole.cpp:205
+msgid "Save session"
+msgstr "Sitzung speichern"
+
+#: src/quadkonsole.cpp:209
+msgid "Restore session"
+msgstr "Sitzung wiederherstellen"
+
+#: src/quadkonsole.cpp:398
 msgid "General"
 msgstr "Allgemein"
 
-#. i18n: file: src/prefs_shutdown.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
-#: src/quadkonsole.cpp:367 rc.cpp:27
+#: src/quadkonsole.cpp:403
 msgid "Shutdown"
 msgstr "Beenden"
 
-#. i18n: file: src/detach_processes.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
-#: rc.cpp:3
-msgid "Detach processes"
-msgstr "Prozesse Ab&trennen"
-
-#. i18n: file: src/detach_processes.ui:20
-#. i18n: ectx: property (text), widget (QLabel, lTitle)
-#: rc.cpp:6
-msgid ""
-"The following processes are still running. Do you wish to detach the "
-"containing windows before exiting?"
-msgstr ""
-"Die folgenden Prozesse laufen noch. Möchten Sie diese Fenster vor den "
-"Beenden abtrennen?"
-
-#. i18n: file: src/detach_processes.ui:36
-#. i18n: ectx: property (text), widget (QTableWidget, processTable)
-#: rc.cpp:9
-msgid "Process"
-msgstr "Prozess"
-
-#. i18n: file: src/prefs_base.ui:20
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
-#. i18n: file: src/quadkonsole4.kcfg:9
-#. i18n: ectx: label, entry (sloppyFocus), group (General)
-#: rc.cpp:15 rc.cpp:33
-msgid "Focus follows mouse"
-msgstr "Aktivierung unter Mauszeiger"
-
-#. i18n: file: src/prefs_base.ui:27
-#. i18n: ectx: property (title), widget (QGroupBox, groupBox)
-#: rc.cpp:18
-msgid "Startup"
-msgstr "Start"
-
-#. i18n: file: src/prefs_base.ui:46
-#. i18n: ectx: property (text), widget (QLabel, labelRows)
-#. i18n: file: src/quadkonsole4.kcfg:13
-#. i18n: ectx: label, entry (numRows), group (General)
-#: rc.cpp:21 rc.cpp:36
-msgid "Number of rows"
-msgstr "Anzahl Zeilen"
-
-#. i18n: file: src/prefs_base.ui:63
-#. i18n: ectx: property (text), widget (QLabel, labelColumns)
-#: rc.cpp:24
-msgid "Number of Columns"
-msgstr "Anzahl Spalten"
-
-#. i18n: file: src/prefs_shutdown.ui:20
-#. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
-#: rc.cpp:30
-msgid "&Ask before terminating running processes"
-msgstr "Vor dem Beenden laufender Prozesse nachfragen"
-
-#. i18n: file: src/quadkonsole4.kcfg:18
-#. i18n: ectx: label, entry (numCols), group (General)
-#: rc.cpp:39
-msgid "Number of columns"
-msgstr "Anzahl Spalten"
-
-#. i18n: file: src/quadkonsole4.kcfg:25
-#. i18n: ectx: label, entry (queryClose), group (Shutdown)
-#: rc.cpp:42
-msgid "Ask before terminating running processes"
-msgstr "Vor dem Beenden laufender Prozesse nachfragen"
-
-#. i18n: file: src/quadkonsole4ui.rc:25
-#. i18n: ectx: ToolBar (mainToolBar)
-#: rc.cpp:45
-msgid "Main Toolbar"
-msgstr "Haupt-Werkzeugleiste"
-
-#: rc.cpp:46
+#: rc.cpp:1
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr ""
 
-#: rc.cpp:47
+#: rc.cpp:2
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr ""
+
+#~ msgid "Detach processes"
+#~ msgstr "Prozesse Ab&trennen"
+
+#~ msgid ""
+#~ "The following processes are still running. Do you wish to detach the "
+#~ "containing windows before exiting?"
+#~ msgstr ""
+#~ "Die folgenden Prozesse laufen noch. Möchten Sie diese Fenster vor den "
+#~ "Beenden abtrennen?"
+
+#~ msgid "Process"
+#~ msgstr "Prozess"
+
+#~ msgid "Focus follows mouse"
+#~ msgstr "Aktivierung unter Mauszeiger"
+
+#~ msgid "Startup"
+#~ msgstr "Start"
+
+#~ msgid "Number of rows"
+#~ msgstr "Anzahl Zeilen"
+
+#~ msgid "Number of Columns"
+#~ msgstr "Anzahl Spalten"
+
+#~ msgid "&Ask before terminating running processes"
+#~ msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+
+#~ msgid "Number of columns"
+#~ msgstr "Anzahl Spalten"
+
+#~ msgid "Ask before terminating running processes"
+#~ msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+
+#~ msgid "Main Toolbar"
+#~ msgstr "Haupt-Werkzeugleiste"

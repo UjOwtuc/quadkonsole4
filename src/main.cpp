@@ -30,7 +30,7 @@
 #include <KDE/KLocale>
 
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
-static const char version[] = "0.2";
+static const char version[] = "0.3";
 
 int main(int argc, char **argv)
 {

@@ -69,6 +69,7 @@ class QuadKonsole : public KParts::MainWindow
 		void insertHorizontal(int row=-1, int col=-1);
 		void insertVertical(int row=-1, int col=-1);
 		void removePart(int row=-1, int col=-1);
+		void switchView();
 
 #ifdef DEBUG
 	private slots:

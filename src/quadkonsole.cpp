@@ -186,7 +186,12 @@ void QuadKonsole::setupActions()
 	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
-
+	
+	KAction* switchView = new KAction(KIcon("document-open-folder"), i18n("S&witch view"), this);
+	switchView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
+	actionCollection()->addAction("switch view", switchView);
+	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
+	
 	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
 	KAction *pasteSelection = new KAction(KIcon("edit-paste"), i18n("Paste &selection"), this);
 	pasteSelection->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
@@ -539,6 +544,7 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 {
 	QWidget* container = new QWidget;
 	mRowLayouts[row]->insertWidget(col, container);
+	
 	QBoxLayout* layout = new QBoxLayout(QBoxLayout::Down, container);
 	layout->setSpacing(0);
 	layout->setContentsMargins(0, 0, 0, 0);
@@ -563,7 +569,7 @@ Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
 
 void QuadKonsole::insertHorizontal(int row, int col)
 {
-	if (row == -1 && col == -1)
+	if (row == -1 || col == -1)
 		getFocusCoords(row, col);
 
 	if (row >= 0 && col >= 0)
@@ -578,7 +584,7 @@ void QuadKonsole::insertHorizontal(int row, int col)
 
 void QuadKonsole::insertVertical(int row, int col)
 {
-	if (row == -1 && col == -1)
+	if (row == -1 || col == -1)
 		getFocusCoords(row, col);
 
 	if (row >= 0 && col >= 0)
@@ -600,7 +606,7 @@ void QuadKonsole::insertVertical(int row, int col)
 
 void QuadKonsole::removePart(int row, int col)
 {
-	if (row == -1 && col == -1)
+	if (row == -1 || col == -1)
 		getFocusCoords(row, col);
 
 	if (row >= 0 && col >= 0)
@@ -638,6 +644,14 @@ void QuadKonsole::removePart(int row, int col)
 		}
 	}
 }
+
+
+void QuadKonsole::switchView()
+{
+	Konsole* konsole = getFocusPart();
+	konsole->focusNext();
+}
+
 
 #ifdef DEBUG
 namespace

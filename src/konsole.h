@@ -24,6 +24,7 @@
 #include <QtCore/QObject>
 
 class QLayout;
+class QStackedWidget;
 namespace KParts
 {
 	class ReadOnlyPart;
@@ -48,8 +49,9 @@ class Konsole : public QObject
 		void setLayout(QLayout* layout);
 
 		QString foregroundProcessName();
+		QString workingDir();
 
-		KParts::ReadOnlyPart* part() { return m_part; }
+		KParts::ReadOnlyPart* part() { return m_konsolePart; }
 		QWidget* widget();
 
 	signals:
@@ -58,13 +60,16 @@ class Konsole : public QObject
 
 	public slots:
 		void partDestroyed();
-
+		void focusNext();
+		
 	private:
 		void createPart();
 
 		QWidget* m_parent;
 		QLayout* m_layout;
-		KParts::ReadOnlyPart* m_part;
+		QStackedWidget* m_stack;
+		KParts::ReadOnlyPart* m_konsolePart;
+		KParts::ReadOnlyPart* m_dolphinPart;
 };
 
 #endif // KONSOLE_H

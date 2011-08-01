@@ -25,23 +25,31 @@
 #include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
+#include <KDE/KAction>
 #include <kde_terminal_interface_v2.h>
+#include <KDE/KParts/BrowserExtension>
 
+#include <QtCore/QFileInfo>
 #include <QtGui/QWidget>
 #include <QtGui/QLayout>
+#include <QtGui/QStackedWidget>
 
 namespace
 {
-	KService::Ptr service;
+	KService::Ptr konsoleService;
+	KService::Ptr dolphinService;
 }
 
 
 Konsole::Konsole(QWidget* parent, QLayout* layout)
 	: QObject(parent),
 	m_parent(parent),
-	m_layout(layout)
+	m_layout(layout),
+	m_stack(new QStackedWidget)
 {
-	m_part = 0;
+	layout->addWidget(m_stack);
+	m_konsolePart = 0;
+	m_dolphinPart = 0;
 	createPart();
 }
 
@@ -49,28 +57,32 @@ Konsole::Konsole(QWidget* parent, QLayout* layout)
 Konsole::Konsole(QWidget *parent, KParts::ReadOnlyPart* part)
 	: QObject(parent),
 	m_parent(parent),
-	m_layout(0)
+	m_layout(0),
+	m_stack(new QStackedWidget)
 {
-	m_part = part;
+	m_konsolePart = part;
+	m_dolphinPart = 0;
 	part->setParent(parent);
-	m_part->widget()->setParent(parent);
-	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
+	m_konsolePart->widget()->setParent(parent);
+	connect(m_konsolePart, SIGNAL(destroyed()), SLOT(partDestroyed()));
 }
 
 
 Konsole::~Konsole()
 {
-	if (m_part)
+	if (m_konsolePart)
 	{
-		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
-		delete m_part;
+		disconnect(m_konsolePart, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
+		delete m_konsolePart;
 	}
+	delete m_dolphinPart;
+	delete m_stack;
 }
 
 
 void Konsole::sendInput(const QString& text)
 {
-	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_part);
+	TerminalInterfaceV2 *t = qobject_cast< TerminalInterfaceV2* >(m_konsolePart);
 	if (t)
 		t->sendInput(text);
 	else
@@ -81,8 +93,8 @@ void Konsole::sendInput(const QString& text)
 void Konsole::setParent(QWidget* parent)
 {
 	m_parent = parent;
-	m_part->setParent(parent);
-	m_part->widget()->setParent(parent);
+	m_konsolePart->setParent(parent);
+	m_konsolePart->widget()->setParent(parent);
 }
 
 
@@ -94,13 +106,13 @@ void Konsole::setLayout(QLayout* layout)
 		return;
 	}
 	m_layout = layout;
-	m_layout->addWidget(m_part->widget());
+	m_layout->addWidget(m_stack);
 }
 
 
 QString Konsole::foregroundProcessName()
 {
-	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_part);
+	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_konsolePart);
 	if (t)
 		return t->foregroundProcessName();
 	else
@@ -110,16 +122,32 @@ QString Konsole::foregroundProcessName()
 }
 
 
+QString Konsole::workingDir()
+{
+	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_konsolePart);
+	if (t)
+	{
+		int pid = t->terminalProcessId();
+		QFileInfo info(QString("/proc/%1/cwd").arg(pid));
+		return info.readLink();
+	}
+	else
+		kDebug() << "Part is no TerminalInterfaceV2" << endl;
+	
+	return "/";
+}
+
+
 void Konsole::partDestroyed()
 {
-	if (m_part)
+	if (m_konsolePart)
 	{
-		disconnect(m_part, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
-		m_part = 0;
+		disconnect(m_konsolePart, SIGNAL(destroyed()), this, SLOT(partDestroyed()));
+		m_konsolePart = 0;
 	}
 
 	createPart();
-	m_part->widget()->setFocus();
+	m_konsolePart->widget()->setFocus();
 }
 
 
@@ -131,19 +159,19 @@ void Konsole::createPart()
 		return;
 	}
 
-	if (service.isNull())
+	if (konsoleService.isNull())
 	{
 		kDebug() << "loading KPart factory" << endl;
-		service = KService::serviceByDesktopPath("konsolepart.desktop");
-		if (service.isNull())
+		konsoleService = KService::serviceByDesktopPath("konsolepart.desktop");
+		if (konsoleService.isNull())
 		{
 			KMessageBox::error(m_parent, i18n("Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"));
 			return;
 		}
 	}
-	m_part = service->createInstance<KParts::ReadOnlyPart>(this);
-	connect(m_part, SIGNAL(destroyed()), SLOT(partDestroyed()));
-	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	m_konsolePart = konsoleService->createInstance<KParts::ReadOnlyPart>(this);
+	connect(m_konsolePart, SIGNAL(destroyed()), SLOT(partDestroyed()));
+	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_konsolePart);
 	if (t)
 		t->showShellInDir(QString());
 	else
@@ -152,20 +180,51 @@ void Konsole::createPart()
 		exit(1);
 	}
 
-	m_part->widget()->setParent(m_parent);
-	m_layout->addWidget(m_part->widget());
-	m_parent->setFocusProxy(m_part->widget());
+	m_konsolePart->widget()->setParent(m_parent);
+	m_stack->insertWidget(0, m_konsolePart->widget());
+	m_stack->setFocusProxy(m_konsolePart->widget());
+	m_parent->setFocusProxy(m_konsolePart->widget());
 
 	emit partCreated();
 }
 
 
+void Konsole::focusNext()
+{
+	if (m_dolphinPart == 0)
+	{
+		if (dolphinService.isNull())
+			dolphinService = KService::serviceByDesktopPath("dolphinpart.desktop");
+		
+		if (! dolphinService.isNull())
+		{
+			m_dolphinPart = dolphinService->createInstance<KParts::ReadOnlyPart>(this);
+			m_stack->addWidget(m_dolphinPart->widget());
+		}
+	}
+	
+	if (m_dolphinPart == 0)
+		return;
+	
+	if (m_stack->currentWidget() == m_konsolePart->widget())
+	{
+		m_dolphinPart->openUrl(workingDir());
+		m_stack->setFocusProxy(m_dolphinPart->widget());
+		m_stack->setCurrentWidget(m_dolphinPart->widget());
+	}
+	else
+	{
+		KUrl url = m_dolphinPart->url();
+		sendInput(QString("cd ") + url.directory());
+		m_stack->setFocusProxy(m_konsolePart->widget());
+		m_stack->setCurrentWidget(m_konsolePart->widget());
+	}
+}
+
+
 QWidget* Konsole::widget()
 {
-	if (m_part)
-		return m_part->widget();
-
-	return 0;
+	return m_stack;
 }
 
 #include "konsole.moc"

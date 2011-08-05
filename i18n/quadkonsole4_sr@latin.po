@@ -1,0 +1,190 @@
+# QuadKonsole4 Serbian Latin translation.
+# Copyright (C) 2011 Karsten Borgwaldt <kb@kb.ccchl.de>
+# This file is distributed under the same license as the QuadKonsole4 package.
+#
+# Karsten Borgwaldt <k.borgwaldt@soit.de>, 2011.
+# Karsten Borgwaldt <kb@kb.ccchl.de>, 2011.
+# Mladen Pejakovic <pejakm@gmail.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: quadkonsole4\n"
+"Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
+"POT-Creation-Date: 2011-08-05 01:27+0200\n"
+"PO-Revision-Date: 2009-07-29 21:23+0200\n"
+"Last-Translator: Mladen Pejakovic <pejakm@gmail.com>\n"
+"Language-Team: Serbian Latin <kde-i18n-sr@kde.org>\n"
+"Language: sr@latin\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
+"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Accelerator-Marker: &\n"
+"X-Text-Markup: kde4\n"
+"X-Environment: kde\n"
+"X-Wrapping: fine\n"
+
+#: i18n/rc.cpp:1 rc.cpp:1
+msgctxt "NAME OF TRANSLATORS"
+msgid "Your names"
+msgstr "Mladen Pejaković"
+
+#: i18n/rc.cpp:2 rc.cpp:2
+msgctxt "EMAIL OF TRANSLATORS"
+msgid "Your emails"
+msgstr "pejakm@gmail.com"
+
+#: src/closedialog.cpp:42
+msgid "Don't detach"
+msgstr "Ne otkačuj"
+
+#: src/closedialog.cpp:46
+msgid "Detach selected"
+msgstr "Otkači izabrano"
+
+#: src/konsole.cpp:140
+msgid ""
+"Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
+msgstr ""
+"Ne mogu da napravim fabriku za „libkonsolepart“. Da li je Konzola "
+"instalirana?"
+
+#: src/main.cpp:32
+msgid "Embeds multiple Konsoles in a grid layout"
+msgstr "Ugrađuje više Konzola u mrežni raspored"
+
+#: src/main.cpp:37
+msgid "quadkonsole4"
+msgstr "Četvero-konzola 4"
+
+#: src/main.cpp:37
+msgid ""
+"(C) 2005 Simon Perreault\n"
+"(C) 2009 - 2011 Karsten Borgwaldt"
+msgstr ""
+"© 2005, Simon Perol\n"
+"© 2009 - 2011, Karsten Borgvald"
+
+#: src/main.cpp:38
+msgid "Simon Perreault"
+msgstr "Simon Perol"
+
+#: src/main.cpp:39
+msgid "Karsten Borgwaldt"
+msgstr "Karsten Borgvald"
+
+#: src/main.cpp:43
+msgid "Number of rows of terminal emulators"
+msgstr "Broj redova emulatora terminala"
+
+#: src/main.cpp:44
+msgid "Number of columns of terminal emulators"
+msgstr "Broj kolona emulatora terminala"
+
+#: src/main.cpp:45
+msgid "Run command (may be used multiple times)"
+msgstr "Izvrši naredbu (može biti korišćeno više puta)"
+
+#: src/quadkonsole.cpp:144
+msgid "Go &right"
+msgstr "Idi &desno"
+
+#: src/quadkonsole.cpp:149
+msgid "Go &left"
+msgstr "Idi &levo"
+
+#: src/quadkonsole.cpp:154
+msgid "Go &up"
+msgstr "Idi &gore"
+
+#: src/quadkonsole.cpp:159
+msgid "Go &down"
+msgstr "Idi do&le"
+
+#: src/quadkonsole.cpp:165
+msgid "De&tach"
+msgstr "&Otkači"
+
+#: src/quadkonsole.cpp:170
+msgid "Insert &horizontal"
+msgstr "Umetni &vodoravno"
+
+#: src/quadkonsole.cpp:175
+msgid "Insert &vertical"
+msgstr "Umetni ver&tikalno"
+
+#: src/quadkonsole.cpp:180
+msgid "Re&move part"
+msgstr "&Ukloni dio"
+
+#: src/quadkonsole.cpp:186
+msgid "R&eset layouts"
+msgstr "&Resetuj raspored"
+
+#: src/quadkonsole.cpp:191
+msgid "Paste &selection"
+msgstr "&Nalepi izbor"
+
+#: src/quadkonsole.cpp:205
+msgid "Save session"
+msgstr "Sačuvaj sesiju"
+
+#: src/quadkonsole.cpp:209
+msgid "Restore session"
+msgstr "Povrati sesiju"
+
+#: src/quadkonsole.cpp:398 src/ui_prefs_base.h:101
+msgid "General"
+msgstr "Opšte"
+
+#: src/quadkonsole.cpp:403 src/ui_prefs_shutdown.h:53
+msgid "Shutdown"
+msgstr "Gašenje"
+
+#: src/settings.cpp:38 src/ui_prefs_base.h:102
+msgid "Focus follows mouse"
+msgstr "Fokus prati miša"
+
+#: src/settings.cpp:42 src/ui_prefs_base.h:106
+msgid "Start maximized"
+msgstr "Pokreni maksimizovano"
+
+#: src/settings.cpp:47 src/ui_prefs_base.h:104
+msgid "Number of rows"
+msgstr "Broj redova"
+
+#: src/settings.cpp:52
+msgid "Number of columns"
+msgstr "Broj kolona"
+
+#: src/settings.cpp:59
+msgid "Ask before terminating running processes"
+msgstr "Pitaj pre prekidanja pokrenutog procesa"
+
+#: src/ui_detach_processes.h:67
+msgid "Detach processes"
+msgstr "Otkači proces"
+
+#: src/ui_detach_processes.h:68
+msgid ""
+"The following processes are still running. Do you wish to detach the "
+"containing windows before exiting?"
+msgstr ""
+"Sledeći procesi su još uvijek pokrenuti. Da li želite da otkačite "
+"prozore u kom su pokrenuti prije napuštanja?"
+
+#: src/ui_detach_processes.h:70
+msgid "Process"
+msgstr "Proces"
+
+#: src/ui_prefs_base.h:103
+msgid "Startup"
+msgstr "Pokretanje"
+
+#: src/ui_prefs_base.h:105
+msgid "Number of Columns"
+msgstr "Broj kolona"
+
+#: src/ui_prefs_shutdown.h:54
+msgid "&Ask before terminating running processes"
+msgstr "&Pitaj pre prekidanja pokrenutog procesa"

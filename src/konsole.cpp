@@ -28,17 +28,28 @@
 #include <KDE/KAction>
 #include <kde_terminal_interface_v2.h>
 #include <KDE/KParts/BrowserExtension>
+#include <KDE/KParts/BrowserInterface>
+#include <KDE/KFileItemList>
 
 #include <QtCore/QFileInfo>
 #include <QtGui/QWidget>
 #include <QtGui/QLayout>
 #include <QtGui/QStackedWidget>
+#include <QtGui/QMenu>
 
 namespace
 {
 	KService::Ptr konsoleService;
 	KService::Ptr dolphinService;
 }
+
+
+class KonsoleBrowserInterface : public KParts::BrowserInterface
+{
+	public:
+		explicit KonsoleBrowserInterface(QObject* parent) : KParts::BrowserInterface(parent) {}
+		virtual ~KonsoleBrowserInterface() {}
+};
 
 
 Konsole::Konsole(QWidget* parent, QLayout* layout)
@@ -133,8 +144,21 @@ QString Konsole::workingDir()
 	}
 	else
 		kDebug() << "Part is no TerminalInterfaceV2" << endl;
-	
+
 	return "/";
+}
+
+
+void Konsole::setWorkingDir(const QString& dir)
+{
+	TerminalInterfaceV2* t = qobject_cast< TerminalInterfaceV2* >(m_konsolePart);
+	if (t)
+	{
+		if (t->foregroundProcessName().isEmpty())
+			sendInput(QString("cd \"%1\"").arg(dir));
+	}
+	else
+		kDebug() << "Part is no TerminalInterfaceV2" << endl;
 }
 
 
@@ -192,33 +216,117 @@ void Konsole::createPart()
 void Konsole::focusNext()
 {
 	if (m_dolphinPart == 0)
-	{
-		if (dolphinService.isNull())
-			dolphinService = KService::serviceByDesktopPath("dolphinpart.desktop");
-		
-		if (! dolphinService.isNull())
-		{
-			m_dolphinPart = dolphinService->createInstance<KParts::ReadOnlyPart>(this);
-			m_stack->addWidget(m_dolphinPart->widget());
-		}
-	}
-	
+		createDolphinPart();
+
 	if (m_dolphinPart == 0)
 		return;
-	
+
 	if (m_stack->currentWidget() == m_konsolePart->widget())
 	{
 		m_dolphinPart->openUrl(workingDir());
 		m_stack->setFocusProxy(m_dolphinPart->widget());
 		m_stack->setCurrentWidget(m_dolphinPart->widget());
+		m_dolphinPart->widget()->setFocus();
 	}
 	else
 	{
 		KUrl url = m_dolphinPart->url();
-		sendInput(QString("cd ") + url.directory());
+		if (! m_selectedItems.empty())
+			copy(false);
+		else if (workingDir() != url.path())
+			setWorkingDir(url.path());
+
 		m_stack->setFocusProxy(m_konsolePart->widget());
 		m_stack->setCurrentWidget(m_konsolePart->widget());
+		m_konsolePart->widget()->setFocus();
 	}
+}
+
+
+void Konsole::popupMenu(QPoint where, KFileItemList, KParts::OpenUrlArguments, KParts::BrowserArguments, KParts::BrowserExtension::PopupFlags, KParts::BrowserExtension::ActionGroupMap)
+{
+	kDebug() << "KFileList" << where << endl;
+
+	QMenu* menu = new QMenu;
+	KAction* copy = new KAction(KIcon("edit-copy"), i18n("&Copy to konsole"), this);
+	connect(copy, SIGNAL(triggered(bool)), SLOT(copy()));
+	menu->addAction(copy);
+
+	menu->popup(where);
+}
+
+
+void Konsole::selectionInfo(KFileItemList items)
+{
+	kDebug() << items.count() << items.urlList() << endl;
+	m_selectedItems = items;
+}
+
+
+void Konsole::copy(bool setFocus)
+{
+	if (m_selectedItems.empty())
+		return;
+
+	QString toCopy;
+	KFileItemList::const_iterator it;
+	for (it=m_selectedItems.begin(); it!=m_selectedItems.end(); ++it)
+	{
+		toCopy.append(" \"");
+		toCopy.append(it->localPath().replace("\"", "\\\""));
+		toCopy.append("\"");
+	}
+	m_selectedItems.clear();
+	sendInput(toCopy);
+
+	if (setFocus)
+		focusNext();
+}
+
+
+void Konsole::openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments)
+{
+	kDebug() << "url=" << url << endl;
+	QFileInfo info(url.path());
+	if (info.isDir())
+		m_dolphinPart->openUrl(url);
+	else
+		copy();
+}
+
+
+void Konsole::enableAction(const char* action, bool enable)
+{
+	kDebug() << "action=" << action << "enable=" << enable << endl;
+}
+
+
+void Konsole::createDolphinPart()
+{
+	if (dolphinService.isNull())
+	{
+		dolphinService = KService::serviceByDesktopPath("dolphinpart.desktop");
+		if (dolphinService.isNull())
+		{
+			kDebug() << "could not create dolphinpart factory" << endl;
+			return;
+		}
+	}
+
+	m_dolphinPart = dolphinService->createInstance<KParts::ReadOnlyPart>(this);
+	m_stack->addWidget(m_dolphinPart->widget());
+
+	KParts::BrowserExtension* ext = KParts::BrowserExtension::childObject(m_dolphinPart);
+	if (ext)
+	{
+		ext->setBrowserInterface(new KonsoleBrowserInterface(this));
+		connect(ext, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
+		connect(ext, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));
+		connect(ext, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl, KParts::OpenUrlArguments, KParts::BrowserArguments)));
+		connect(ext, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));
+	}
+	else
+		kDebug() << "could not get BrowserExtension from dolphinPart" << endl;
 }
 
 
@@ -228,4 +336,3 @@ QWidget* Konsole::widget()
 }
 
 #include "konsole.moc"
-

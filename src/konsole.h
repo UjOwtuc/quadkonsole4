@@ -21,6 +21,9 @@
 #ifndef KONSOLE_H
 #define KONSOLE_H
 
+#include <KDE/KFileItemList>
+#include <KDE/KParts/BrowserExtension>
+
 #include <QtCore/QObject>
 
 class QLayout;
@@ -50,6 +53,7 @@ class Konsole : public QObject
 
 		QString foregroundProcessName();
 		QString workingDir();
+		void setWorkingDir(const QString& dir);
 
 		KParts::ReadOnlyPart* part() { return m_konsolePart; }
 		QWidget* widget();
@@ -61,15 +65,22 @@ class Konsole : public QObject
 	public slots:
 		void partDestroyed();
 		void focusNext();
+		void popupMenu(QPoint where, KFileItemList, KParts::OpenUrlArguments, KParts::BrowserArguments, KParts::BrowserExtension::PopupFlags, KParts::BrowserExtension::ActionGroupMap);
+		void selectionInfo(KFileItemList items);
+		void copy(bool setFocus=true);
+		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
+		void enableAction(const char* action, bool enable);
 		
 	private:
 		void createPart();
+		void createDolphinPart();
 
 		QWidget* m_parent;
 		QLayout* m_layout;
 		QStackedWidget* m_stack;
 		KParts::ReadOnlyPart* m_konsolePart;
 		KParts::ReadOnlyPart* m_dolphinPart;
+		KFileItemList m_selectedItems;
 };
 
 #endif // KONSOLE_H

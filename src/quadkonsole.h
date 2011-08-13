@@ -21,8 +21,8 @@
  ***************************************************************************/
 
 
-#ifndef _QUADKONSOLE_H_
-#define _QUADKONSOLE_H_
+#ifndef QUADKONSOLE_H
+#define QUADKONSOLE_H
 
 #include <KDE/KParts/MainWindow>
 
@@ -30,7 +30,7 @@
 
 #include <vector>
 
-class Konsole;
+class QKStack;
 class QGridLayout;
 class QSplitter;
 class MouseMoveFilter;
@@ -58,7 +58,7 @@ class QuadKonsole : public KParts::MainWindow
 		void focusKonsoleLeft();
 		void focusKonsoleUp();
 		void focusKonsoleDown();
-		void detach(Konsole* part=0);
+		void detach(QKStack* stack=0);
 		void pasteClipboard();
 		void pasteSelection();
 		void resetLayouts();
@@ -69,6 +69,7 @@ class QuadKonsole : public KParts::MainWindow
 		void insertHorizontal(int row=-1, int col=-1);
 		void insertVertical(int row=-1, int col=-1);
 		void removePart(int row=-1, int col=-1);
+		void switchView();
 
 #ifdef DEBUG
 	private slots:
@@ -78,24 +79,23 @@ class QuadKonsole : public KParts::MainWindow
 
 	protected:
 		bool queryClose();
-		Konsole* getFocusPart();
+		QKStack* getFocusStack();
 		void getFocusCoords(int& row, int& col);
-		Konsole* addPart(int row, int col, Konsole* part=0);
+		QKStack* addStack(int row, int col, KParts::ReadOnlyPart* part=0);
 		void saveProperties(KConfigGroup& config);
 		void readProperties(const KConfigGroup& config);
 
 	private:
 		QuadKonsole(KParts::ReadOnlyPart* part);
 		void setupActions();
-		void setupUi(int rows, int columns);
+		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
 		void emitPaste(QClipboard::Mode mode);
 		void resetLayout(QSplitter* layout, int targetSize);
 
-		typedef std::vector<Konsole*> PartVector;
-		PartVector mKonsoleParts;
-		QSplitter* mRows;
+		QList<QKStack*> m_stacks;
+		QSplitter* m_rows;
 		std::vector<QSplitter*> mRowLayouts;
 		MouseMoveFilter* mFilter;
 };
 
-#endif // _QUADKONSOLE_H_
+#endif // QUADKONSOLE_H

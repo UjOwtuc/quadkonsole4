@@ -18,53 +18,44 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef KONSOLE_H
-#define KONSOLE_H
+#include "prefsviews.h"
 
-#include <QtCore/QObject>
+#include <KDE/KDebug>
+#include <KDE/KEditListWidget>
+#include <KDE/KService>
+#include <KDE/KComboBox>
+#include <KDE/KLineEdit>
+#include <KDE/KConfigDialogManager>
 
-class QLayout;
-namespace KParts
+#include <QtGui/QWidget>
+
+#include "ui_prefs_views.h"
+
+PrefsViews::PrefsViews(QWidget* parent, Qt::WindowFlags f)
+	: QWidget(parent, f),
+	m_comboBox(new KComboBox)
 {
-	class ReadOnlyPart;
+	KConfigDialogManager::propertyMap()->insert("KEditListWidget", "items");
+	KConfigDialogManager::changedMap()->insert("KEditListWidget", SIGNAL(changed()));
+
+	KEditListWidget::CustomEditor editor;
+	editor.setLineEdit(new KLineEdit);
+	editor.setRepresentationWidget(m_comboBox);
+	m_comboBox->setLineEdit(editor.lineEdit());
+
+	Ui::prefs_views prefs_views;
+	prefs_views.setupUi(this);
+	prefs_views.kcfg_views->setCustomEditor(editor);
+
+	KService::List services = KService::allServices();
+	KService::List::const_iterator it;
+	for (it=services.constBegin(); it!=services.constEnd(); ++it)
+	{
+		if ((*it)->library().endsWith("part"))
+			m_comboBox->addItem(KIcon((*it)->icon()), (*it)->entryPath());
+	}
 }
 
-/**
- * @short Contains a terminal emulator
- * @author Karsten Borgwaldt <kb@kb.ccchl.de>
- * @version 2.1
- */
-class Konsole : public QObject
-{
-	Q_OBJECT
 
-	public:
-		Konsole(QWidget* parent, QLayout* layout);
-		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
-		virtual ~Konsole();
-
-		void sendInput(const QString& text);
-		virtual void setParent(QWidget* parent);
-		void setLayout(QLayout* layout);
-
-		QString foregroundProcessName();
-
-		KParts::ReadOnlyPart* part() { return m_part; }
-		QWidget* widget();
-
-	signals:
-		void destroyed();
-		void partCreated();
-
-	public slots:
-		void partDestroyed();
-
-	private:
-		void createPart();
-
-		QWidget* m_parent;
-		QLayout* m_layout;
-		KParts::ReadOnlyPart* m_part;
-};
-
-#endif // KONSOLE_H
+PrefsViews::~PrefsViews()
+{}

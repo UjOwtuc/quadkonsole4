@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,20 +18,62 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifndef QKVIEW_H
+#define QKVIEW_H
 
-#ifndef MOUSEMOVEFILTER_H
-#define MOUSEMOVEFILTER_H
+#include <KDE/KFileItemList>
+#include <KDE/KUrl>
 
-#include <QtCore/QObject>
+#include <QtGui/QWidget>
 
-class MouseMoveFilter : public QObject
+class QToolBar;
+class QBoxLayout;
+namespace KParts
+{
+	class ReadOnlyPart;
+	class OpenUrlArguments;
+	class BrowserArguments;
+}
+
+class QKView : public QWidget
 {
 	Q_OBJECT
 	public:
-		MouseMoveFilter(QObject* parent=0);
+		explicit QKView(const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
+		virtual ~QKView();
 
-	protected:
-		bool eventFilter(QObject* o, QEvent* e);
+		bool hasFocus() const;
+		void setFocus();
+		QString getURL() const;
+		void setURL(const QString& url);
+		void sendInput(const QString& text);
+		KParts::ReadOnlyPart* part();
+
+		QString foregroundProcess() const;
+
+	public slots:
+		void show();
+		void settingsChanged();
+		void partDestroyed();
+
+	signals:
+		void partCreated();
+
+	protected slots:
+		void createPart();
+		void selectionInfo(KFileItemList items);
+		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
+		void enableAction(const char* action, bool enable);
+
+	private:
+		void setupUi(KParts::ReadOnlyPart* part=0);
+		void setupPart();
+
+		QString m_partname;
+		QBoxLayout* m_layout;
+		QToolBar* m_toolbar;
+		KParts::ReadOnlyPart* m_part;
 };
 
-#endif // MOUSEMOVEFILTER_H
+#endif // QKVIEW_H

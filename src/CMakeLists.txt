@@ -1,14 +1,17 @@
 set(quadkonsole4_SRCS
 	quadkonsole.cpp
 	main.cpp
-	konsole.cpp
 	mousemovefilter.cpp
 	closedialog.cpp
+	qkstack.cpp
+	qkview.cpp
+	prefsviews.cpp
 )
 
 kde4_add_ui_files(quadkonsole4_SRCS
 	prefs_base.ui
 	prefs_shutdown.ui
+	prefs_views.ui
 	detach_processes.ui
 )
 

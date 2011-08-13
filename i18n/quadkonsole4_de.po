@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-01 20:08+0200\n"
-"PO-Revision-Date: 2011-08-01 20:10+0200\n"
+"POT-Creation-Date: 2011-08-13 18:16+0200\n"
+"PO-Revision-Date: 2011-08-13 18:18+0200\n"
 "Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
@@ -26,13 +26,6 @@ msgstr "Nicht abtrennen"
 #: src/closedialog.cpp:46
 msgid "Detach selected"
 msgstr "Ausgewählte abtrennen"
-
-#: src/konsole.cpp:140
-msgid ""
-"Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
-msgstr ""
-"Konnte Factory für \"libkonsolepart\" nicht erstellen. Ist Konsole "
-"installiert?"
 
 #: src/main.cpp:32
 msgid "Embeds multiple Konsoles in a grid layout"
@@ -70,6 +63,14 @@ msgstr "Anzahl Spalten von Terminalemulatoren"
 msgid "Run command (may be used multiple times)"
 msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
 
+#: src/qkview.cpp:162
+msgid "Could not create a factory for %1."
+msgstr "Konnte Factory für %1 nicht erstellen."
+
+#: src/qkview.cpp:170
+msgid "The factory for %1 could not create a KPart."
+msgstr "Die Factory für %1 konnte kein KPart laden."
+
 #: src/quadkonsole.cpp:144
 msgid "Go &right"
 msgstr "Gehe nach &rechts"
@@ -106,36 +107,50 @@ msgstr "Ansicht &entfernen"
 msgid "R&eset layouts"
 msgstr "Gitter &zurücksezten"
 
-#: src/quadkonsole.cpp:191
+#: src/quadkonsole.cpp:190
+msgid "S&witch view"
+msgstr "Ansicht &welchseln"
+
+#: src/quadkonsole.cpp:196
 #, fuzzy
 msgid "Paste &selection"
 msgstr "Zwischenablage &einfügen"
 
-#: src/quadkonsole.cpp:205
+#: src/quadkonsole.cpp:210
 msgid "Save session"
 msgstr "Sitzung speichern"
 
-#: src/quadkonsole.cpp:209
+#: src/quadkonsole.cpp:214
 msgid "Restore session"
 msgstr "Sitzung wiederherstellen"
 
-#: src/quadkonsole.cpp:398
+#: src/quadkonsole.cpp:403
 msgid "General"
 msgstr "Allgemein"
 
-#: src/quadkonsole.cpp:403
+#: src/quadkonsole.cpp:408
 msgid "Shutdown"
 msgstr "Beenden"
+
+#: src/quadkonsole.cpp:411
+msgid "Views"
+msgstr "Ansichten"
 
 #: rc.cpp:1
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
-msgstr ""
+msgstr "Karsten Borgwaldt"
 
 #: rc.cpp:2
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
-msgstr ""
+msgstr "kb@kb.ccchl.de"
+
+#~ msgid ""
+#~ "Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
+#~ msgstr ""
+#~ "Konnte Factory für \"libkonsolepart\" nicht erstellen. Ist Konsole "
+#~ "installiert?"
 
 #~ msgid "Detach processes"
 #~ msgstr "Prozesse Ab&trennen"

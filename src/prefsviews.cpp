@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,20 +18,44 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "prefsviews.h"
 
-#ifndef MOUSEMOVEFILTER_H
-#define MOUSEMOVEFILTER_H
+#include <KDE/KDebug>
+#include <KDE/KEditListWidget>
+#include <KDE/KService>
+#include <KDE/KComboBox>
+#include <KDE/KLineEdit>
+#include <KDE/KConfigDialogManager>
 
-#include <QtCore/QObject>
+#include <QtGui/QWidget>
 
-class MouseMoveFilter : public QObject
+#include "ui_prefs_views.h"
+
+PrefsViews::PrefsViews(QWidget* parent, Qt::WindowFlags f)
+	: QWidget(parent, f),
+	m_comboBox(new KComboBox)
 {
-	Q_OBJECT
-	public:
-		MouseMoveFilter(QObject* parent=0);
+	KConfigDialogManager::propertyMap()->insert("KEditListWidget", "items");
+	KConfigDialogManager::changedMap()->insert("KEditListWidget", SIGNAL(changed()));
 
-	protected:
-		bool eventFilter(QObject* o, QEvent* e);
-};
+	KEditListWidget::CustomEditor editor;
+	editor.setLineEdit(new KLineEdit);
+	editor.setRepresentationWidget(m_comboBox);
+	m_comboBox->setLineEdit(editor.lineEdit());
 
-#endif // MOUSEMOVEFILTER_H
+	Ui::prefs_views prefs_views;
+	prefs_views.setupUi(this);
+	prefs_views.kcfg_views->setCustomEditor(editor);
+
+	KService::List services = KService::allServices();
+	KService::List::const_iterator it;
+	for (it=services.constBegin(); it!=services.constEnd(); ++it)
+	{
+		if ((*it)->library().endsWith("part"))
+			m_comboBox->addItem(KIcon((*it)->icon()), (*it)->entryPath());
+	}
+}
+
+
+PrefsViews::~PrefsViews()
+{}

@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,20 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifndef QKSTACK_H
+#define QKSTACK_H
 
-#ifndef MOUSEMOVEFILTER_H
-#define MOUSEMOVEFILTER_H
+#include <QtGui/QStackedWidget>
 
-#include <QtCore/QObject>
+class QKView;
+namespace KParts
+{
+	class ReadOnlyPart;
+}
 
-class MouseMoveFilter : public QObject
+class QKStack : public QStackedWidget
 {
 	Q_OBJECT
 	public:
-		MouseMoveFilter(QObject* parent=0);
+		explicit QKStack(QWidget* parent = 0);
+		explicit QKStack(KParts::ReadOnlyPart* part, QWidget* parent=0);
+		virtual ~QKStack();
 
-	protected:
-		bool eventFilter(QObject* o, QEvent* e);
+		bool hasFocus() const;
+		void setFocus();
+		QString foregroundProcess() const;
+		KParts::ReadOnlyPart* part();
+		void partDestroyed();
+
+	signals:
+		void partCreated();
+
+	public slots:
+		void sendInput(const QString& text);
+		void switchView();
+
+	private slots:
+		void slotPartCreated();
+
+	private:
+		void setupUi(KParts::ReadOnlyPart* part=0);
 };
 
-#endif // MOUSEMOVEFILTER_H
+#endif // QKSTACK_H

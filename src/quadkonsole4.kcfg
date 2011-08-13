@@ -4,6 +4,7 @@
       xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 	<kcfgfile name="quadkonsole4rc" />
+	<include>KDE/KService</include>
 	<group name="General">
 		<entry name="sloppyFocus" type="bool">
 			<label>Focus follows mouse</label>
@@ -28,6 +29,16 @@
 		<entry name="queryClose" type="bool">
 			<label>Ask before terminating running processes</label>
 			<default>true</default>
+		</entry>
+	</group>
+	<group name="Views">
+		<entry name="viewHasToolbar" type="bool">
+			<label>Display a toolbar for each view</label>
+			<default>true</default>
+		</entry>
+		<entry name="views" type="StringList">
+			<label>Prepare these views</label>
+			<default code="true">QStringList( KService::serviceByDesktopPath("konsolepart.desktop")->entryPath() )</default>
 		</entry>
 	</group>
 </kcfg>

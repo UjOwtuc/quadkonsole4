@@ -21,10 +21,11 @@
  ***************************************************************************/
 
 #include "quadkonsole.h"
-#include "konsole.h"
 #include "mousemovefilter.h"
 #include "settings.h"
 #include "closedialog.h"
+#include "qkstack.h"
+#include "prefsviews.h"
 
 #include <KDE/KDebug>
 #include <kde_terminal_interface_v2.h>
@@ -88,9 +89,9 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 
 	if (cmds.size())
 	{
-		int max = std::min(cmds.size(), static_cast<int>(mKonsoleParts.size()));
+		int max = std::min(cmds.size(), m_stacks.count());
 		for (int i=0; i<max; ++i)
-			mKonsoleParts[i]->sendInput(cmds[i] + "\n");
+			m_stacks[i]->sendInput(cmds[i] + "\n");
 	}
 }
 
@@ -98,24 +99,23 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	: mFilter(0)
 {
-	Konsole* k = new Konsole(this, part);
-	mKonsoleParts.push_back(k);
+	QList<KParts::ReadOnlyPart*> parts;
+	parts.append(part);
 
 	setupActions();
-	setupUi(1, 1);
-	k->setParent(mRowLayouts[0]->widget(0));
-	actionCollection()->associateWidget(k->widget());
+	setupUi(1, 1, parts);
 	showNormal();
 }
 
 
 QuadKonsole::~QuadKonsole()
 {
-	kDebug() << "deleting " << mKonsoleParts.size() << " parts" << endl;
+	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	delete mFilter;
-	for (PartVector::const_iterator i = mKonsoleParts.begin(); i != mKonsoleParts.end(); ++i)
+	while (m_stacks.count())
 	{
-		delete *i;
+		delete m_stacks.front();
+		m_stacks.pop_front();
 	}
 }
 
@@ -186,12 +186,12 @@ void QuadKonsole::setupActions()
 	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
-	
+
 	KAction* switchView = new KAction(KIcon("document-open-folder"), i18n("S&witch view"), this);
 	switchView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
 	actionCollection()->addAction("switch view", switchView);
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
-	
+
 	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
 	KAction *pasteSelection = new KAction(KIcon("edit-paste"), i18n("Paste &selection"), this);
 	pasteSelection->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
@@ -218,14 +218,14 @@ void QuadKonsole::setupActions()
 }
 
 
-void QuadKonsole::setupUi(int rows, int columns)
+void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > parts)
 {
 	QWidget* centralWidget = new QWidget(this, 0);
 	QGridLayout* grid = new QGridLayout(centralWidget);
 
-	mRows = new QSplitter(Qt::Vertical);
-	mRows->setChildrenCollapsible(false);
-	grid->addWidget(mRows, 0, 0);
+	m_rows = new QSplitter(Qt::Vertical);
+	m_rows->setChildrenCollapsible(false);
+	grid->addWidget(m_rows, 0, 0);
 
 	setCentralWidget(centralWidget);
 	actionCollection()->addAssociatedWidget(centralWidget);
@@ -235,17 +235,17 @@ void QuadKonsole::setupUi(int rows, int columns)
 		QSplitter* row = new QSplitter(Qt::Horizontal);
 		row->setChildrenCollapsible(false);
 		mRowLayouts.push_back(row);
-		mRows->addWidget(row);
-		for (int j = 0; j < columns; ++j)
+		m_rows->addWidget(row);
+		for (int j=0; j<columns; ++j)
 		{
-			Konsole* part = 0;
-			if (mKonsoleParts.size() > static_cast<unsigned long>(i*columns + j))
-				part = mKonsoleParts[i*columns + j];
+			KParts::ReadOnlyPart* part = 0;
+			if (parts.count() > static_cast<long>(i*columns + j))
+				part = parts.at(i*columns + j);
 
-			addPart(i, j, part);
+			addStack(i, j, part);
 		}
 	}
-	kDebug() << "finished setting up layouts for " << mKonsoleParts.size() << " parts" << endl;
+	kDebug() << "finished setting up layouts for " << m_stacks.count() << " parts" << endl;
 
 	setWindowIcon(KIcon("quadkonsole4"));
 
@@ -260,7 +260,7 @@ void QuadKonsole::emitPaste(QClipboard::Mode mode)
 {
 	kDebug() << "pasting" << mode << endl;
 	QString text = QApplication::clipboard()->text(mode);
-	Konsole* part = getFocusPart();
+	QKStack* part = getFocusStack();
 	if (part)
 		part->sendInput(text);
 }
@@ -328,18 +328,18 @@ void QuadKonsole::focusKonsoleDown()
 }
 
 
-void QuadKonsole::detach(Konsole* part)
+void QuadKonsole::detach(QKStack* stack)
 {
-	if (part == 0)
+	if (stack == 0)
 	{
-		part = getFocusPart();
-		if (part == 0)
+		stack = getFocusStack();
+		if (stack == 0)
 			return;
 	}
 
-	actionCollection()->removeAssociatedWidget(part->widget());
-	QuadKonsole* external = new QuadKonsole(part->part());
-	part->partDestroyed();
+	actionCollection()->removeAssociatedWidget(stack);
+	QuadKonsole* external = new QuadKonsole(stack->part());
+	stack->partDestroyed();
 	external->setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -373,7 +373,7 @@ void QuadKonsole::resetLayouts()
 {
 	kDebug() << "resetting layouts" << endl;
 
-	resetLayout(mRows, mRows->height() / mRows->count());
+	resetLayout(m_rows, m_rows->height() / m_rows->count());
 
 	std::vector<QSplitter*>::iterator it;
 	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
@@ -407,6 +407,9 @@ void QuadKonsole::optionsPreferences()
 	prefs_shutdown.setupUi(shutdownSettings);
 	dialog->addPage(shutdownSettings, i18n("Shutdown"), "application-exit");
 
+	PrefsViews* viewsSettings = new PrefsViews;
+	dialog->addPage(viewsSettings, i18n("Views"), "edit-find");
+
 	connect(dialog, SIGNAL(settingsChanged(QString)), this, SLOT(settingsChanged()));
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->show();
@@ -439,9 +442,9 @@ bool QuadKonsole::queryClose()
 	if (Settings::queryClose())
 	{
 		CloseDialog dialog(this);
-		for (unsigned int i=0; i<mKonsoleParts.size(); ++i)
+		for (int i=0; i<m_stacks.count(); ++i)
 		{
-			QString process = mKonsoleParts[i]->foregroundProcessName();
+			QString process = m_stacks[i]->foregroundProcess();
 			if (process.size())
 			{
 				dialog.addProcess(i, process);
@@ -457,7 +460,7 @@ bool QuadKonsole::queryClose()
 			{
 				QListIterator<int> it(doDetach);
 				while (it.hasNext())
-					detach(mKonsoleParts[it.next()]);
+					detach(m_stacks[it.next()]);
 
 				return true;
 			}
@@ -470,7 +473,7 @@ bool QuadKonsole::queryClose()
 
 void QuadKonsole::saveProperties(KConfigGroup& config)
 {
-	QList<int> rowSizes = mRows->sizes();
+	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
 	kDebug() << "saving session. rowSizes =" << rowSizes << endl;
 
@@ -506,15 +509,16 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		mRowLayouts[i]->setSizes(sizes);
 	}
 
-	mRows->setSizes(rowSizes);
+	m_rows->setSizes(rowSizes);
 }
 
 
-Konsole* QuadKonsole::getFocusPart()
+QKStack* QuadKonsole::getFocusStack()
 {
-	for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
+	QList<QKStack*>::iterator it;
+	for (it=m_stacks.begin(); it!=m_stacks.end(); ++it)
 	{
-		if ((*it)->widget() && (*it)->widget()->hasFocus())
+		if ((*it)->hasFocus())
 			return *it;
 	}
 	kDebug() << "could not find focus" << endl;
@@ -528,42 +532,34 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 	{
 		for (col=0; col<mRowLayouts[row]->count(); ++col)
 		{
-			if (mRowLayouts[row]->widget(col)->hasFocus())
+			QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+			if (stack->hasFocus())
 			{
 				return;
 			}
 		}
 	}
-	kDebug() << "could not find focus in" << mKonsoleParts.size() << "parts" << endl;
+	kDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
 	row = -1;
 	col = -1;
 }
 
 
-Konsole* QuadKonsole::addPart(int row, int col, Konsole* part)
+QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 {
-	QWidget* container = new QWidget;
-	mRowLayouts[row]->insertWidget(col, container);
-	
-	QBoxLayout* layout = new QBoxLayout(QBoxLayout::Down, container);
-	layout->setSpacing(0);
-	layout->setContentsMargins(0, 0, 0, 0);
-
-	if (part != 0)
-	{
-		part->setLayout(layout);
-		part->setParent(container);
-		container->setFocusProxy(part->widget());
-	}
+	QKStack* stack;
+	if (part)
+		stack = new QKStack(part);
 	else
-	{
-		part = new Konsole(container, layout);
-		mKonsoleParts.push_back(part);
-	}
-	connect(part, SIGNAL(partCreated()), SLOT(resetLayouts()));
-	actionCollection()->addAssociatedWidget(part->widget());
+		stack = new QKStack;
 
-	return part;
+	m_stacks.append(stack);
+	mRowLayouts[row]->insertWidget(col, stack);
+
+	connect(stack, SIGNAL(partCreated()), SLOT(resetLayouts()));
+	actionCollection()->addAssociatedWidget(stack);
+
+	return stack;
 }
 
 
@@ -574,8 +570,8 @@ void QuadKonsole::insertHorizontal(int row, int col)
 
 	if (row >= 0 && col >= 0)
 	{
-		Konsole* part = addPart(row, col);
-		part->widget()->setFocus();
+		QKStack* stack = addStack(row, col);
+		stack->setFocus();
 
 		resetLayouts();
 	}
@@ -591,14 +587,14 @@ void QuadKonsole::insertVertical(int row, int col)
 	{
 		QSplitter *newRow = new QSplitter(Qt::Horizontal);
 		newRow->setChildrenCollapsible(false);
-		mRows->insertWidget(row, newRow);
+		m_rows->insertWidget(row, newRow);
 
 		std::vector<QSplitter*>::iterator it = mRowLayouts.begin();
 		it += row;
 		mRowLayouts.insert(it, newRow);
 
-		Konsole* part = addPart(row, 0);
-		part->widget()->setFocus();
+		QKStack* stack = addStack(row, 0);
+		stack->setFocus();
 		resetLayouts();
 	}
 }
@@ -611,20 +607,10 @@ void QuadKonsole::removePart(int row, int col)
 
 	if (row >= 0 && col >= 0)
 	{
-		// Konsole* part = getFocusPart();
-		Konsole* part = qobject_cast<Konsole*>(mRowLayouts[row]->widget(col));
+		QKStack* stack = getFocusStack();
+		m_stacks.removeOne(stack);
 
-		for (PartVector::iterator it=mKonsoleParts.begin(); it!=mKonsoleParts.end(); ++it)
-		{
-			if ((*it) && (*it)->widget() && (*it)->widget()->hasFocus())
-			{
-				mKonsoleParts.erase(it);
-				break;
-			}
-		}
-
-		delete part;
-		delete mRowLayouts[row]->widget(col);
+		delete stack;
 		if (mRowLayouts[row]->count() < 1)
 		{
 			QSplitter* splitter = mRowLayouts[row];
@@ -634,7 +620,7 @@ void QuadKonsole::removePart(int row, int col)
 			delete splitter;
 		}
 
-		if (mKonsoleParts.empty())
+		if (m_stacks.isEmpty())
 			quit();
 		else
 		{
@@ -648,8 +634,11 @@ void QuadKonsole::removePart(int row, int col)
 
 void QuadKonsole::switchView()
 {
-	Konsole* konsole = getFocusPart();
-	konsole->focusNext();
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->switchView();
+	else
+		kDebug() << "getFocusPart return 0" << endl;
 }
 
 
@@ -676,10 +665,10 @@ void QuadKonsole::restoreSession()
 {
 	if (sessionTest)
 	{
-		while (mKonsoleParts.size())
+		while (m_stacks.count())
 		{
-			delete mKonsoleParts.front();
-			mKonsoleParts.erase(mKonsoleParts.begin());
+			delete m_stacks.front();
+			m_stacks.pop_front();
 		}
 		while (mRowLayouts.size())
 		{

@@ -18,69 +18,62 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef KONSOLE_H
-#define KONSOLE_H
+#ifndef QKVIEW_H
+#define QKVIEW_H
 
 #include <KDE/KFileItemList>
-#include <KDE/KParts/BrowserExtension>
+#include <KDE/KUrl>
 
-#include <QtCore/QObject>
+#include <QtGui/QWidget>
 
-class QLayout;
-class QStackedWidget;
+class QToolBar;
+class QBoxLayout;
 namespace KParts
 {
 	class ReadOnlyPart;
+	class OpenUrlArguments;
+	class BrowserArguments;
 }
 
-/**
- * @short Contains a terminal emulator
- * @author Karsten Borgwaldt <kb@kb.ccchl.de>
- * @version 2.1
- */
-class Konsole : public QObject
+class QKView : public QWidget
 {
 	Q_OBJECT
-
 	public:
-		Konsole(QWidget* parent, QLayout* layout);
-		Konsole(QWidget* parent, KParts::ReadOnlyPart* part);
-		virtual ~Konsole();
+		explicit QKView(const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
+		virtual ~QKView();
 
+		bool hasFocus() const;
+		void setFocus();
+		QString getURL() const;
+		void setURL(const QString& url);
 		void sendInput(const QString& text);
-		virtual void setParent(QWidget* parent);
-		void setLayout(QLayout* layout);
+		KParts::ReadOnlyPart* part();
 
-		QString foregroundProcessName();
-		QString workingDir();
-		void setWorkingDir(const QString& dir);
-
-		KParts::ReadOnlyPart* part() { return m_konsolePart; }
-		QWidget* widget();
-
-	signals:
-		void destroyed();
-		void partCreated();
+		QString foregroundProcess() const;
 
 	public slots:
+		void show();
+		void settingsChanged();
 		void partDestroyed();
-		void focusNext();
-		void popupMenu(QPoint where, KFileItemList, KParts::OpenUrlArguments, KParts::BrowserArguments, KParts::BrowserExtension::PopupFlags, KParts::BrowserExtension::ActionGroupMap);
+
+	signals:
+		void partCreated();
+
+	protected slots:
+		void createPart();
 		void selectionInfo(KFileItemList items);
-		void copy(bool setFocus=true);
 		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
 		void enableAction(const char* action, bool enable);
-		
-	private:
-		void createPart();
-		void createDolphinPart();
 
-		QWidget* m_parent;
-		QLayout* m_layout;
-		QStackedWidget* m_stack;
-		KParts::ReadOnlyPart* m_konsolePart;
-		KParts::ReadOnlyPart* m_dolphinPart;
-		KFileItemList m_selectedItems;
+	private:
+		void setupUi(KParts::ReadOnlyPart* part=0);
+		void setupPart();
+
+		QString m_partname;
+		QBoxLayout* m_layout;
+		QToolBar* m_toolbar;
+		KParts::ReadOnlyPart* m_part;
 };
 
-#endif // KONSOLE_H
+#endif // QKVIEW_H

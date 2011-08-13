@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef _CLOSEDIALOG_H_
-#define _CLOSEDIALOG_H_
+#ifndef CLOSEDIALOG_H
+#define CLOSEDIALOG_H
 
 #include <KDE/KDialog>
 
@@ -48,4 +48,4 @@ class CloseDialog : public KDialog
 		QList<int> m_result;
 };
 
-#endif // _CLOSEDIALOG_H_
+#endif // CLOSEDIALOG_H

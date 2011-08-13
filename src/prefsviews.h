@@ -1,6 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Simon Perreault                                 *
- *   nomis80@nomis80.org                                                   *
  *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
  *   kb@kb.ccchl.de                                                        *
  *                                                                         *
@@ -20,20 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifndef PREFSVIEWS_H
+#define PREFSVIEWS_H
 
-#ifndef MOUSEMOVEFILTER_H
-#define MOUSEMOVEFILTER_H
+#include <QtGui/QWidget>
 
-#include <QtCore/QObject>
+class KEditListWidget;
+class KComboBox;
 
-class MouseMoveFilter : public QObject
+class PrefsViews : public QWidget
 {
-	Q_OBJECT
 	public:
-		MouseMoveFilter(QObject* parent=0);
+		explicit PrefsViews(QWidget* parent = 0, Qt::WindowFlags f = 0);
+		virtual ~PrefsViews();
+
+	protected slots:
+		void selectorChanged();
 
 	protected:
-		bool eventFilter(QObject* o, QEvent* e);
+		KComboBox* m_comboBox;
 };
 
-#endif // MOUSEMOVEFILTER_H
+#endif // PREFSVIEWS_H

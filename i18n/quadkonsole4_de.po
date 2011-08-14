@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-13 18:16+0200\n"
-"PO-Revision-Date: 2011-08-13 18:18+0200\n"
+"POT-Creation-Date: 2011-08-14 19:20+0200\n"
+"PO-Revision-Date: 2011-08-14 19:22+0200\n"
 "Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
@@ -63,78 +63,85 @@ msgstr "Anzahl Spalten von Terminalemulatoren"
 msgid "Run command (may be used multiple times)"
 msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
 
-#: src/qkview.cpp:162
+#: src/qkview.cpp:54
 msgid "Could not create a factory for %1."
 msgstr "Konnte Factory für %1 nicht erstellen."
 
-#: src/qkview.cpp:170
+#: src/qkview.cpp:216
 msgid "The factory for %1 could not create a KPart."
 msgstr "Die Factory für %1 konnte kein KPart laden."
 
-#: src/quadkonsole.cpp:144
+#: src/qkview.cpp:275
+msgid "%1 files selected (%2)"
+msgstr "%1 Dateien ausgewählt (%2)"
+
+#: src/quadkonsole.cpp:151
 msgid "Go &right"
 msgstr "Gehe nach &rechts"
 
-#: src/quadkonsole.cpp:149
+#: src/quadkonsole.cpp:156
 msgid "Go &left"
 msgstr "Gehe nach &links"
 
-#: src/quadkonsole.cpp:154
+#: src/quadkonsole.cpp:161
 msgid "Go &up"
 msgstr "Gehe &hoch"
 
-#: src/quadkonsole.cpp:159
+#: src/quadkonsole.cpp:166
 msgid "Go &down"
 msgstr "Gehe her&unter"
 
-#: src/quadkonsole.cpp:165
+#: src/quadkonsole.cpp:172
 msgid "De&tach"
 msgstr "&Abtrennen"
 
-#: src/quadkonsole.cpp:170
+#: src/quadkonsole.cpp:177
 msgid "Insert &horizontal"
 msgstr "Einfügen: &horizontal"
 
-#: src/quadkonsole.cpp:175
+#: src/quadkonsole.cpp:182
 msgid "Insert &vertical"
 msgstr "Einfügen: &vertikal"
 
-#: src/quadkonsole.cpp:180
+#: src/quadkonsole.cpp:187
 msgid "Re&move part"
 msgstr "Ansicht &entfernen"
 
-#: src/quadkonsole.cpp:186
+#: src/quadkonsole.cpp:193
 msgid "R&eset layouts"
 msgstr "Gitter &zurücksezten"
 
-#: src/quadkonsole.cpp:190
+#: src/quadkonsole.cpp:197
 msgid "S&witch view"
 msgstr "Ansicht &welchseln"
 
-#: src/quadkonsole.cpp:196
-#, fuzzy
+#: src/quadkonsole.cpp:203
 msgid "Paste &selection"
 msgstr "Zwischenablage &einfügen"
 
-#: src/quadkonsole.cpp:210
+#: src/quadkonsole.cpp:217
 msgid "Save session"
 msgstr "Sitzung speichern"
 
-#: src/quadkonsole.cpp:214
+#: src/quadkonsole.cpp:221
 msgid "Restore session"
 msgstr "Sitzung wiederherstellen"
 
-#: src/quadkonsole.cpp:403
+#: src/quadkonsole.cpp:407
 msgid "General"
 msgstr "Allgemein"
 
-#: src/quadkonsole.cpp:408
+#: src/quadkonsole.cpp:412
 msgid "Shutdown"
 msgstr "Beenden"
 
-#: src/quadkonsole.cpp:411
+#: src/quadkonsole.cpp:415
 msgid "Views"
 msgstr "Ansichten"
+
+#: src/quadkonsole.cpp:620
+msgid "The process \"%1\" is still running. Do you want to terminate it?"
+msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
 
 #: rc.cpp:1
 msgctxt "NAME OF TRANSLATORS"

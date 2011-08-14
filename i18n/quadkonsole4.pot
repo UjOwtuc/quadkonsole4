@@ -1,0 +1,150 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
+"POT-Creation-Date: 2011-08-14 19:20+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/closedialog.cpp:42
+msgid "Don't detach"
+msgstr ""
+
+#: src/closedialog.cpp:46
+msgid "Detach selected"
+msgstr ""
+
+#: src/main.cpp:32
+msgid "Embeds multiple Konsoles in a grid layout"
+msgstr ""
+
+#: src/main.cpp:37
+msgid "quadkonsole4"
+msgstr ""
+
+#: src/main.cpp:37
+msgid ""
+"(C) 2005 Simon Perreault\n"
+"(C) 2009 - 2011 Karsten Borgwaldt"
+msgstr ""
+
+#: src/main.cpp:38
+msgid "Simon Perreault"
+msgstr ""
+
+#: src/main.cpp:39
+msgid "Karsten Borgwaldt"
+msgstr ""
+
+#: src/main.cpp:43
+msgid "Number of rows of terminal emulators"
+msgstr ""
+
+#: src/main.cpp:44
+msgid "Number of columns of terminal emulators"
+msgstr ""
+
+#: src/main.cpp:45
+msgid "Run command (may be used multiple times)"
+msgstr ""
+
+#: src/qkview.cpp:54
+msgid "Could not create a factory for %1."
+msgstr ""
+
+#: src/qkview.cpp:216
+msgid "The factory for %1 could not create a KPart."
+msgstr ""
+
+#: src/qkview.cpp:275
+msgid "%1 files selected (%2)"
+msgstr ""
+
+#: src/quadkonsole.cpp:151
+msgid "Go &right"
+msgstr ""
+
+#: src/quadkonsole.cpp:156
+msgid "Go &left"
+msgstr ""
+
+#: src/quadkonsole.cpp:161
+msgid "Go &up"
+msgstr ""
+
+#: src/quadkonsole.cpp:166
+msgid "Go &down"
+msgstr ""
+
+#: src/quadkonsole.cpp:172
+msgid "De&tach"
+msgstr ""
+
+#: src/quadkonsole.cpp:177
+msgid "Insert &horizontal"
+msgstr ""
+
+#: src/quadkonsole.cpp:182
+msgid "Insert &vertical"
+msgstr ""
+
+#: src/quadkonsole.cpp:187
+msgid "Re&move part"
+msgstr ""
+
+#: src/quadkonsole.cpp:193
+msgid "R&eset layouts"
+msgstr ""
+
+#: src/quadkonsole.cpp:197
+msgid "S&witch view"
+msgstr ""
+
+#: src/quadkonsole.cpp:203
+msgid "Paste &selection"
+msgstr ""
+
+#: src/quadkonsole.cpp:217
+msgid "Save session"
+msgstr ""
+
+#: src/quadkonsole.cpp:221
+msgid "Restore session"
+msgstr ""
+
+#: src/quadkonsole.cpp:407
+msgid "General"
+msgstr ""
+
+#: src/quadkonsole.cpp:412
+msgid "Shutdown"
+msgstr ""
+
+#: src/quadkonsole.cpp:415
+msgid "Views"
+msgstr ""
+
+#: src/quadkonsole.cpp:620
+msgid "The process \"%1\" is still running. Do you want to terminate it?"
+msgstr ""
+
+#: rc.cpp:1
+msgctxt "NAME OF TRANSLATORS"
+msgid "Your names"
+msgstr ""
+
+#: rc.cpp:2
+msgctxt "EMAIL OF TRANSLATORS"
+msgid "Your emails"
+msgstr ""

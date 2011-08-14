@@ -23,9 +23,11 @@
 
 #include <KDE/KFileItemList>
 #include <KDE/KUrl>
+#include <KDE/KService>
 
 #include <QtGui/QWidget>
 
+class KMenu;
 class QToolBar;
 class QBoxLayout;
 namespace KParts
@@ -33,38 +35,62 @@ namespace KParts
 	class ReadOnlyPart;
 	class OpenUrlArguments;
 	class BrowserArguments;
+	class PartManager;
 }
+
+
+class QKPartFactory
+{
+	public:
+		static KService::Ptr getFactory(const QString& name);
+
+	private:
+		QKPartFactory() {};
+		static QMap<QString, KService::Ptr> m_partFactories;
+};
+
 
 class QKView : public QWidget
 {
 	Q_OBJECT
 	public:
-		explicit QKView(const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
-		explicit QKView(KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
+		typedef enum { PartName=0 } userData_t;
+		explicit QKView(KParts::PartManager& partManager, const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
 
 		bool hasFocus() const;
 		void setFocus();
-		QString getURL() const;
-		void setURL(const QString& url);
+		KUrl getURL() const;
+		void setURL(const KUrl& url);
 		void sendInput(const QString& text);
 		KParts::ReadOnlyPart* part();
+		const QString& partName() const { return m_partname; }
 
 		QString foregroundProcess() const;
+		const QString& statusBarText() const { return m_statusBarText; }
+		const QString& windowCaption() const { return m_windowCaption; }
+		bool hasMimeType(const KUrl& url);
+
+	signals:
+		void partCreated();
+		void setStatusBarText(QString);
+		void setWindowCaption(QString);
+		void openUrlOutside(KUrl);
 
 	public slots:
 		void show();
 		void settingsChanged();
 		void partDestroyed();
 
-	signals:
-		void partCreated();
-
 	protected slots:
 		void createPart();
+		void popupMenu(QPoint where, KFileItemList);
 		void selectionInfo(KFileItemList items);
 		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
 		void enableAction(const char* action, bool enable);
+		void slotSetStatusBarText(QString text);
+		void slotSetWindowCaption(QString text);
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);
@@ -74,6 +100,9 @@ class QKView : public QWidget
 		QBoxLayout* m_layout;
 		QToolBar* m_toolbar;
 		KParts::ReadOnlyPart* m_part;
+		QString m_statusBarText;
+		QString m_windowCaption;
+		KParts::PartManager& m_partManager;
 };
 
 #endif // QKVIEW_H

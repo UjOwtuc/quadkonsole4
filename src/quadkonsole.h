@@ -25,6 +25,7 @@
 #define QUADKONSOLE_H
 
 #include <KDE/KParts/MainWindow>
+#include <KDE/KParts/PartManager>
 
 #include <QtGui/QClipboard>
 
@@ -70,9 +71,12 @@ class QuadKonsole : public KParts::MainWindow
 		void insertVertical(int row=-1, int col=-1);
 		void removePart(int row=-1, int col=-1);
 		void switchView();
+		void setStatusBarText(QString text);
+		void setWindowCaption(QString text);
 
-#ifdef DEBUG
 	private slots:
+		void slotActivePartChanged(KParts::Part* part);
+#ifdef DEBUG
 		void saveSession();
 		void restoreSession();
 #endif // DEBUG
@@ -96,6 +100,7 @@ class QuadKonsole : public KParts::MainWindow
 		QSplitter* m_rows;
 		std::vector<QSplitter*> mRowLayouts;
 		MouseMoveFilter* mFilter;
+		KParts::PartManager m_partManager;
 };
 
 #endif // QUADKONSOLE_H

@@ -21,20 +21,23 @@
 #ifndef QKSTACK_H
 #define QKSTACK_H
 
+#include <KDE/KUrl>
+
 #include <QtGui/QStackedWidget>
 
 class QKView;
 namespace KParts
 {
 	class ReadOnlyPart;
+	class PartManager;
 }
 
 class QKStack : public QStackedWidget
 {
 	Q_OBJECT
 	public:
-		explicit QKStack(QWidget* parent = 0);
-		explicit QKStack(KParts::ReadOnlyPart* part, QWidget* parent=0);
+		explicit QKStack(KParts::PartManager& partManager, QWidget* parent = 0);
+		explicit QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent = 0);
 		virtual ~QKStack();
 
 		bool hasFocus() const;
@@ -45,16 +48,20 @@ class QKStack : public QStackedWidget
 
 	signals:
 		void partCreated();
+		void setStatusBarText(QString);
+		void setWindowCaption(QString);
 
 	public slots:
 		void sendInput(const QString& text);
-		void switchView();
+		void switchView(KUrl url=KUrl());
 
 	private slots:
 		void slotPartCreated();
+		void slotSetStatusBarText(QString text);
+		void slotSetWindowCaption(QString text);
 
 	private:
-		void setupUi(KParts::ReadOnlyPart* part=0);
+		void setupUi(KParts::PartManager& partManager, KParts::ReadOnlyPart* part=0);
 };
 
 #endif // QKSTACK_H

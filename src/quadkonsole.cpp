@@ -26,6 +26,7 @@
 #include "closedialog.h"
 #include "qkstack.h"
 #include "prefsviews.h"
+#include "qkview.h"
 
 #include <KDE/KDebug>
 #include <kde_terminal_interface_v2.h>
@@ -43,6 +44,7 @@
 #include <KDE/KConfigDialog>
 #include <KDE/KMessageBox>
 #include <KDE/KParts/ReadOnlyPart>
+#include <KDE/KParts/PartManager>
 
 #include <QtGui/QMouseEvent>
 #include <QtGui/QAction>
@@ -56,7 +58,8 @@
 
 // Only for restoring a session.
 QuadKonsole::QuadKonsole()
-	: mFilter(0)
+	: mFilter(0),
+	m_partManager(this, this)
 {
 	setupActions();
 	setupUi(0, 0);
@@ -64,7 +67,8 @@ QuadKonsole::QuadKonsole()
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
-	: mFilter(0)
+	: mFilter(0),
+	m_partManager(this, this)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -97,7 +101,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 
 
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
-	: mFilter(0)
+	: mFilter(0),
+	m_partManager(this, this)
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
@@ -139,6 +144,8 @@ void QuadKonsole::setupActions()
 		mFilter = new MouseMoveFilter(this);
 		qApp->installEventFilter(mFilter);
 	}
+
+	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 
 	// Movement
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
@@ -230,7 +237,7 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	setCentralWidget(centralWidget);
 	actionCollection()->addAssociatedWidget(centralWidget);
 
-	for (int i = 0; i < rows; ++i)
+	for (int i=0; i<rows; ++i)
 	{
 		QSplitter* row = new QSplitter(Qt::Horizontal);
 		row->setChildrenCollapsible(false);
@@ -250,9 +257,6 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	setWindowIcon(KIcon("quadkonsole4"));
 
 	setupGUI();
-
-	// unused
-	statusBar()->hide();
 }
 
 
@@ -337,9 +341,9 @@ void QuadKonsole::detach(QKStack* stack)
 			return;
 	}
 
-	actionCollection()->removeAssociatedWidget(stack);
-	QuadKonsole* external = new QuadKonsole(stack->part());
+	KParts::ReadOnlyPart* part = stack->part();
 	stack->partDestroyed();
+	QuadKonsole* external = new QuadKonsole(part);
 	external->setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -549,15 +553,16 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 {
 	QKStack* stack;
 	if (part)
-		stack = new QKStack(part);
+		stack = new QKStack(m_partManager, part);
 	else
-		stack = new QKStack;
+		stack = new QKStack(m_partManager);
 
 	m_stacks.append(stack);
 	mRowLayouts[row]->insertWidget(col, stack);
 
 	connect(stack, SIGNAL(partCreated()), SLOT(resetLayouts()));
-	actionCollection()->addAssociatedWidget(stack);
+	connect(stack, SIGNAL(setStatusBarText(QString)), SLOT(setStatusBarText(QString)));
+	connect(stack, SIGNAL(setWindowCaption(QString)), SLOT(setWindowCaption(QString)));
 
 	return stack;
 }
@@ -608,6 +613,14 @@ void QuadKonsole::removePart(int row, int col)
 	if (row >= 0 && col >= 0)
 	{
 		QKStack* stack = getFocusStack();
+		if (Settings::queryClose())
+		{
+			if (stack->foregroundProcess().size())
+			{
+				if (KMessageBox::questionYesNo(this, i18n("The process \"%1\" is still running. Do you want to terminate it?", stack->foregroundProcess())) == KMessageBox::No)
+					return;
+			}
+		}
 		m_stacks.removeOne(stack);
 
 		delete stack;
@@ -639,6 +652,28 @@ void QuadKonsole::switchView()
 		stack->switchView();
 	else
 		kDebug() << "getFocusPart return 0" << endl;
+}
+
+
+void QuadKonsole::setStatusBarText(QString text)
+{
+	QKStack* stack = qobject_cast<QKStack*>(sender());
+	if (stack->hasFocus())
+		statusBar()->showMessage(text);
+}
+
+
+void QuadKonsole::setWindowCaption(QString text)
+{
+	QKStack* stack = qobject_cast<QKStack*>(sender());
+	if (stack->hasFocus())
+		setCaption(text);
+}
+
+
+void QuadKonsole::slotActivePartChanged(KParts::Part* part)
+{
+	createGUI(part);
 }
 
 

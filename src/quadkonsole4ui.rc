@@ -10,11 +10,12 @@
 			<Action name="detach" />
 			<Action name="reset layouts" />
 		</Menu>
-		<Menu name="move">
+		<Menu name="view">
 			<Action name="go left" />
 			<Action name="go right" />
 			<Action name="go up" />
 			<Action name="go down" />
+			<Action name="switch view" />
 		</Menu>
 		<Menu name="settings">
 			<Action name="toggle menu" />
@@ -25,5 +26,6 @@
 		<text>Main Toolbar</text>
 		<Action name="detach" />
 		<Action name="reset layouts" />
+		<Action name="switch view" />
 	</ToolBar>
 </gui>

@@ -23,20 +23,23 @@
 
 #include <QtGui/QWidget>
 
+class QListWidget;
 class KEditListWidget;
 class KComboBox;
 
 class PrefsViews : public QWidget
 {
+	Q_OBJECT
 	public:
 		explicit PrefsViews(QWidget* parent = 0, Qt::WindowFlags f = 0);
 		virtual ~PrefsViews();
 
 	protected slots:
-		void selectorChanged();
+		void showMimeTypes(QString partname);
 
 	protected:
 		KComboBox* m_comboBox;
+		QListWidget* m_mimeList;
 };
 
 #endif // PREFSVIEWS_H

@@ -210,7 +210,7 @@ void QKView::createPart()
 	if (service.isNull())
 		return;
 
-	m_part = service->createInstance<KParts::ReadOnlyPart>();
+	m_part = service->createInstance<KParts::ReadOnlyPart>(this);
 	if (m_part == 0)
 	{
 		KMessageBox::error(this, i18n("The factory for %1 could not create a KPart.", m_partname));

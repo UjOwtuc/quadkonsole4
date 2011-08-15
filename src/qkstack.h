@@ -45,6 +45,7 @@ class QKStack : public QStackedWidget
 		QString foregroundProcess() const;
 		KParts::ReadOnlyPart* part();
 		void partDestroyed();
+		void addViews(const QStringList& partNames);
 
 	signals:
 		void partCreated();
@@ -54,6 +55,7 @@ class QKStack : public QStackedWidget
 	public slots:
 		void sendInput(const QString& text);
 		void switchView(KUrl url=KUrl());
+		void settingsChanged();
 
 	private slots:
 		void slotPartCreated();
@@ -61,7 +63,10 @@ class QKStack : public QStackedWidget
 		void slotSetWindowCaption(QString text);
 
 	private:
-		void setupUi(KParts::PartManager& partManager, KParts::ReadOnlyPart* part=0);
+		void setupUi(KParts::ReadOnlyPart* part=0);
+
+		KParts::PartManager& m_partManager;
+		QStringList m_loadedViews;
 };
 
 #endif // QKSTACK_H

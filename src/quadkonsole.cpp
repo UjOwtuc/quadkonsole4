@@ -199,12 +199,6 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("switch view", switchView);
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
 
-	KStandardAction::paste(this, SLOT(pasteClipboard()), actionCollection());
-	KAction *pasteSelection = new KAction(KIcon("edit-paste"), i18n("Paste &selection"), this);
-	pasteSelection->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Insert));
-	actionCollection()->addAction("pasteSelection", pasteSelection);
-	connect(pasteSelection, SIGNAL(triggered(bool)), this, SLOT(pasteSelection()));
-
 	// Standard actions
 	KStandardAction::preferences(this, SLOT(optionsPreferences()), actionCollection());
 	KStandardAction::quit(this, SLOT(quit()), actionCollection());
@@ -605,10 +599,10 @@ void QuadKonsole::insertVertical(int row, int col)
 }
 
 
-void QuadKonsole::removePart(int row, int col)
+void QuadKonsole::removePart()
 {
-	if (row == -1 || col == -1)
-		getFocusCoords(row, col);
+	int row, col;
+	getFocusCoords(row, col);
 
 	if (row >= 0 && col >= 0)
 	{
@@ -645,20 +639,18 @@ void QuadKonsole::removePart(int row, int col)
 }
 
 
-void QuadKonsole::switchView()
+void QuadKonsole::switchView(const KUrl& url)
 {
 	QKStack* stack = getFocusStack();
 	if (stack)
-		stack->switchView();
-	else
-		kDebug() << "getFocusPart return 0" << endl;
+		stack->switchView(url);
 }
 
 
 void QuadKonsole::setStatusBarText(QString text)
 {
 	QKStack* stack = qobject_cast<QKStack*>(sender());
-	if (stack->hasFocus())
+	if (stack && stack->hasFocus())
 		statusBar()->showMessage(text);
 }
 
@@ -666,7 +658,7 @@ void QuadKonsole::setStatusBarText(QString text)
 void QuadKonsole::setWindowCaption(QString text)
 {
 	QKStack* stack = qobject_cast<QKStack*>(sender());
-	if (stack->hasFocus())
+	if (stack && stack->hasFocus())
 		setCaption(text);
 }
 

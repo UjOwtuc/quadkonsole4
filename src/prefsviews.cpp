@@ -28,6 +28,7 @@
 #include <KDE/KConfigDialogManager>
 
 #include <QtGui/QWidget>
+#include <QtGui/QListWidget>
 
 #include "ui_prefs_views.h"
 
@@ -41,21 +42,35 @@ PrefsViews::PrefsViews(QWidget* parent, Qt::WindowFlags f)
 	KEditListWidget::CustomEditor editor;
 	editor.setLineEdit(new KLineEdit);
 	editor.setRepresentationWidget(m_comboBox);
+	editor.lineEdit()->setReadOnly(true);
 	m_comboBox->setLineEdit(editor.lineEdit());
 
 	Ui::prefs_views prefs_views;
 	prefs_views.setupUi(this);
 	prefs_views.kcfg_views->setCustomEditor(editor);
+	m_mimeList = prefs_views.mimeList;
 
 	KService::List services = KService::allServices();
 	KService::List::const_iterator it;
 	for (it=services.constBegin(); it!=services.constEnd(); ++it)
 	{
-		if ((*it)->library().endsWith("part"))
-			m_comboBox->addItem(KIcon((*it)->icon()), (*it)->entryPath());
+		KService::Ptr s = *it;
+		if (s->serviceTypes().contains("KParts/ReadOnlyPart", Qt::CaseInsensitive))
+			m_comboBox->addItem(KIcon(s->icon()), s->entryPath());
 	}
+
+	connect(m_comboBox, SIGNAL(currentIndexChanged(QString)), SLOT(showMimeTypes(QString)));
+	connect(m_comboBox, SIGNAL(editTextChanged(QString)), SLOT(showMimeTypes(QString)));
 }
 
 
 PrefsViews::~PrefsViews()
 {}
+
+
+void PrefsViews::showMimeTypes(QString partname)
+{
+	KService::Ptr service = KService::serviceByDesktopPath(partname);
+	m_mimeList->clear();
+	m_mimeList->addItems(service->serviceTypes());
+}

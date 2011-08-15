@@ -28,16 +28,18 @@
 #include <QtGui/QStackedWidget>
 
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
-	: QStackedWidget(parent)
+	: QStackedWidget(parent),
+	m_partManager(partManager)
 {
-	setupUi(partManager);
+	setupUi();
 }
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
-	: QStackedWidget(parent)
+	: QStackedWidget(parent),
+	m_partManager(partManager)
 {
-	setupUi(partManager, part);
+	setupUi(part);
 }
 
 
@@ -91,6 +93,24 @@ void QKStack::sendInput(const QString& text)
 }
 
 
+void QKStack::addViews(const QStringList& partNames)
+{
+	QKView* view;
+	QStringListIterator it(partNames);
+	while (it.hasNext())
+	{
+		QString name = it.next();
+		view = new QKView(m_partManager, name);
+		m_loadedViews << name;
+		addWidget(view);
+		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
+		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
+		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
+		connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
+	}
+}
+
+
 void QKStack::switchView(KUrl url)
 {
 	QKView* view;
@@ -118,6 +138,18 @@ void QKStack::switchView(KUrl url)
 	}
 	kDebug() << "no KPart want's to handle" << url << endl;
 	switchView(url.upUrl());
+	emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
+}
+
+
+void QKStack::settingsChanged()
+{
+	QStringList partNames = Settings::views();
+	QStringListIterator it(m_loadedViews);
+	while (it.hasNext())
+		partNames.removeOne(it.next());
+
+	addViews(partNames);
 }
 
 
@@ -139,42 +171,30 @@ void QKStack::slotSetWindowCaption(QString text)
 }
 
 
-void QKStack::setupUi(KParts::PartManager& partManager, KParts::ReadOnlyPart* part)
+void QKStack::setupUi(KParts::ReadOnlyPart* part)
 {
 	setContentsMargins(0, 0, 0, 0);
 
-	QStringList partNames = Settings::views();
-	QString firstName = partNames.front();
-
 	QKView* view;
-
+	QStringList partNames = Settings::views();
 	if (part)
 	{
-		view = new QKView(partManager, part);
-		firstName = view->partName();
-	}
-	else
-		view = new QKView(partManager, partNames.front());
-
-	addWidget(view);
-	view->show();
-	setFocusProxy(view);
-	connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
-	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
-	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
-	connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
-
-	partNames.removeOne(firstName);
-	while (partNames.count())
-	{
-		view = new QKView(partManager, partNames.front());
-		partNames.pop_front();
+		view = new QKView(m_partManager, part, this);
+		partNames.removeOne(view->partName());
+		m_loadedViews << view->partName();
 		addWidget(view);
 		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
 		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 		connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
 	}
+	addViews(partNames);
+
+	view = qobject_cast<QKView*>(currentWidget());
+	view->show();
+	setFocusProxy(view);
+
+	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
 }
 
 #include "qkstack.moc"

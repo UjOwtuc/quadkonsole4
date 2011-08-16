@@ -2,14 +2,13 @@
 # Copyright (C) 2011 Karsten Borgwaldt <kb@kb.ccchl.de>
 # This file is distributed under the same license as the QuadKonsole4 package.
 #
-# Karsten Borgwaldt <k.borgwaldt@soit.de>, 2011.
 # Karsten Borgwaldt <kb@kb.ccchl.de>, 2011.
 # Mladen Pejakovic <pejakm@gmail.com>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: quadkonsole4\n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-05 01:27+0200\n"
+"POT-Creation-Date: 2011-08-16 19:18+0200\n"
 "PO-Revision-Date: 2009-07-29 21:23+0200\n"
 "Last-Translator: Mladen Pejakovic <pejakm@gmail.com>\n"
 "Language-Team: Serbian <kde-i18n-sr@kde.org>\n"
@@ -24,12 +23,142 @@ msgstr ""
 "X-Environment: kde\n"
 "X-Wrapping: fine\n"
 
-#: i18n/rc.cpp:1 rc.cpp:1
+#. i18n: file: src/detach_processes.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
+#: i18n/rc.cpp:3 rc.cpp:3
+msgid "Detach processes"
+msgstr "Откачи процес"
+
+#. i18n: file: src/detach_processes.ui:20
+#. i18n: ectx: property (text), widget (QLabel, lTitle)
+#: i18n/rc.cpp:6 rc.cpp:6
+msgid ""
+"The following processes are still running. Do you wish to detach the "
+"containing windows before exiting?"
+msgstr ""
+"Следећи процеси су још увијек покренути. Да ли желите да откачите прозоре у "
+"ком су покренути прије напуштања?"
+
+#. i18n: file: src/detach_processes.ui:36
+#. i18n: ectx: property (text), widget (QTableWidget, processTable)
+#: i18n/rc.cpp:9 rc.cpp:9
+msgid "Process"
+msgstr "Процес"
+
+#. i18n: file: src/prefs_base.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
+#: i18n/rc.cpp:12 src/quadkonsole.cpp:407 rc.cpp:12
+msgid "General"
+msgstr "Опште"
+
+#. i18n: file: src/prefs_base.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
+#. i18n: file: src/quadkonsole4.kcfg:10
+#. i18n: ectx: label, entry (sloppyFocus), group (General)
+#. i18n: file: src/prefs_base.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
+#. i18n: file: src/quadkonsole4.kcfg:10
+#. i18n: ectx: label, entry (sloppyFocus), group (General)
+#: i18n/rc.cpp:15 i18n/rc.cpp:42 rc.cpp:15 rc.cpp:42
+msgid "Focus follows mouse"
+msgstr "Фокус прати миша"
+
+#. i18n: file: src/prefs_base.ui:27
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox)
+#: i18n/rc.cpp:18 rc.cpp:18
+msgid "Startup"
+msgstr "Покретање"
+
+#. i18n: file: src/prefs_base.ui:46
+#. i18n: ectx: property (text), widget (QLabel, labelRows)
+#. i18n: file: src/quadkonsole4.kcfg:18
+#. i18n: ectx: label, entry (numRows), group (General)
+#. i18n: file: src/prefs_base.ui:46
+#. i18n: ectx: property (text), widget (QLabel, labelRows)
+#. i18n: file: src/quadkonsole4.kcfg:18
+#. i18n: ectx: label, entry (numRows), group (General)
+#: i18n/rc.cpp:21 i18n/rc.cpp:48 rc.cpp:21 rc.cpp:48
+msgid "Number of rows"
+msgstr "Број редова"
+
+#. i18n: file: src/prefs_base.ui:63
+#. i18n: ectx: property (text), widget (QLabel, labelColumns)
+#: i18n/rc.cpp:24 rc.cpp:24
+msgid "Number of Columns"
+msgstr "Број колона"
+
+#. i18n: file: src/prefs_base.ui:70
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (startMaximized), group (General)
+#. i18n: file: src/prefs_base.ui:70
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (startMaximized), group (General)
+#: i18n/rc.cpp:27 i18n/rc.cpp:45 rc.cpp:27 rc.cpp:45
+msgid "Start maximized"
+msgstr "Покрени максимизовано"
+
+#. i18n: file: src/prefs_shutdown.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
+#: i18n/rc.cpp:30 src/quadkonsole.cpp:412 rc.cpp:30
+msgid "Shutdown"
+msgstr "Гашење"
+
+#. i18n: file: src/prefs_shutdown.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
+#: i18n/rc.cpp:33 rc.cpp:33
+msgid "&Ask before terminating running processes"
+msgstr "&Питај пре прекидања покренутог процеса"
+
+#. i18n: file: src/prefs_views.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
+#: i18n/rc.cpp:36 src/quadkonsole.cpp:415 rc.cpp:36
+msgid "Views"
+msgstr "Прикази"
+
+#. i18n: file: src/prefs_views.ui:23
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
+#. i18n: file: src/quadkonsole4.kcfg:36
+#. i18n: ectx: label, entry (viewHasToolbar), group (Views)
+#. i18n: file: src/prefs_views.ui:23
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
+#. i18n: file: src/quadkonsole4.kcfg:36
+#. i18n: ectx: label, entry (viewHasToolbar), group (Views)
+#: i18n/rc.cpp:39 i18n/rc.cpp:57 rc.cpp:39 rc.cpp:57
+msgid "Display a toolbar for each view"
+msgstr "Прикажи траку алата за сваки приказ"
+
+#. i18n: file: src/quadkonsole4.kcfg:23
+#. i18n: ectx: label, entry (numCols), group (General)
+#: i18n/rc.cpp:51 rc.cpp:51
+msgid "Number of columns"
+msgstr "Број колона"
+
+#. i18n: file: src/quadkonsole4.kcfg:30
+#. i18n: ectx: label, entry (queryClose), group (Shutdown)
+#: i18n/rc.cpp:54 rc.cpp:54
+msgid "Ask before terminating running processes"
+msgstr "Питај пре прекидања покренутог процеса"
+
+#. i18n: file: src/quadkonsole4.kcfg:40
+#. i18n: ectx: label, entry (views), group (Views)
+#: i18n/rc.cpp:60 rc.cpp:60
+msgid "Prepare these views"
+msgstr "Припреми ове приказе"
+
+#. i18n: file: src/quadkonsole4ui.rc:26
+#. i18n: ectx: ToolBar (mainToolBar)
+#: i18n/rc.cpp:64 rc.cpp:64
+msgid "Main Toolbar"
+msgstr "Главна трака"
+
+#: i18n/rc.cpp:65 rc.cpp:65
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr "Младен Пејаковић"
 
-#: i18n/rc.cpp:2 rc.cpp:2
+#: i18n/rc.cpp:66 rc.cpp:66
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr "pejakm@gmail.com"
@@ -41,13 +170,6 @@ msgstr "Не откачуј"
 #: src/closedialog.cpp:46
 msgid "Detach selected"
 msgstr "Откачи изабрано"
-
-#: src/konsole.cpp:140
-msgid ""
-"Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
-msgstr ""
-"Не могу да направим фабрику за „libkonsolepart“. Да ли је Конзола "
-"инсталирана?"
 
 #: src/main.cpp:32
 msgid "Embeds multiple Konsoles in a grid layout"
@@ -85,106 +207,70 @@ msgstr "Број колона емулатора терминала"
 msgid "Run command (may be used multiple times)"
 msgstr "Изврши наредбу (може бити коришћено више пута)"
 
-#: src/quadkonsole.cpp:144
+#: src/qkview.cpp:54
+msgid "Could not create a factory for %1."
+msgstr "Не могу да направим фабрику за %1."
+
+#: src/qkview.cpp:216
+msgid "The factory for %1 could not create a KPart."
+msgstr "Фабрика за %1 није могла да направи К-део."
+
+#: src/qkview.cpp:275
+msgid "%1 files selected (%2)"
+msgstr "%1 фајлова изабрано (%2)"
+
+#: src/quadkonsole.cpp:151
 msgid "Go &right"
 msgstr "Иди &десно"
 
-#: src/quadkonsole.cpp:149
+#: src/quadkonsole.cpp:156
 msgid "Go &left"
 msgstr "Иди &лево"
 
-#: src/quadkonsole.cpp:154
+#: src/quadkonsole.cpp:161
 msgid "Go &up"
 msgstr "Иди &горе"
 
-#: src/quadkonsole.cpp:159
+#: src/quadkonsole.cpp:166
 msgid "Go &down"
 msgstr "Иди до&ле"
 
-#: src/quadkonsole.cpp:165
+#: src/quadkonsole.cpp:172
 msgid "De&tach"
 msgstr "&Откачи"
 
-#: src/quadkonsole.cpp:170
+#: src/quadkonsole.cpp:177
 msgid "Insert &horizontal"
 msgstr "Уметни &водоравно"
 
-#: src/quadkonsole.cpp:175
+#: src/quadkonsole.cpp:182
 msgid "Insert &vertical"
 msgstr "Уметни вер&тикално"
 
-#: src/quadkonsole.cpp:180
+#: src/quadkonsole.cpp:187
 msgid "Re&move part"
 msgstr "&Уклони дио"
 
-#: src/quadkonsole.cpp:186
+#: src/quadkonsole.cpp:193
 msgid "R&eset layouts"
 msgstr "&Ресетуј распоред"
 
-#: src/quadkonsole.cpp:191
+#: src/quadkonsole.cpp:197
+msgid "S&witch view"
+msgstr "&Промени приказ"
+
+#: src/quadkonsole.cpp:203
 msgid "Paste &selection"
 msgstr "&Налепи избор"
 
-#: src/quadkonsole.cpp:205
+#: src/quadkonsole.cpp:217
 msgid "Save session"
 msgstr "Сачувај сесију"
 
-#: src/quadkonsole.cpp:209
+#: src/quadkonsole.cpp:221
 msgid "Restore session"
 msgstr "Поврати сесију"
 
-#: src/quadkonsole.cpp:398 src/ui_prefs_base.h:101
-msgid "General"
-msgstr "Опште"
-
-#: src/quadkonsole.cpp:403 src/ui_prefs_shutdown.h:53
-msgid "Shutdown"
-msgstr "Гашење"
-
-#: src/settings.cpp:38 src/ui_prefs_base.h:102
-msgid "Focus follows mouse"
-msgstr "Фокус прати миша"
-
-#: src/settings.cpp:42 src/ui_prefs_base.h:106
-msgid "Start maximized"
-msgstr "Покрени максимизовано"
-
-#: src/settings.cpp:47 src/ui_prefs_base.h:104
-msgid "Number of rows"
-msgstr "Број редова"
-
-#: src/settings.cpp:52
-msgid "Number of columns"
-msgstr "Број колона"
-
-#: src/settings.cpp:59
-msgid "Ask before terminating running processes"
-msgstr "Питај пре прекидања покренутог процеса"
-
-#: src/ui_detach_processes.h:67
-msgid "Detach processes"
-msgstr "Откачи процес"
-
-#: src/ui_detach_processes.h:68
-msgid ""
-"The following processes are still running. Do you wish to detach the "
-"containing windows before exiting?"
-msgstr ""
-"Следећи процеси су још увијек покренути. Да ли желите да откачите "
-"прозоре у ком су покренути прије напуштања?"
-
-#: src/ui_detach_processes.h:70
-msgid "Process"
-msgstr "Процес"
-
-#: src/ui_prefs_base.h:103
-msgid "Startup"
-msgstr "Покретање"
-
-#: src/ui_prefs_base.h:105
-msgid "Number of Columns"
-msgstr "Број колона"
-
-#: src/ui_prefs_shutdown.h:54
-msgid "&Ask before terminating running processes"
-msgstr "&Питај пре прекидања покренутог процеса"
+#: src/quadkonsole.cpp:620
+msgid "The process \"%1\" is still running. Do you want to terminate it?"
+msgstr "Процес „%1“ је још увек покренут. Да ли желите да га прекинете?"

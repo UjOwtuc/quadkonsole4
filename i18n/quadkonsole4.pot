@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-14 19:20+0200\n"
+"POT-Creation-Date: 2011-08-16 22:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,15 +59,19 @@ msgstr ""
 msgid "Run command (may be used multiple times)"
 msgstr ""
 
+#: src/qkstack.cpp:161
+msgid "No view is able to open \"%1\""
+msgstr ""
+
 #: src/qkview.cpp:54
 msgid "Could not create a factory for %1."
 msgstr ""
 
-#: src/qkview.cpp:216
+#: src/qkview.cpp:222
 msgid "The factory for %1 could not create a KPart."
 msgstr ""
 
-#: src/qkview.cpp:275
+#: src/qkview.cpp:281
 msgid "%1 files selected (%2)"
 msgstr ""
 
@@ -111,31 +115,27 @@ msgstr ""
 msgid "S&witch view"
 msgstr ""
 
-#: src/quadkonsole.cpp:203
-msgid "Paste &selection"
-msgstr ""
-
-#: src/quadkonsole.cpp:217
+#: src/quadkonsole.cpp:211
 msgid "Save session"
 msgstr ""
 
-#: src/quadkonsole.cpp:221
+#: src/quadkonsole.cpp:215
 msgid "Restore session"
 msgstr ""
 
-#: src/quadkonsole.cpp:407
+#: src/quadkonsole.cpp:401
 msgid "General"
 msgstr ""
 
-#: src/quadkonsole.cpp:412
+#: src/quadkonsole.cpp:406
 msgid "Shutdown"
 msgstr ""
 
-#: src/quadkonsole.cpp:415
+#: src/quadkonsole.cpp:409
 msgid "Views"
 msgstr ""
 
-#: src/quadkonsole.cpp:620
+#: src/quadkonsole.cpp:614
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
 msgstr ""
 

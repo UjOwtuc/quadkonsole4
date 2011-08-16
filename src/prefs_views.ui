@@ -14,7 +14,7 @@
    <string>Views</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="KEditListWidget" name="kcfg_views"/>
    </item>
    <item row="0" column="0">
@@ -24,13 +24,20 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QListWidget" name="mimeList"/>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="mimeTypesLabel">
      <property name="text">
       <string>Supported MIME types</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="kcfg_autoloadView">
+     <property name="text">
+      <string>Load new views automatically for unhandles MIME types</string>
      </property>
     </widget>
    </item>

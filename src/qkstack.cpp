@@ -24,6 +24,7 @@
 
 #include <KDE/KDebug>
 #include <KDE/KUrl>
+#include <KDE/KMimeTypeTrader>
 
 #include <QtGui/QStackedWidget>
 
@@ -93,52 +94,84 @@ void QKStack::sendInput(const QString& text)
 }
 
 
-void QKStack::addViews(const QStringList& partNames)
+int QKStack::addViews(const QStringList& partNames)
 {
 	QKView* view;
 	QStringListIterator it(partNames);
+	int index = 0;
 	while (it.hasNext())
 	{
 		QString name = it.next();
 		view = new QKView(m_partManager, name);
 		m_loadedViews << name;
-		addWidget(view);
+		index = addWidget(view);
 		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
 		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 		connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
 	}
+	return index;
 }
 
 
 void QKStack::switchView(KUrl url)
 {
 	QKView* view;
+
 	if (url.isEmpty())
 	{
 		view = qobject_cast<QKView*>(currentWidget());
 		url = view->getURL();
 	}
+	KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
 
 	for (int i=1; i<count(); ++i)
 	{
 		view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
-		if (view->hasMimeType(url))
+		if (view->hasMimeType(item.mimetype()))
 		{
-			setCurrentIndex((currentIndex() +i) % count());
-			view = qobject_cast<QKView*>(currentWidget());
-			view->show();
-			view->setURL(url);
-			setFocusProxy(view);
-
-			emit setStatusBarText(view->statusBarText());
-			emit setWindowCaption(view->windowCaption());
+			switchView((currentIndex() +i) % count(), url);
 			return;
 		}
 	}
-	kDebug() << "no KPart want's to handle" << url << endl;
-	switchView(url.upUrl());
+	kDebug() << "no other loaded KPart want's to handle" << url << endl;
+
+	if (Settings::autoloadView())
+	{
+		// try to find a new KPart only if either the current KPart won't handle url or there are no other parts involved
+		view = qobject_cast<QKView*>(currentWidget());
+		if (! view->hasMimeType(item.mimetype()) || count() <= 1)
+		{
+			KService::List services = KMimeTypeTrader::self()->query(item.mimetype(), "KParts/ReadOnlyPart");
+			if (services.count())
+			{
+				kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << item.mimetype() << endl;
+				int index = addViews(QStringList(services.front()->entryPath()));
+				switchView(index, url);
+				return;
+			}
+			else
+				kDebug() << "unable to find a service for mime type" << item.mimetype() << endl;
+		}
+	}
+
+	if (count() > 1)
+		switchView(url.upUrl());
+
 	emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
+}
+
+
+void QKStack::switchView(int index, const KUrl& url)
+{
+	setCurrentIndex(index);
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	view->show();
+	view->setURL(url);
+	setFocusProxy(view);
+
+	emit setStatusBarText(view->statusBarText());
+	emit setWindowCaption(view->windowCaption());
 }
 
 

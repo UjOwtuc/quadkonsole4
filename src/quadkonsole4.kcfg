@@ -36,6 +36,10 @@
 			<label>Display a toolbar for each view</label>
 			<default>true</default>
 		</entry>
+		<entry name="autoloadView" type="bool">
+			<label>Load new views automatically for unhandles MIME types</label>
+			<default>true</default>
+		</entry>
 		<entry name="views" type="StringList">
 			<label>Prepare these views</label>
 			<default code="true">QStringList( KService::serviceByDesktopPath("konsolepart.desktop")->entryPath() )</default>

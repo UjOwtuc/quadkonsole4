@@ -1,3 +1,7 @@
+2011-08-16  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Support for autoloading KParts based on mime types
+
 2011-08-14  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Added support for different KParts

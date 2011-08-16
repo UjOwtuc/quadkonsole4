@@ -3,23 +3,38 @@ BASEDIR="../"
 PROJECT="quadkonsole4"
 BUGADDR="quadkonsole4@kb.ccchl.de"
 WDIR=`pwd`
- 
+GIT=no
+if [ -d $BASEDIR/.git && -x `which git 2>&1` ]
+then
+	GIT=yes
+fi
+
 echo "Preparing rc files"
 cd ${BASEDIR}
 # we use simple sorting to make sure the lines do not jump around too much from system to system
-git ls-files '*.rc' '*.ui' '*.kcfg' | sort > ${WDIR}/rcfiles.list
+if [ $GIT = "yes" ]
+then
+	git ls-files '*.rc' '*.ui' '*.kcfg' | sort > ${WDIR}/rcfiles.list
+else
+	find . -type f \( -name '*.rc' -o -name '*.ui' -o -name '*.kcfg' \) | sort > ${WDIR}/rcfiles.list
+fi
 xargs --arg-file=${WDIR}/rcfiles.list extractrc > ${WDIR}/rc.cpp
 # additional string for KAboutData
 echo 'i18nc("NAME OF TRANSLATORS","Your names");' >> ${WDIR}/rc.cpp
 echo 'i18nc("EMAIL OF TRANSLATORS","Your emails");' >> ${WDIR}/rc.cpp
 cd ${WDIR}
 echo "Done preparing rc files"
- 
- 
+
+
 echo "Extracting messages"
 cd ${BASEDIR}
 # see above on sorting
-git ls-files '*.cpp' '*.h' '*.c' | sort > ${WDIR}/infiles.list
+if [$GIT = "yes" ]
+then
+	git ls-files '*.cpp' '*.h' '*.c' | sort > ${WDIR}/infiles.list
+else
+	find . -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) | sort > ${WDIR}/infiles.list
+fi
 echo "rc.cpp" >> ${WDIR}/infiles.list
 cd ${WDIR}
 xgettext --from-code=UTF-8 -C -kde -ci18n -ki18n:1 -ki18nc:1c,2 -ki18np:1,2 -ki18ncp:1c,2,3 -ktr2i18n:1 \
@@ -27,8 +42,8 @@ xgettext --from-code=UTF-8 -C -kde -ci18n -ki18n:1 -ki18nc:1c,2 -ki18np:1,2 -ki1
 	--msgid-bugs-address="${BUGADDR}" \
 	--files-from=infiles.list -D ${BASEDIR} -D ${WDIR} -o ${PROJECT}.pot || { echo "error while calling xgettext. aborting."; exit 1; }
 echo "Done extracting messages"
- 
- 
+
+
 echo "Merging translations"
 catalogs=`find . -name '*.po'`
 for cat in $catalogs; do
@@ -37,8 +52,8 @@ for cat in $catalogs; do
 	mv $cat.new $cat
 done
 echo "Done merging translations"
- 
- 
+
+
 echo "Cleaning up"
 cd ${WDIR}
 rm rcfiles.list

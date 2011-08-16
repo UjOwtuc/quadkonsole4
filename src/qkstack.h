@@ -45,7 +45,7 @@ class QKStack : public QStackedWidget
 		QString foregroundProcess() const;
 		KParts::ReadOnlyPart* part();
 		void partDestroyed();
-		void addViews(const QStringList& partNames);
+		int addViews(const QStringList& partNames);
 
 	signals:
 		void partCreated();
@@ -55,6 +55,7 @@ class QKStack : public QStackedWidget
 	public slots:
 		void sendInput(const QString& text);
 		void switchView(KUrl url=KUrl());
+		void switchView(int index, const KUrl& url);
 		void settingsChanged();
 
 	private slots:

@@ -131,7 +131,7 @@ void QKView::setURL(const KUrl& url)
 
 			t->sendInput(QString(" \"%1\"").arg(escaped));
 		}
-		else if (hasMimeType(url))
+		else if (hasMimeTypeFor(url))
 		{
 			m_part->openUrl(url);
 		}
@@ -169,18 +169,24 @@ QString QKView::foregroundProcess() const
 }
 
 
-bool QKView::hasMimeType(const KUrl& url)
+bool QKView::hasMimeType(const QString& type)
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	KFileItem fileItem(KFileItem::Unknown, KFileItem::Unknown, url);
 	if (service.isNull())
 		return false;
 
-	if (service->hasMimeType(fileItem.mimetype()))
+	if (service->hasMimeType(type))
 		return true;
 
-	kDebug() << "KPart" << m_partname << "does not like mime type" << fileItem.mimetype() << endl;
+	kDebug() << "KPart" << m_partname << "does not like mime type" << type << endl;
 	return false;
+}
+
+
+bool QKView::hasMimeTypeFor(const KUrl& url)
+{
+	KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
+	return hasMimeType(item.mimetype());
 }
 
 
@@ -331,11 +337,8 @@ void QKView::setupUi(KParts::ReadOnlyPart* part)
 
 void QKView::setupPart()
 {
-	m_partManager.addPart(m_part);
-	m_part->setManager(&m_partManager);
 	m_layout->addWidget(m_part->widget());
 	setFocusProxy(m_part->widget());
-
 
 	m_toolbar->addActions(m_part->actionCollection()->actions());
 	m_toolbar->addActions(m_part->widget()->actions());
@@ -357,6 +360,7 @@ void QKView::setupPart()
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));
 		connect(b, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));
 	}
+	m_partManager.addPart(m_part);
 }
 
 #include "qkview.moc"

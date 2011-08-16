@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-14 19:20+0200\n"
-"PO-Revision-Date: 2011-08-14 19:22+0200\n"
+"POT-Creation-Date: 2011-08-16 22:02+0200\n"
+"PO-Revision-Date: 2011-08-16 22:03+0200\n"
 "Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
@@ -63,15 +63,19 @@ msgstr "Anzahl Spalten von Terminalemulatoren"
 msgid "Run command (may be used multiple times)"
 msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
 
+#: src/qkstack.cpp:161
+msgid "No view is able to open \"%1\""
+msgstr "Keine Ansicht kann \"%1\" öffnen"
+
 #: src/qkview.cpp:54
 msgid "Could not create a factory for %1."
 msgstr "Konnte Factory für %1 nicht erstellen."
 
-#: src/qkview.cpp:216
+#: src/qkview.cpp:222
 msgid "The factory for %1 could not create a KPart."
 msgstr "Die Factory für %1 konnte kein KPart laden."
 
-#: src/qkview.cpp:275
+#: src/qkview.cpp:281
 msgid "%1 files selected (%2)"
 msgstr "%1 Dateien ausgewählt (%2)"
 
@@ -115,31 +119,27 @@ msgstr "Gitter &zurücksezten"
 msgid "S&witch view"
 msgstr "Ansicht &welchseln"
 
-#: src/quadkonsole.cpp:203
-msgid "Paste &selection"
-msgstr "Zwischenablage &einfügen"
-
-#: src/quadkonsole.cpp:217
+#: src/quadkonsole.cpp:211
 msgid "Save session"
 msgstr "Sitzung speichern"
 
-#: src/quadkonsole.cpp:221
+#: src/quadkonsole.cpp:215
 msgid "Restore session"
 msgstr "Sitzung wiederherstellen"
 
-#: src/quadkonsole.cpp:407
+#: src/quadkonsole.cpp:401
 msgid "General"
 msgstr "Allgemein"
 
-#: src/quadkonsole.cpp:412
+#: src/quadkonsole.cpp:406
 msgid "Shutdown"
 msgstr "Beenden"
 
-#: src/quadkonsole.cpp:415
+#: src/quadkonsole.cpp:409
 msgid "Views"
 msgstr "Ansichten"
 
-#: src/quadkonsole.cpp:620
+#: src/quadkonsole.cpp:614
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
 msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
 
@@ -152,6 +152,9 @@ msgstr "Karsten Borgwaldt"
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr "kb@kb.ccchl.de"
+
+#~ msgid "Paste &selection"
+#~ msgstr "Zwischenablage &einfügen"
 
 #~ msgid ""
 #~ "Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"

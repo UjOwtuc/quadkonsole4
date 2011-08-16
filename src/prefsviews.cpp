@@ -70,7 +70,8 @@ PrefsViews::~PrefsViews()
 
 void PrefsViews::showMimeTypes(QString partname)
 {
-	KService::Ptr service = KService::serviceByDesktopPath(partname);
 	m_mimeList->clear();
-	m_mimeList->addItems(service->serviceTypes());
+	KService::Ptr service = KService::serviceByDesktopPath(partname);
+	if (service)
+		m_mimeList->addItems(service->serviceTypes());
 }

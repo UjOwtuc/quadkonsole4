@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-16 22:02+0200\n"
+"POT-Creation-Date: 2011-08-17 16:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,15 +123,21 @@ msgstr ""
 msgid "Restore session"
 msgstr ""
 
-#: src/quadkonsole.cpp:401
+#. i18n: file: src/prefs_base.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
+#: src/quadkonsole.cpp:401 rc.cpp:12
 msgid "General"
 msgstr ""
 
-#: src/quadkonsole.cpp:406
+#. i18n: file: src/prefs_shutdown.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
+#: src/quadkonsole.cpp:406 rc.cpp:30
 msgid "Shutdown"
 msgstr ""
 
-#: src/quadkonsole.cpp:409
+#. i18n: file: src/prefs_views.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
+#: src/quadkonsole.cpp:409 rc.cpp:36
 msgid "Views"
 msgstr ""
 
@@ -139,12 +145,120 @@ msgstr ""
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
 msgstr ""
 
-#: rc.cpp:1
+#. i18n: file: src/detach_processes.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
+#: rc.cpp:3
+msgid "Detach processes"
+msgstr ""
+
+#. i18n: file: src/detach_processes.ui:20
+#. i18n: ectx: property (text), widget (QLabel, lTitle)
+#: rc.cpp:6
+msgid ""
+"The following processes are still running. Do you wish to detach the "
+"containing windows before exiting?"
+msgstr ""
+
+#. i18n: file: src/detach_processes.ui:36
+#. i18n: ectx: property (text), widget (QTableWidget, processTable)
+#: rc.cpp:9
+msgid "Process"
+msgstr ""
+
+#. i18n: file: src/prefs_base.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
+#. i18n: file: src/quadkonsole4.kcfg:10
+#. i18n: ectx: label, entry (sloppyFocus), group (General)
+#: rc.cpp:15 rc.cpp:48
+msgid "Focus follows mouse"
+msgstr ""
+
+#. i18n: file: src/prefs_base.ui:27
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox)
+#: rc.cpp:18
+msgid "Startup"
+msgstr ""
+
+#. i18n: file: src/prefs_base.ui:46
+#. i18n: ectx: property (text), widget (QLabel, labelRows)
+#. i18n: file: src/quadkonsole4.kcfg:18
+#. i18n: ectx: label, entry (numRows), group (General)
+#: rc.cpp:21 rc.cpp:54
+msgid "Number of rows"
+msgstr ""
+
+#. i18n: file: src/prefs_base.ui:63
+#. i18n: ectx: property (text), widget (QLabel, labelColumns)
+#: rc.cpp:24
+msgid "Number of Columns"
+msgstr ""
+
+#. i18n: file: src/prefs_base.ui:70
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (startMaximized), group (General)
+#: rc.cpp:27 rc.cpp:51
+msgid "Start maximized"
+msgstr ""
+
+#. i18n: file: src/prefs_shutdown.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
+#: rc.cpp:33
+msgid "&Ask before terminating running processes"
+msgstr ""
+
+#. i18n: file: src/prefs_views.ui:23
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
+#. i18n: file: src/quadkonsole4.kcfg:36
+#. i18n: ectx: label, entry (viewHasToolbar), group (Views)
+#: rc.cpp:39 rc.cpp:63
+msgid "Display a toolbar for each view"
+msgstr ""
+
+#. i18n: file: src/prefs_views.ui:33
+#. i18n: ectx: property (text), widget (QLabel, mimeTypesLabel)
+#: rc.cpp:42
+msgid "Supported MIME types"
+msgstr ""
+
+#. i18n: file: src/prefs_views.ui:40
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
+#. i18n: file: src/quadkonsole4.kcfg:40
+#. i18n: ectx: label, entry (autoloadView), group (Views)
+#: rc.cpp:45 rc.cpp:66
+msgid "Load new views automatically for unhandles MIME types"
+msgstr ""
+
+#. i18n: file: src/quadkonsole4.kcfg:23
+#. i18n: ectx: label, entry (numCols), group (General)
+#: rc.cpp:57
+msgid "Number of columns"
+msgstr ""
+
+#. i18n: file: src/quadkonsole4.kcfg:30
+#. i18n: ectx: label, entry (queryClose), group (Shutdown)
+#: rc.cpp:60
+msgid "Ask before terminating running processes"
+msgstr ""
+
+#. i18n: file: src/quadkonsole4.kcfg:44
+#. i18n: ectx: label, entry (views), group (Views)
+#: rc.cpp:69
+msgid "Prepare these views"
+msgstr ""
+
+#. i18n: file: src/quadkonsole4ui.rc:26
+#. i18n: ectx: ToolBar (mainToolBar)
+#: rc.cpp:73
+msgid "Main Toolbar"
+msgstr ""
+
+#: rc.cpp:74
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr ""
 
-#: rc.cpp:2
+#: rc.cpp:75
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr ""

@@ -4,8 +4,9 @@ PROJECT="quadkonsole4"
 BUGADDR="quadkonsole4@kb.ccchl.de"
 WDIR=`pwd`
 GIT=no
-if [ -d $BASEDIR/.git && -x `which git 2>&1` ]
+if [ -d "$BASEDIR/.git" ] && [ -x `which git 2>&1` ]
 then
+	echo "using 'git ls-files' to find translatable strings"
 	GIT=yes
 fi
 
@@ -29,7 +30,7 @@ echo "Done preparing rc files"
 echo "Extracting messages"
 cd ${BASEDIR}
 # see above on sorting
-if [$GIT = "yes" ]
+if [ $GIT = "yes" ]
 then
 	git ls-files '*.cpp' '*.h' '*.c' | sort > ${WDIR}/infiles.list
 else

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-16 22:02+0200\n"
-"PO-Revision-Date: 2011-08-16 22:03+0200\n"
-"Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
+"POT-Creation-Date: 2011-08-17 16:16+0200\n"
+"PO-Revision-Date: 2011-08-17 16:21+0200\n"
+"Last-Translator: Karsten Borgwaldt <k.borgwaldt@soit.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -127,15 +127,21 @@ msgstr "Sitzung speichern"
 msgid "Restore session"
 msgstr "Sitzung wiederherstellen"
 
-#: src/quadkonsole.cpp:401
+#. i18n: file: src/prefs_base.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
+#: src/quadkonsole.cpp:401 rc.cpp:12
 msgid "General"
 msgstr "Allgemein"
 
-#: src/quadkonsole.cpp:406
+#. i18n: file: src/prefs_shutdown.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
+#: src/quadkonsole.cpp:406 rc.cpp:30
 msgid "Shutdown"
 msgstr "Beenden"
 
-#: src/quadkonsole.cpp:409
+#. i18n: file: src/prefs_views.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
+#: src/quadkonsole.cpp:409 rc.cpp:36
 msgid "Views"
 msgstr "Ansichten"
 
@@ -143,12 +149,122 @@ msgstr "Ansichten"
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
 msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
 
-#: rc.cpp:1
+#. i18n: file: src/detach_processes.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
+#: rc.cpp:3
+msgid "Detach processes"
+msgstr "Prozesse Ab&trennen"
+
+#. i18n: file: src/detach_processes.ui:20
+#. i18n: ectx: property (text), widget (QLabel, lTitle)
+#: rc.cpp:6
+msgid ""
+"The following processes are still running. Do you wish to detach the "
+"containing windows before exiting?"
+msgstr ""
+"Die folgenden Prozesse laufen noch. Möchten Sie diese Fenster vor den "
+"Beenden abtrennen?"
+
+#. i18n: file: src/detach_processes.ui:36
+#. i18n: ectx: property (text), widget (QTableWidget, processTable)
+#: rc.cpp:9
+msgid "Process"
+msgstr "Prozess"
+
+#. i18n: file: src/prefs_base.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
+#. i18n: file: src/quadkonsole4.kcfg:10
+#. i18n: ectx: label, entry (sloppyFocus), group (General)
+#: rc.cpp:15 rc.cpp:48
+msgid "Focus follows mouse"
+msgstr "Aktivierung unter Mauszeiger"
+
+#. i18n: file: src/prefs_base.ui:27
+#. i18n: ectx: property (title), widget (QGroupBox, groupBox)
+#: rc.cpp:18
+msgid "Startup"
+msgstr "Start"
+
+#. i18n: file: src/prefs_base.ui:46
+#. i18n: ectx: property (text), widget (QLabel, labelRows)
+#. i18n: file: src/quadkonsole4.kcfg:18
+#. i18n: ectx: label, entry (numRows), group (General)
+#: rc.cpp:21 rc.cpp:54
+msgid "Number of rows"
+msgstr "Anzahl Zeilen"
+
+#. i18n: file: src/prefs_base.ui:63
+#. i18n: ectx: property (text), widget (QLabel, labelColumns)
+#: rc.cpp:24
+msgid "Number of Columns"
+msgstr "Anzahl Spalten"
+
+#. i18n: file: src/prefs_base.ui:70
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (startMaximized), group (General)
+#: rc.cpp:27 rc.cpp:51
+msgid "Start maximized"
+msgstr "Starte maximiert"
+
+#. i18n: file: src/prefs_shutdown.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
+#: rc.cpp:33
+msgid "&Ask before terminating running processes"
+msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+
+#. i18n: file: src/prefs_views.ui:23
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
+#. i18n: file: src/quadkonsole4.kcfg:36
+#. i18n: ectx: label, entry (viewHasToolbar), group (Views)
+#: rc.cpp:39 rc.cpp:63
+msgid "Display a toolbar for each view"
+msgstr "Zeige eine Toolbar für jede Ansicht"
+
+#. i18n: file: src/prefs_views.ui:33
+#. i18n: ectx: property (text), widget (QLabel, mimeTypesLabel)
+#: rc.cpp:42
+msgid "Supported MIME types"
+msgstr "Unterstützte MIME Typen"
+
+#. i18n: file: src/prefs_views.ui:40
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
+#. i18n: file: src/quadkonsole4.kcfg:40
+#. i18n: ectx: label, entry (autoloadView), group (Views)
+#: rc.cpp:45 rc.cpp:66
+msgid "Load new views automatically for unhandles MIME types"
+msgstr "Lade automatisch weitere Ansichten für neue MIME Typen"
+
+#. i18n: file: src/quadkonsole4.kcfg:23
+#. i18n: ectx: label, entry (numCols), group (General)
+#: rc.cpp:57
+msgid "Number of columns"
+msgstr "Anzahl Spalten"
+
+#. i18n: file: src/quadkonsole4.kcfg:30
+#. i18n: ectx: label, entry (queryClose), group (Shutdown)
+#: rc.cpp:60
+msgid "Ask before terminating running processes"
+msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+
+#. i18n: file: src/quadkonsole4.kcfg:44
+#. i18n: ectx: label, entry (views), group (Views)
+#: rc.cpp:69
+msgid "Prepare these views"
+msgstr "Bereite diese Ansichten vor"
+
+#. i18n: file: src/quadkonsole4ui.rc:26
+#. i18n: ectx: ToolBar (mainToolBar)
+#: rc.cpp:73
+msgid "Main Toolbar"
+msgstr "Haupt-Werkzeugleiste"
+
+#: rc.cpp:74
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr "Karsten Borgwaldt"
 
-#: rc.cpp:2
+#: rc.cpp:75
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr "kb@kb.ccchl.de"
@@ -161,40 +277,3 @@ msgstr "kb@kb.ccchl.de"
 #~ msgstr ""
 #~ "Konnte Factory für \"libkonsolepart\" nicht erstellen. Ist Konsole "
 #~ "installiert?"
-
-#~ msgid "Detach processes"
-#~ msgstr "Prozesse Ab&trennen"
-
-#~ msgid ""
-#~ "The following processes are still running. Do you wish to detach the "
-#~ "containing windows before exiting?"
-#~ msgstr ""
-#~ "Die folgenden Prozesse laufen noch. Möchten Sie diese Fenster vor den "
-#~ "Beenden abtrennen?"
-
-#~ msgid "Process"
-#~ msgstr "Prozess"
-
-#~ msgid "Focus follows mouse"
-#~ msgstr "Aktivierung unter Mauszeiger"
-
-#~ msgid "Startup"
-#~ msgstr "Start"
-
-#~ msgid "Number of rows"
-#~ msgstr "Anzahl Zeilen"
-
-#~ msgid "Number of Columns"
-#~ msgstr "Anzahl Spalten"
-
-#~ msgid "&Ask before terminating running processes"
-#~ msgstr "Vor dem Beenden laufender Prozesse nachfragen"
-
-#~ msgid "Number of columns"
-#~ msgstr "Anzahl Spalten"
-
-#~ msgid "Ask before terminating running processes"
-#~ msgstr "Vor dem Beenden laufender Prozesse nachfragen"
-
-#~ msgid "Main Toolbar"
-#~ msgstr "Haupt-Werkzeugleiste"

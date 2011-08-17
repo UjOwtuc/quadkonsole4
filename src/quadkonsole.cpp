@@ -199,6 +199,11 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("switch view", switchView);
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
 
+	KAction* toggleUrlBar = new KAction(KIcon("document-open-remote"), i18n("&Open URL"), this);
+	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
+	actionCollection()->addAction("toggle url bar", toggleUrlBar);
+	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(toggleUrlBar()));
+
 	// Standard actions
 	KStandardAction::preferences(this, SLOT(optionsPreferences()), actionCollection());
 	KStandardAction::quit(this, SLOT(quit()), actionCollection());
@@ -660,6 +665,14 @@ void QuadKonsole::setWindowCaption(QString text)
 	QKStack* stack = qobject_cast<QKStack*>(sender());
 	if (stack && stack->hasFocus())
 		setCaption(text);
+}
+
+
+void QuadKonsole::toggleUrlBar()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->toggleUrlBar();
 }
 
 

@@ -62,6 +62,7 @@ class QKStack : public QStackedWidget
 		void switchView(KUrl url, const QString& mimeType, bool tryCurrent);
 		void switchView(int index, const KUrl& url);
 		void settingsChanged();
+		void toggleUrlBar();
 
 	private slots:
 		void slotPartCreated();

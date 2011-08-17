@@ -29,6 +29,7 @@
 #include <KDE/KFile>
 #include <KDE/KFileItemList>
 #include <KDE/KMenu>
+#include <KDE/KUrlRequester>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
@@ -236,6 +237,19 @@ void QKView::partDestroyed()
 }
 
 
+void QKView::toggleUrlBar()
+{
+	if (m_urlbar->isVisible())
+		m_urlbar->hide();
+	else
+	{
+		m_urlbar->setUrl(getURL());
+		m_urlbar->show();
+		m_urlbar->setFocus();
+	}
+}
+
+
 void QKView::popupMenu(QPoint where, KFileItemList)
 {
 	KMenu* popup = new KMenu(this);
@@ -301,6 +315,16 @@ void QKView::slotSetWindowCaption(QString text)
 }
 
 
+void QKView::slotOpenUrl(QString url)
+{
+	KUrl real(url);
+	if (real.protocol().isEmpty() && ! url.startsWith('/'))
+		real = QString("http://") + url;
+
+	emit openUrlRequest(real);
+}
+
+
 void QKView::setupUi(KParts::ReadOnlyPart* part)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -312,6 +336,14 @@ void QKView::setupUi(KParts::ReadOnlyPart* part)
 
 	m_toolbar = new QToolBar;
 	m_layout->addWidget(m_toolbar);
+	m_urlbar = new KUrlRequester;
+	m_urlbar->hide();
+	connect(m_urlbar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
+	connect(m_urlbar, SIGNAL(returnPressed()), m_urlbar, SLOT(hide()));
+	connect(m_urlbar, SIGNAL(urlSelected(KUrl)), SIGNAL(openUrlRequest(KUrl)));
+	connect(m_urlbar, SIGNAL(urlSelected(KUrl)), m_urlbar, SLOT(hide()));
+
+	m_layout->addWidget(m_urlbar);
 	m_part = part;
 
 	if (m_part)

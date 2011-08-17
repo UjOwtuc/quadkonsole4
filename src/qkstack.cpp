@@ -218,6 +218,14 @@ void QKStack::settingsChanged()
 }
 
 
+void QKStack::toggleUrlBar()
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+		view->toggleUrlBar();
+}
+
+
 void QKStack::slotPartCreated()
 {
 	emit partCreated();

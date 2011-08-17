@@ -73,6 +73,7 @@ class QuadKonsole : public KParts::MainWindow
 		void switchView();
 		void setStatusBarText(QString text);
 		void setWindowCaption(QString text);
+		void toggleUrlBar();
 
 	private slots:
 		void slotActivePartChanged(KParts::Part* part);

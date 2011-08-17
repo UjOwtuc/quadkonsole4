@@ -25,6 +25,8 @@
 #include <KDE/KDebug>
 #include <KDE/KUrl>
 #include <KDE/KMimeTypeTrader>
+#include <KDE/KIO/TransferJob>
+#include <KDE/KIO/Scheduler>
 
 #include <QtGui/QStackedWidget>
 
@@ -108,27 +110,52 @@ int QKStack::addViews(const QStringList& partNames)
 		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
 		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
-		connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
+		connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
 	}
 	return index;
 }
 
 
-void QKStack::switchView(KUrl url)
+void QKStack::switchView()
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+	{
+		KUrl url = view->getURL();
+		if (url.protocol() == "file")
+		{
+			KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
+			switchView(url, item.mimetype(), false);
+		}
+		else
+		{
+			KIO::JobFlags flags = KIO::HideProgressInfo;
+			KIO::TransferJob* job = KIO::get(url, KIO::NoReload, flags);
+			job->setProperty("tryCurrent", false);
+			connect(job, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*,QString)));
+		}
+	}
+}
+
+
+void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
 {
 	QKView* view;
 
-	if (url.isEmpty())
+	if (tryCurrent)
 	{
 		view = qobject_cast<QKView*>(currentWidget());
-		url = view->getURL();
+		if (view->hasMimeType(mimeType))
+		{
+			switchView(currentIndex(), url);
+			return;
+		}
 	}
-	KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
 
 	for (int i=1; i<count(); ++i)
 	{
 		view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
-		if (view->hasMimeType(item.mimetype()))
+		if (view->hasMimeType(mimeType))
 		{
 			switchView((currentIndex() +i) % count(), url);
 			return;
@@ -140,23 +167,28 @@ void QKStack::switchView(KUrl url)
 	{
 		// try to find a new KPart only if either the current KPart won't handle url or there are no other parts involved
 		view = qobject_cast<QKView*>(currentWidget());
-		if (! view->hasMimeType(item.mimetype()) || count() <= 1)
+		if (! view->hasMimeType(mimeType) || count() <= 1)
 		{
-			KService::List services = KMimeTypeTrader::self()->query(item.mimetype(), "KParts/ReadOnlyPart");
+			KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
 			if (services.count())
 			{
-				kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << item.mimetype() << endl;
+				kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << mimeType << endl;
 				int index = addViews(QStringList(services.front()->entryPath()));
 				switchView(index, url);
 				return;
 			}
 			else
-				kDebug() << "unable to find a service for mime type" << item.mimetype() << endl;
+				kDebug() << "unable to find a service for mime type" << mimeType << endl;
 		}
 	}
 
 	if (count() > 1)
-		switchView(url.upUrl());
+	{
+		if (url == url.upUrl())
+			switchView();
+		else
+			switchView((currentIndex() +1) % count(), url.upUrl());
+	}
 
 	emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
 }
@@ -201,6 +233,35 @@ void QKStack::slotSetStatusBarText(QString text)
 void QKStack::slotSetWindowCaption(QString text)
 {
 	emit setWindowCaption(text);
+}
+
+
+void QKStack::slotMimetype(KIO::Job* job, QString mimeType)
+{
+	KIO::TransferJob* transfer = qobject_cast<KIO::TransferJob*>(job);
+	if (transfer)
+	{
+		transfer->putOnHold();
+		KIO::Scheduler::publishSlaveOnHold();
+		switchView(transfer->url(), mimeType, transfer->property("tryCurrent").toBool());
+	}
+}
+
+
+void QKStack::slotOpenUrlRequest(KUrl url)
+{
+	if (url.protocol() == "file")
+	{
+		KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
+		switchView(url, item.mimetype(), true);
+	}
+	else
+	{
+		KIO::JobFlags flags = KIO::HideProgressInfo;
+		KIO::TransferJob* job = KIO::get(url, KIO::NoReload, flags);
+		job->setProperty("tryCurrent", true);
+		connect(job, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*,QString)));
+	}
 }
 
 

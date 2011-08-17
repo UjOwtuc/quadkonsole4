@@ -639,11 +639,11 @@ void QuadKonsole::removePart()
 }
 
 
-void QuadKonsole::switchView(const KUrl& url)
+void QuadKonsole::switchView()
 {
 	QKStack* stack = getFocusStack();
 	if (stack)
-		stack->switchView(url);
+		stack->switchView();
 }
 
 

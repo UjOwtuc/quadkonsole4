@@ -31,6 +31,10 @@ namespace KParts
 	class ReadOnlyPart;
 	class PartManager;
 }
+namespace KIO
+{
+	class Job;
+}
 
 class QKStack : public QStackedWidget
 {
@@ -54,7 +58,8 @@ class QKStack : public QStackedWidget
 
 	public slots:
 		void sendInput(const QString& text);
-		void switchView(KUrl url=KUrl());
+		void switchView();
+		void switchView(KUrl url, const QString& mimeType, bool tryCurrent);
 		void switchView(int index, const KUrl& url);
 		void settingsChanged();
 
@@ -62,6 +67,8 @@ class QKStack : public QStackedWidget
 		void slotPartCreated();
 		void slotSetStatusBarText(QString text);
 		void slotSetWindowCaption(QString text);
+		void slotMimetype(KIO::Job* job, QString mimeType);
+		void slotOpenUrlRequest(KUrl url);
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);

@@ -131,14 +131,11 @@ void QKView::setURL(const KUrl& url)
 
 			t->sendInput(QString(" \"%1\"").arg(escaped));
 		}
-		else if (hasMimeTypeFor(url))
-		{
-			m_part->openUrl(url);
-		}
 		else
-		{
-			emit openUrlOutside(url);
-		}
+			m_part->openUrl(url);
+
+		m_windowCaption = url.pathOrUrl();
+		emit setWindowCaption(m_windowCaption);
 	}
 }
 
@@ -180,13 +177,6 @@ bool QKView::hasMimeType(const QString& type)
 
 	kDebug() << "KPart" << m_partname << "does not like mime type" << type << endl;
 	return false;
-}
-
-
-bool QKView::hasMimeTypeFor(const KUrl& url)
-{
-	KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
-	return hasMimeType(item.mimetype());
 }
 
 
@@ -287,9 +277,7 @@ void QKView::selectionInfo(KFileItemList items)
 void QKView::openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments)
 {
 	kDebug() << "url " << url << endl;
-	setURL(url);
-	m_windowCaption = url.pathOrUrl();
-	emit setWindowCaption(m_windowCaption);
+	emit openUrlRequest(url);
 }
 
 

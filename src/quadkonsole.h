@@ -70,7 +70,7 @@ class QuadKonsole : public KParts::MainWindow
 		void insertHorizontal(int row=-1, int col=-1);
 		void insertVertical(int row=-1, int col=-1);
 		void removePart();
-		void switchView(const KUrl& url=KUrl());
+		void switchView();
 		void setStatusBarText(QString text);
 		void setWindowCaption(QString text);
 

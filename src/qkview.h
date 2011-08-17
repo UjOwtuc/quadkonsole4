@@ -71,13 +71,12 @@ class QKView : public QWidget
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type);
-		bool hasMimeTypeFor(const KUrl& url);
 
 	signals:
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
-		void openUrlOutside(KUrl);
+		void openUrlRequest(KUrl);
 
 	public slots:
 		void show();

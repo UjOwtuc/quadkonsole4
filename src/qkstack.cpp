@@ -107,10 +107,7 @@ int QKStack::addViews(const QStringList& partNames)
 		view = new QKView(m_partManager, name);
 		m_loadedViews << name;
 		index = addWidget(view);
-		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
-		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
-		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
-		connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
+		addViewActions(view);
 	}
 	return index;
 }
@@ -249,6 +246,7 @@ void QKStack::slotMimetype(KIO::Job* job, QString mimeType)
 	KIO::TransferJob* transfer = qobject_cast<KIO::TransferJob*>(job);
 	if (transfer)
 	{
+		transfer->disconnect(SIGNAL(mimetype(KIO::Job*,QString)), this);
 		transfer->putOnHold();
 		KIO::Scheduler::publishSlaveOnHold();
 		switchView(transfer->url(), mimeType, transfer->property("tryCurrent").toBool());
@@ -281,14 +279,11 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	QStringList partNames = Settings::views();
 	if (part)
 	{
-		view = new QKView(m_partManager, part, this);
+		view = new QKView(m_partManager, part);
 		partNames.removeOne(view->partName());
 		m_loadedViews << view->partName();
 		addWidget(view);
-		connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
-		connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
-		connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
-		connect(view, SIGNAL(openUrlOutside(KUrl)), SLOT(switchView(KUrl)));
+		addViewActions(view);
 	}
 	addViews(partNames);
 
@@ -297,6 +292,15 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	setFocusProxy(view);
 
 	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
+}
+
+
+void QKStack::addViewActions(QKView* view)
+{
+	connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
+	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
+	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
+	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
 }
 
 #include "qkstack.moc"

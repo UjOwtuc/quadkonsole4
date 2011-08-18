@@ -96,7 +96,7 @@ class QKView : public QWidget
 		void slotOpenUrl(QString url);
 
 	private:
-		void setupUi(KParts::ReadOnlyPart* part=0);
+		void setupUi();
 		void setupPart();
 
 		QString m_partname;

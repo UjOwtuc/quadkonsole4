@@ -73,6 +73,7 @@ class QKStack : public QStackedWidget
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);
+		void addViewActions(QKView* view);
 
 		KParts::PartManager& m_partManager;
 		QStringList m_loadedViews;

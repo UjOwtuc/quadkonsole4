@@ -344,6 +344,7 @@ void QuadKonsole::detach(QKStack* stack)
 	stack->partDestroyed();
 	QuadKonsole* external = new QuadKonsole(part);
 	external->setAttribute(Qt::WA_DeleteOnClose);
+	stack->switchView(KUrl("~"), "inode/directory", true);
 }
 
 

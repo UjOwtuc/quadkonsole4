@@ -62,6 +62,7 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 QKView::QKView(KParts::PartManager& partManager, const QString& partname, QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
 	m_partname(partname),
+	m_part(0),
 	m_partManager(partManager)
 {
 	setupUi();
@@ -70,10 +71,11 @@ QKView::QKView(KParts::PartManager& partManager, const QString& partname, QWidge
 
 QKView::QKView(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
+	m_part(part),
 	m_partManager(partManager)
 {
 	m_partname = part->property("QKPartName").toString();
-	setupUi(part);
+	setupUi();
 }
 
 
@@ -234,8 +236,18 @@ void QKView::partDestroyed()
 		m_part->disconnect();
 		if (m_part->widget())
 		{
+			// part was detached
+			KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
+			if (b)
+			{
+				b->disconnect(SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), this);
+				b->disconnect(SIGNAL(selectionInfo(KFileItemList)), this);
+				b->disconnect(SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), this);
+				b->disconnect(SIGNAL(enableAction(const char*,bool)), this);
+			}
 			m_partManager.removeManagedTopLevelWidget(m_part->widget());
 			disconnect(m_part->widget(), SIGNAL(destroyed(QObject*)), this, SLOT(partDestroyed()));
+
 		}
 	}
 	createPart();
@@ -330,7 +342,7 @@ void QKView::slotOpenUrl(QString url)
 }
 
 
-void QKView::setupUi(KParts::ReadOnlyPart* part)
+void QKView::setupUi()
 {
 	setContentsMargins(0, 0, 0, 0);
 
@@ -349,7 +361,6 @@ void QKView::setupUi(KParts::ReadOnlyPart* part)
 	connect(m_urlbar, SIGNAL(urlSelected(KUrl)), m_urlbar, SLOT(hide()));
 
 	m_layout->addWidget(m_urlbar);
-	m_part = part;
 
 	if (m_part)
 		setupPart();
@@ -375,11 +386,15 @@ void QKView::setupPart()
 
 	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)
+	{
+		kDebug() << "part" << m_partname << "has a TerminalInterfaceV2" << endl;
 		t->showShellInDir(QString());
+	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
 	if (b)
 	{
+		kDebug() << "part" << m_partname << "has a BrowserExtension" << endl;
 		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList)));
 		connect(b, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));

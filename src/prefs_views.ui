@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0">
-    <widget class="KEditListWidget" name="kcfg_views"/>
+    <widget class="KEditListBox" name="kcfg_views"/>
    </item>
    <item row="0" column="0">
     <widget class="QCheckBox" name="kcfg_viewHasToolbar">
@@ -45,9 +45,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KEditListWidget</class>
+   <class>KEditListBox</class>
    <extends>QWidget</extends>
-   <header>keditlistwidget.h</header>
+   <header>keditlistbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

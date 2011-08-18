@@ -21,11 +21,12 @@
 #include "prefsviews.h"
 
 #include <KDE/KDebug>
-#include <KDE/KEditListWidget>
 #include <KDE/KService>
 #include <KDE/KComboBox>
 #include <KDE/KLineEdit>
+#include <KDE/KEditListBox>
 #include <KDE/KConfigDialogManager>
+
 
 #include <QtGui/QWidget>
 #include <QtGui/QListWidget>
@@ -36,10 +37,10 @@ PrefsViews::PrefsViews(QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
 	m_comboBox(new KComboBox)
 {
-	KConfigDialogManager::propertyMap()->insert("KEditListWidget", "items");
-	KConfigDialogManager::changedMap()->insert("KEditListWidget", SIGNAL(changed()));
+	KConfigDialogManager::propertyMap()->insert("KEditListBox", "items");
+	KConfigDialogManager::changedMap()->insert("KEditListBox", SIGNAL(changed()));
 
-	KEditListWidget::CustomEditor editor;
+	KEditListBox::CustomEditor editor;
 	editor.setLineEdit(new KLineEdit);
 	editor.setRepresentationWidget(m_comboBox);
 	editor.lineEdit()->setReadOnly(true);

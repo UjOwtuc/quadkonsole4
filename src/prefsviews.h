@@ -24,7 +24,6 @@
 #include <QtGui/QWidget>
 
 class QListWidget;
-class KEditListWidget;
 class KComboBox;
 
 class PrefsViews : public QWidget

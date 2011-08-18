@@ -21,6 +21,7 @@
 #include "qkview.h"
 #include "settings.h"
 
+#include <kdeversion.h>
 #include <KDE/KDebug>
 #include <KDE/KService>
 #include <KDE/KMessageBox>
@@ -173,9 +174,13 @@ bool QKView::hasMimeType(const QString& type)
 	if (service.isNull())
 		return false;
 
+#if KDE_VERSION_MINOR >= 6
 	if (service->hasMimeType(type))
 		return true;
-
+#else // KDE_VERSION_MINOR
+	if (service->hasMimeType(KMimeType::mimeType(type).data()))
+		return true;
+#endif // KDE_VERSION_MINOR
 	kDebug() << "KPart" << m_partname << "does not like mime type" << type << endl;
 	return false;
 }

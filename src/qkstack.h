@@ -23,7 +23,7 @@
 
 #include <KDE/KUrl>
 
-#include <QtGui/QStackedWidget>
+#include <QtGui/QTabWidget>
 
 class QKView;
 namespace KParts
@@ -36,7 +36,7 @@ namespace KIO
 	class Job;
 }
 
-class QKStack : public QStackedWidget
+class QKStack : public QTabWidget
 {
 	Q_OBJECT
 	public:
@@ -70,6 +70,7 @@ class QKStack : public QStackedWidget
 		void slotSetWindowCaption(QString text);
 		void slotMimetype(KIO::Job* job, QString mimeType);
 		void slotOpenUrlRequest(KUrl url);
+		void slotCurrentChanged();
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);

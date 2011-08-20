@@ -14,31 +14,90 @@
    <string>Views</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
+   <item row="4" column="0" colspan="3">
     <widget class="KEditListBox" name="kcfg_views"/>
    </item>
-   <item row="0" column="0">
+   <item row="2" column="0" colspan="3">
     <widget class="QCheckBox" name="kcfg_viewHasToolbar">
      <property name="text">
       <string>Display a toolbar for each view</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="6" column="0" colspan="3">
     <widget class="QListWidget" name="mimeList"/>
    </item>
-   <item row="3" column="0">
+   <item row="5" column="0" colspan="3">
     <widget class="QLabel" name="mimeTypesLabel">
      <property name="text">
       <string>Supported MIME types</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="3" column="0" colspan="3">
     <widget class="QCheckBox" name="kcfg_autoloadView">
      <property name="text">
       <string>Load new views automatically for unhandles MIME types</string>
      </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Tab bar display</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QComboBox" name="kcfg_showTabBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Always</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>When needed</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Never</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Tab bar position</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QComboBox" name="kcfg_tabBarPosition">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Above</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Below</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>
@@ -46,7 +105,7 @@
  <customwidgets>
   <customwidget>
    <class>KEditListBox</class>
-   <extends>QWidget</extends>
+   <extends>QGroupBox</extends>
    <header>keditlistbox.h</header>
   </customwidget>
  </customwidgets>

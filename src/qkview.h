@@ -72,6 +72,7 @@ class QKView : public QWidget
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type);
+		const QIcon& icon() const { return *m_icon; }
 
 	signals:
 		void partCreated();
@@ -107,6 +108,7 @@ class QKView : public QWidget
 		QString m_statusBarText;
 		QString m_windowCaption;
 		KParts::PartManager& m_partManager;
+		QIcon* m_icon;
 };
 
 #endif // QKVIEW_H

@@ -20,7 +20,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
+#include "version.h"
 #include "quadkonsole.h"
 #include "settings.h"
 
@@ -29,8 +29,12 @@
 #include <KDE/KCmdLineArgs>
 #include <KDE/KLocale>
 
+#ifndef QUADKONSOLE4_VERSION
+#error QUADKONSOLE4_VERSION undefined
+#endif
+
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
-static const char version[] = "0.4";
+static const char version[] = QUADKONSOLE4_VERSION;
 
 int main(int argc, char **argv)
 {

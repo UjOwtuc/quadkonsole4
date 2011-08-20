@@ -32,6 +32,23 @@
 		</entry>
 	</group>
 	<group name="Views">
+		<entry name="showTabBar" type="Enum">
+			<label>Tab bar display</label>
+			<choices>
+				<choice name="always"><label>Always</label></choice>
+				<choice name="whenNeeded"><label>When needed</label></choice>
+				<choice name="never"><label>Never</label></choice>
+			</choices>
+			<default>whenNeeded</default>
+		</entry>
+		<entry name="tabBarPosition" type="Enum">
+			<label>Tab bar position</label>
+			<choices>
+				<choice name="above"><label>Above</label></choice>
+				<choice name="below"><label>Below</label></choice>
+			</choices>
+			<default>below</default>
+		</entry>
 		<entry name="viewHasToolbar" type="bool">
 			<label>Display a toolbar for each view</label>
 			<default>true</default>

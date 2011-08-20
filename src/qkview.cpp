@@ -346,6 +346,12 @@ void QKView::slotOpenUrl(QString url)
 
 void QKView::setupUi()
 {
+	KService::Ptr service = QKPartFactory::getFactory(m_partname);
+	if (service.isNull())
+		m_icon = new QIcon;
+	else
+		m_icon = new QIcon(service->icon());
+
 	setContentsMargins(0, 0, 0, 0);
 
 	m_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);

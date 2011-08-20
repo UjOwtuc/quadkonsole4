@@ -102,6 +102,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 }
 
 
+// for detaching parts
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	: mFilter(0),
 	m_partManager(this, this)
@@ -231,6 +232,7 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	setCentralWidget(centralWidget);
 
 	QGridLayout* grid = new QGridLayout(centralWidget);
+	grid->setContentsMargins(0, 0, 0, 0);
 
 	m_rows = new QSplitter(Qt::Vertical);
 	m_rows->setChildrenCollapsible(false);
@@ -256,9 +258,6 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	kDebug() << "finished setting up layouts for " << m_stacks.count() << " parts" << endl;
 
 	setWindowIcon(KIcon("quadkonsole4"));
-	//createGUI(m_stacks.front()->part());
-
-	// GUI is initialzed, now the PartManager may send it's events to recreate the GUI
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 }
 

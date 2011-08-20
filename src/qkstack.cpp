@@ -28,10 +28,11 @@
 #include <KDE/KIO/TransferJob>
 #include <KDE/KIO/Scheduler>
 
-#include <QtGui/QStackedWidget>
+#include <QtGui/QTabWidget>
+#include <QtGui/QTabBar>
 
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
-	: QStackedWidget(parent),
+	: QTabWidget(parent),
 	m_partManager(partManager)
 {
 	setupUi();
@@ -39,7 +40,7 @@ QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
-	: QStackedWidget(parent),
+	: QTabWidget(parent),
 	m_partManager(partManager)
 {
 	setupUi(part);
@@ -106,7 +107,7 @@ int QKStack::addViews(const QStringList& partNames)
 		QString name = it.next();
 		view = new QKView(m_partManager, name);
 		m_loadedViews << name;
-		index = addWidget(view);
+		index = addTab(view, view->icon(), view->partName());
 		addViewActions(view);
 	}
 	return index;
@@ -229,6 +230,28 @@ void QKStack::settingsChanged()
 		partNames.removeOne(it.next());
 
 	addViews(partNames);
+
+	switch (Settings::showTabBar())
+	{
+		case Settings::EnumShowTabBar::always :
+			tabBar()->show();
+			break;
+		case Settings::EnumShowTabBar::whenNeeded :
+			if (count() > 1)
+				tabBar()->show();
+			else
+				tabBar()->hide();
+			break;
+		case Settings::EnumShowTabBar::never :
+		default:
+			tabBar()->hide();
+			break;
+	}
+
+	if (Settings::tabBarPosition() == Settings::EnumTabBarPosition::above)
+		setTabPosition(North);
+	else
+		setTabPosition(South);
 }
 
 
@@ -288,9 +311,32 @@ void QKStack::slotOpenUrlRequest(KUrl url)
 }
 
 
+void QKStack::slotCurrentChanged()
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+	{
+		view->show();
+		view->setFocus();
+	}
+
+	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)
+	{
+		if (count() > 1)
+			tabBar()->show();
+		else
+			tabBar()->hide();
+	}
+}
+
+
 void QKStack::setupUi(KParts::ReadOnlyPart* part)
 {
 	setContentsMargins(0, 0, 0, 0);
+	// do not accept focus at the tab bar. give it to the current view instead
+	setFocusPolicy(Qt::NoFocus);
+	// don't draw a frame
+	setDocumentMode(true);
 
 	QKView* view;
 	QStringList partNames = Settings::views();
@@ -299,16 +345,19 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 		view = new QKView(m_partManager, part);
 		partNames.removeOne(view->partName());
 		m_loadedViews << view->partName();
-		addWidget(view);
+		addTab(view, view->icon(), view->partName());
 		addViewActions(view);
 	}
 	addViews(partNames);
 
 	view = qobject_cast<QKView*>(currentWidget());
 	view->show();
+	view->setFocus();
 	setFocusProxy(view);
 
+	settingsChanged();
 	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
+	connect(this, SIGNAL(currentChanged(int)), SLOT(slotCurrentChanged()));
 }
 
 

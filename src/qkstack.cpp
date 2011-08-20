@@ -263,6 +263,22 @@ void QKStack::toggleUrlBar()
 }
 
 
+void QKStack::slotTabCloseRequested(int index)
+{
+	// do not close the first view
+	if (index == 0)
+		return;
+
+	QKView* view = qobject_cast<QKView*>(widget(index));
+	if (view)
+	{
+		removeTab(index);
+		m_loadedViews.removeOne(view->partName());
+		delete view;
+	}
+}
+
+
 void QKStack::slotPartCreated()
 {
 	emit partCreated();
@@ -337,6 +353,7 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	setFocusPolicy(Qt::NoFocus);
 	// don't draw a frame
 	setDocumentMode(true);
+	setTabsClosable(true);
 
 	QKView* view;
 	QStringList partNames = Settings::views();
@@ -358,6 +375,7 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	settingsChanged();
 	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
 	connect(this, SIGNAL(currentChanged(int)), SLOT(slotCurrentChanged()));
+	connect(this, SIGNAL(tabCloseRequested(int)), SLOT(slotTabCloseRequested(int)));
 }
 
 

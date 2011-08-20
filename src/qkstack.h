@@ -63,6 +63,7 @@ class QKStack : public QTabWidget
 		void switchView(int index, const KUrl& url);
 		void settingsChanged();
 		void toggleUrlBar();
+		void slotTabCloseRequested(int index);
 
 	private slots:
 		void slotPartCreated();

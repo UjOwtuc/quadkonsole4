@@ -22,6 +22,7 @@
 #include "settings.h"
 
 #include <kdeversion.h>
+#include <KDE/KXmlGuiWindow>
 #include <KDE/KDebug>
 #include <KDE/KService>
 #include <KDE/KMessageBox>
@@ -81,7 +82,16 @@ QKView::QKView(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWi
 
 
 QKView::~QKView()
-{}
+{
+	if (m_part)
+	{
+		m_part->disconnect();
+		if (m_part->widget())
+			m_part->widget()->disconnect();
+	}
+	delete m_part;
+	delete m_icon;
+}
 
 
 bool QKView::hasFocus() const
@@ -387,6 +397,10 @@ void QKView::setupPart()
 	m_toolbar->addActions(m_part->actionCollection()->actions());
 	m_toolbar->addActions(m_part->widget()->actions());
 	m_part->widget()->setFocus();
+
+	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+	if (window)
+		m_part->setFactory(window->guiFactory());
 
 	connect(m_part->widget(), SIGNAL(destroyed()), SLOT(partDestroyed()));
 	connect(m_part, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));

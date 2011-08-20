@@ -30,6 +30,7 @@
 #include <KDE/KFile>
 #include <KDE/KFileItemList>
 #include <KDE/KMenu>
+#include <KDE/KLineEdit>
 #include <KDE/KUrlRequester>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
@@ -263,6 +264,7 @@ void QKView::toggleUrlBar()
 		m_urlbar->setUrl(getURL());
 		m_urlbar->show();
 		m_urlbar->setFocus();
+		m_urlbar->lineEdit()->selectAll();
 	}
 }
 

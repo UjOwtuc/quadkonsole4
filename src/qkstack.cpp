@@ -137,63 +137,80 @@ void QKStack::switchView()
 
 void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
 {
-	QKView* view;
+	QKView* view = qobject_cast<QKView*>(currentWidget());
 
-	if (tryCurrent)
+	if (tryCurrent && view->hasMimeType(mimeType))
+		switchView(currentIndex(), url);
+	else
 	{
-		view = qobject_cast<QKView*>(currentWidget());
-		if (view->hasMimeType(mimeType))
-		{
-			switchView(currentIndex(), url);
-			return;
-		}
-	}
+		int targetIndex = -1;
 
-	for (int i=1; i<count(); ++i)
-	{
-		view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
-		if (view->hasMimeType(mimeType))
+		// check for a loaded view that supports mimeType
+		for (int i=1; i<count(); ++i)
 		{
-			switchView((currentIndex() +i) % count(), url);
-			return;
-		}
-	}
-	kDebug() << "no other loaded KPart want's to handle" << url << endl;
-
-	if (Settings::autoloadView())
-	{
-		// try to find a new KPart only if either the current KPart won't handle url or there are no other parts involved
-		view = qobject_cast<QKView*>(currentWidget());
-		if (! view->hasMimeType(mimeType) || count() <= 1)
-		{
-			KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
-			if (services.count())
+			view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
+			if (view->hasMimeType(mimeType))
 			{
-				kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << mimeType << endl;
-				int index = addViews(QStringList(services.front()->entryPath()));
-				switchView(index, url);
-				return;
+				kDebug() << "switching to" << view->partName() << "for mime type" << mimeType << endl;
+				targetIndex = (currentIndex() +i) % count();
+				break;
 			}
-			else
-				kDebug() << "unable to find a service for mime type" << mimeType << endl;
+		}
+
+		if (targetIndex == -1)
+		{
+			kDebug() << "no other loaded KPart want's to handle" << url << endl;
+
+			// load a new KPart to display mimeType
+			if (Settings::autoloadView())
+			{
+				view = qobject_cast<QKView*>(currentWidget());
+				KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
+
+				// only load a new part if it is different from the current one
+				if (services.count() && services.front()->entryPath() != view->partName())
+				{
+					kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << mimeType << endl;
+					int index = addViews(QStringList(services.front()->entryPath()));
+					targetIndex = index;
+				}
+				else if (services.isEmpty())
+					kDebug() << "unable to find a service for mime type" << mimeType << endl;
+			}
+		}
+
+		if (targetIndex == -1)
+		{
+			// unable to open mimeType (either no KPart at all or I must not load it)
+			// if I am able to display another view, I'll just do it
+			if (count() > 1)
+			{
+				if (url == url.upUrl())
+				{
+					// something is really going wrong. I can't open url within any loaded/loadable KPart and it is already the root folder of that url.
+					// display the next view but don't bother to keep trying on this url
+					switchView(KUrl("~"), "inode/directory", false);
+				}
+				else
+					switchView((currentIndex() +1) % count(), url.upUrl());
+			}
+
+			emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
+		}
+		else
+		{
+			// something want's to open url, switch to it
+			switchView(targetIndex, url);
 		}
 	}
-
-	if (count() > 1)
-	{
-		if (url == url.upUrl())
-			switchView();
-		else
-			switchView((currentIndex() +1) % count(), url.upUrl());
-	}
-
-	emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
 }
 
 
 void QKStack::switchView(int index, const KUrl& url)
 {
-	setCurrentIndex(index);
+	if (index != currentIndex())
+		setCurrentIndex(index);
+
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	view->show();
 	view->setURL(url);

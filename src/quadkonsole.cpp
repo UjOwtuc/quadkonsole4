@@ -33,7 +33,7 @@
 #include <KDE/KIconLoader>
 #include <KDE/KLibLoader>
 #include <KDE/KLocale>
-#include <KDE/KXmlGuiWindow>
+#include <KDE/KXMLGUIFactory>
 #include <KDE/KActionCollection>
 #include <KDE/KMenuBar>
 #include <KDE/KMenu>
@@ -63,6 +63,7 @@ QuadKonsole::QuadKonsole()
 {
 	setupActions();
 	setupUi(0, 0);
+	setupGUI();
 }
 
 
@@ -90,6 +91,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 
 	setupActions();
 	setupUi(rows, columns);
+	setupGUI();
 
 	if (cmds.size())
 	{
@@ -109,6 +111,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 	setupActions();
 	setupUi(1, 1, parts);
+	setupGUI();
 	showNormal();
 }
 
@@ -144,8 +147,6 @@ void QuadKonsole::setupActions()
 		mFilter = new MouseMoveFilter(this);
 		qApp->installEventFilter(mFilter);
 	}
-
-	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 
 	// Movement
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
@@ -227,13 +228,14 @@ void QuadKonsole::setupActions()
 void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > parts)
 {
 	QWidget* centralWidget = new QWidget(this, 0);
+	setCentralWidget(centralWidget);
+
 	QGridLayout* grid = new QGridLayout(centralWidget);
 
 	m_rows = new QSplitter(Qt::Vertical);
 	m_rows->setChildrenCollapsible(false);
 	grid->addWidget(m_rows, 0, 0);
 
-	setCentralWidget(centralWidget);
 	actionCollection()->addAssociatedWidget(centralWidget);
 
 	for (int i=0; i<rows; ++i)
@@ -254,8 +256,10 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	kDebug() << "finished setting up layouts for " << m_stacks.count() << " parts" << endl;
 
 	setWindowIcon(KIcon("quadkonsole4"));
+	//createGUI(m_stacks.front()->part());
 
-	setupGUI();
+	// GUI is initialzed, now the PartManager may send it's events to recreate the GUI
+	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 }
 
 

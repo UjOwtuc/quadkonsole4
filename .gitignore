@@ -13,3 +13,6 @@ debian/quadkonsole4.substvars
 debian/quadkonsole4/
 debian/stamp-*
 obj-*/
+
+# autoversion
+src/version.h

@@ -1,0 +1,7 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define QUADKONSOLE4_VERSION	"@QUADKONSOLE4_VERSION@"
+
+#endif // VERSION_H
+

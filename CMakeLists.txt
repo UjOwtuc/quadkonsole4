@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
 project(quadkonsole4)
 
 find_package(KDE4 REQUIRED)
@@ -15,7 +16,21 @@ endif()
 
 include_directories( ${KDE4_INCLUDES} ${QT_INCLUDES} )
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(GetGitRevisionDescription)
+git_describe(QUADKONSOLE4_VERSION)
+if (NOT "${QUADKONSOLE4_VERSION}" STREQUAL HEAD-HASH-NOTFOUND)
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/version.h" @ONLY)
+endif()
+
 add_subdirectory( doc )
 add_subdirectory( src )
 add_subdirectory( icons )
 add_subdirectory( i18n )
+
+set(CPACK_SOURCE_GENERATOR "TBZ2")
+set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;/.kdev4/;.*.kdev4;.*.swp")
+set(CPACK_PACKAGE_VERSION_MAJOR ${QUADKONSOLE4_VERSION})
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "quadkonsole4-${QUADKONSOLE4_VERSION}")
+include(CPack)
+

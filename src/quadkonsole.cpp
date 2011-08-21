@@ -207,6 +207,9 @@ void QuadKonsole::setupActions()
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(toggleUrlBar()));
 
 	// Standard actions
+	KStandardAction::back(this, SLOT(goBack()), actionCollection());
+	KStandardAction::forward(this, SLOT(goForward()), actionCollection());
+	KStandardAction::up(this, SLOT(goUp()), actionCollection());
 	KStandardAction::preferences(this, SLOT(optionsPreferences()), actionCollection());
 	KStandardAction::quit(this, SLOT(quit()), actionCollection());
 	KToggleAction* toggleMenu = KStandardAction::showMenubar(this, SLOT(toggleMenu()), actionCollection());
@@ -677,6 +680,30 @@ void QuadKonsole::toggleUrlBar()
 	QKStack* stack = getFocusStack();
 	if (stack)
 		stack->toggleUrlBar();
+}
+
+
+void QuadKonsole::goBack()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->goBack();
+}
+
+
+void QuadKonsole::goForward()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->goForward();
+}
+
+
+void QuadKonsole::goUp()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->goUp();
 }
 
 

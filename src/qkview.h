@@ -37,6 +37,7 @@ namespace KParts
 	class OpenUrlArguments;
 	class BrowserArguments;
 	class PartManager;
+	class BrowserInterface;
 }
 
 
@@ -56,8 +57,8 @@ class QKView : public QWidget
 	Q_OBJECT
 	public:
 		typedef enum { PartName=0 } userData_t;
-		explicit QKView(KParts::PartManager& partManager, const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
-		explicit QKView(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
 
 		bool hasFocus() const;
@@ -109,6 +110,7 @@ class QKView : public QWidget
 		QString m_windowCaption;
 		KParts::PartManager& m_partManager;
 		QIcon* m_icon;
+		KParts::BrowserInterface* m_browserInterface;
 };
 
 #endif // QKVIEW_H

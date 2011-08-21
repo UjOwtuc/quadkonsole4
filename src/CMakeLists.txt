@@ -6,6 +6,7 @@ set(quadkonsole4_SRCS
 	qkstack.cpp
 	qkview.cpp
 	prefsviews.cpp
+	qkbrowseriface.cpp
 )
 
 kde4_add_ui_files(quadkonsole4_SRCS

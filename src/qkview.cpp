@@ -19,10 +19,13 @@
  ***************************************************************************/
 
 #include "qkview.h"
+#include "qkstack.h"
 #include "settings.h"
 
 #include <kdeversion.h>
+#include <KDE/KAction>
 #include <KDE/KXmlGuiWindow>
+#include <KDE/KXMLGUIFactory>
 #include <KDE/KDebug>
 #include <KDE/KService>
 #include <KDE/KMessageBox>
@@ -36,6 +39,7 @@
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
+#include <KDE/KParts/StatusBarExtension>
 #include <kde_terminal_interface_v2.h>
 
 #include <QtCore/QFileInfo>
@@ -61,20 +65,22 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 }
 
 
-QKView::QKView(KParts::PartManager& partManager, const QString& partname, QWidget* parent, Qt::WindowFlags f)
+QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
 	m_partname(partname),
 	m_part(0),
-	m_partManager(partManager)
+	m_partManager(partManager),
+	m_browserInterface(browserInterface)
 {
 	setupUi();
 }
 
 
-QKView::QKView(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent, Qt::WindowFlags f)
+QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
 	m_part(part),
-	m_partManager(partManager)
+	m_partManager(partManager),
+	m_browserInterface(browserInterface)
 {
 	m_partname = part->property("QKPartName").toString();
 	setupUi();
@@ -85,6 +91,10 @@ QKView::~QKView()
 {
 	if (m_part)
 	{
+		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+		if (window)
+			window->guiFactory()->removeClient(m_part);
+
 		m_part->disconnect();
 		if (m_part->widget())
 			m_part->widget()->disconnect();
@@ -251,6 +261,7 @@ void QKView::partDestroyed()
 			KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
 			if (b)
 			{
+				b->setBrowserInterface(0);
 				b->disconnect(SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), this);
 				b->disconnect(SIGNAL(selectionInfo(KFileItemList)), this);
 				b->disconnect(SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), this);
@@ -326,7 +337,14 @@ void QKView::openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserA
 
 void QKView::enableAction(const char* action, bool enable)
 {
-	kDebug() << "action " << action << enable << endl;
+	kDebug() << action << enable << endl;
+	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+	if (window)
+	{
+		QAction* a = window->actionCollection()->action(action);
+		if (a)
+			a->setEnabled(enable);
+	}
 }
 
 
@@ -371,6 +389,7 @@ void QKView::setupUi()
 
 	m_toolbar = new QToolBar;
 	m_layout->addWidget(m_toolbar);
+
 	m_urlbar = new KUrlRequester;
 	m_urlbar->hide();
 	connect(m_urlbar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
@@ -394,8 +413,6 @@ void QKView::setupPart()
 	m_layout->addWidget(m_part->widget());
 	setFocusProxy(m_part->widget());
 
-	m_toolbar->addActions(m_part->actionCollection()->actions());
-	m_toolbar->addActions(m_part->widget()->actions());
 	m_part->widget()->setFocus();
 
 	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
@@ -417,10 +434,20 @@ void QKView::setupPart()
 	if (b)
 	{
 		kDebug() << "part" << m_partname << "has a BrowserExtension" << endl;
+		b->setBrowserInterface(m_browserInterface);
+
 		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList)));
 		connect(b, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));
 		connect(b, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));
+	}
+
+	KParts::StatusBarExtension* sb = KParts::StatusBarExtension::childObject(m_part);
+	if (sb)
+	{
+		kDebug() << "part" << m_partname << "has a StatusBarExtension" << endl;
+		if (window)
+			sb->setStatusBar(window->statusBar());
 	}
 	m_partManager.addPart(m_part);
 }

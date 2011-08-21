@@ -26,6 +26,7 @@
 #include <QtGui/QTabWidget>
 
 class QKView;
+class QKBrowserInterface;
 namespace KParts
 {
 	class ReadOnlyPart;
@@ -50,6 +51,7 @@ class QKStack : public QTabWidget
 		KParts::ReadOnlyPart* part();
 		void partDestroyed();
 		int addViews(const QStringList& partNames);
+		int historyLength() const { return m_history.count(); }
 
 	signals:
 		void partCreated();
@@ -64,6 +66,10 @@ class QKStack : public QTabWidget
 		void settingsChanged();
 		void toggleUrlBar();
 		void slotTabCloseRequested(int index);
+		void goBack();
+		void goForward();
+		void goUp();
+		void goHistory(int steps);
 
 	private slots:
 		void slotPartCreated();
@@ -72,13 +78,19 @@ class QKStack : public QTabWidget
 		void slotMimetype(KIO::Job* job, QString mimeType);
 		void slotOpenUrlRequest(KUrl url);
 		void slotCurrentChanged();
+		void enableAction(const char* action, bool enable);
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);
 		void addViewActions(QKView* view);
+		void checkEnableActions();
 
 		KParts::PartManager& m_partManager;
+		QKBrowserInterface* m_browserInterface;
 		QStringList m_loadedViews;
+		QList<KUrl> m_history;
+		int m_historyPosition;
+		bool m_blockHistory;
 };
 
 #endif // QKSTACK_H

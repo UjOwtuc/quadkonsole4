@@ -20,11 +20,16 @@
 
 #include "qkstack.h"
 #include "qkview.h"
+#include "qkbrowseriface.h"
 #include "settings.h"
 
 #include <KDE/KDebug>
 #include <KDE/KUrl>
 #include <KDE/KMimeTypeTrader>
+#include <KDE/KXmlGuiWindow>
+#include <KDE/KAction>
+#include <KDE/KActionCollection>
+#include <KDE/KParts/PartManager>
 #include <KDE/KIO/TransferJob>
 #include <KDE/KIO/Scheduler>
 
@@ -33,22 +38,35 @@
 
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 	: QTabWidget(parent),
-	m_partManager(partManager)
+	m_partManager(partManager),
+	m_browserInterface(new QKBrowserInterface(this))
 {
 	setupUi();
+	m_blockHistory = false;
 }
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
 	: QTabWidget(parent),
-	m_partManager(partManager)
+	m_partManager(partManager),
+	m_browserInterface(new QKBrowserInterface(this))
 {
 	setupUi(part);
+	m_blockHistory = false;
 }
 
 
 QKStack::~QKStack()
-{}
+{
+	this->disconnect();
+	while (count())
+	{
+		QWidget* w = currentWidget();
+		removeTab(currentIndex());
+		delete w;
+	}
+	delete m_browserInterface;
+}
 
 
 bool QKStack::hasFocus() const
@@ -66,6 +84,7 @@ void QKStack::setFocus()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	view->setFocus();
+	checkEnableActions();
 }
 
 
@@ -105,7 +124,7 @@ int QKStack::addViews(const QStringList& partNames)
 	while (it.hasNext())
 	{
 		QString name = it.next();
-		view = new QKView(m_partManager, name);
+		view = new QKView(m_partManager, m_browserInterface, name);
 		m_loadedViews << name;
 		index = addTab(view, view->icon(), view->partName());
 		addViewActions(view);
@@ -212,6 +231,25 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (index != currentIndex())
 		setCurrentIndex(index);
 
+	if (! m_blockHistory)
+	{
+		// remove forward entries
+		while (m_historyPosition < m_history.count() -1)
+			m_history.pop_back();
+
+		// filter duplicate entries
+		if (m_history.size())
+		{
+			if (m_history.back() != url)
+				m_history.append(url);
+		}
+		else
+			m_history.append(url);
+
+		m_historyPosition = m_history.count() -1;
+	}
+	checkEnableActions();
+
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	view->show();
 	view->setURL(url);
@@ -275,6 +313,48 @@ void QKStack::slotTabCloseRequested(int index)
 		removeTab(index);
 		m_loadedViews.removeOne(view->partName());
 		delete view;
+	}
+}
+
+
+void QKStack::goBack()
+{
+	goHistory(1);
+}
+
+
+void QKStack::goForward()
+{
+	goHistory(-1);
+}
+
+
+void QKStack::goUp()
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+		slotOpenUrlRequest(view->getURL().upUrl());
+}
+
+
+void QKStack::goHistory(int steps)
+{
+	if (m_history.isEmpty())
+		return;
+
+	int old_pos = m_historyPosition;
+
+	m_historyPosition -= steps;
+	if (m_historyPosition < 0)
+		m_historyPosition = 0;
+	else if (m_historyPosition >= m_history.count())
+		m_historyPosition = m_history.count() -1;
+
+	if (old_pos != m_historyPosition)
+	{
+		m_blockHistory = true;
+		slotOpenUrlRequest(m_history[m_historyPosition]);
+		m_blockHistory = false;
 	}
 }
 
@@ -343,6 +423,20 @@ void QKStack::slotCurrentChanged()
 		else
 			tabBar()->hide();
 	}
+
+	checkEnableActions();
+}
+
+
+void QKStack::enableAction(const char* action, bool enable)
+{
+	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+	if (window)
+	{
+		QAction* a = window->actionCollection()->action(action);
+		if (a)
+			a->setEnabled(enable);
+	}
 }
 
 
@@ -359,7 +453,7 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	QStringList partNames = Settings::views();
 	if (part)
 	{
-		view = new QKView(m_partManager, part);
+		view = new QKView(m_partManager, m_browserInterface, part);
 		partNames.removeOne(view->partName());
 		m_loadedViews << view->partName();
 		addTab(view, view->icon(), view->partName());
@@ -376,6 +470,9 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
 	connect(this, SIGNAL(currentChanged(int)), SLOT(slotCurrentChanged()));
 	connect(this, SIGNAL(tabCloseRequested(int)), SLOT(slotTabCloseRequested(int)));
+
+	enableAction("go_back", false);
+	enableAction("go_forward", false);
 }
 
 
@@ -385,6 +482,20 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
+}
+
+
+void QKStack::checkEnableActions()
+{
+	if (m_historyPosition > 0)
+		enableAction("go_back", true);
+	else
+		enableAction("go_back", false);
+
+	if (m_historyPosition < m_history.count() -1)
+		enableAction("go_forward", true);
+	else
+		enableAction("go_forward", false);
 }
 
 #include "qkstack.moc"

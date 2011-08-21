@@ -74,6 +74,9 @@ class QuadKonsole : public KParts::MainWindow
 		void setStatusBarText(QString text);
 		void setWindowCaption(QString text);
 		void toggleUrlBar();
+		void goBack();
+		void goForward();
+		void goUp();
 
 	private slots:
 		void slotActivePartChanged(KParts::Part* part);

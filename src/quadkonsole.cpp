@@ -287,7 +287,9 @@ void QuadKonsole::focusKonsoleRight()
 			row = (row +1) % mRowLayouts.size();
 			col = 0;
 		}
-		mRowLayouts[row]->widget(col)->setFocus();
+		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+		if (stack)
+			stack->setFocus();
 	}
 }
 
@@ -304,7 +306,9 @@ void QuadKonsole::focusKonsoleLeft()
 			row = (row + mRowLayouts.size() -1) % mRowLayouts.size();
 			col = mRowLayouts[row]->count() -1;
 		}
-		mRowLayouts[row]->widget(col)->setFocus();
+		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+		if (stack)
+			stack->setFocus();
 	}
 }
 
@@ -318,7 +322,9 @@ void QuadKonsole::focusKonsoleUp()
 		row = (row + mRowLayouts.size() -1) % mRowLayouts.size();
 		if (col >= mRowLayouts[row]->count())
 			col = mRowLayouts[row]->count() -1;
-		mRowLayouts[row]->widget(col)->setFocus();
+		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+		if (stack)
+			stack->setFocus();
 	}
 }
 
@@ -332,7 +338,9 @@ void QuadKonsole::focusKonsoleDown()
 		row = (row +1) % mRowLayouts.size();
 		if (col >= mRowLayouts[row]->count())
 			col = mRowLayouts[row]->count() -1;
-		mRowLayouts[row]->widget(col)->setFocus();
+		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+		if (stack)
+			stack->setFocus();
 	}
 }
 
@@ -645,7 +653,9 @@ void QuadKonsole::removePart()
 		{
 			row = row % mRowLayouts.size();
 			col = col % mRowLayouts[row]->count();
-			mRowLayouts[row]->widget(col)->setFocus();
+			QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+			if (stack)
+				stack->setFocus();
 		}
 	}
 }

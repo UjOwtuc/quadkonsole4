@@ -314,6 +314,9 @@ void QKStack::slotTabCloseRequested(int index)
 		m_loadedViews.removeOne(view->partName());
 		delete view;
 	}
+
+	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded && count <= 1)
+		tabBar()->hide();
 }
 
 

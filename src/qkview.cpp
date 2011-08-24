@@ -415,10 +415,6 @@ void QKView::setupPart()
 
 	m_part->widget()->setFocus();
 
-	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
-	if (window)
-		m_part->setFactory(window->guiFactory());
-
 	connect(m_part->widget(), SIGNAL(destroyed()), SLOT(partDestroyed()));
 	connect(m_part, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(m_part, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
@@ -446,6 +442,7 @@ void QKView::setupPart()
 	if (sb)
 	{
 		kDebug() << "part" << m_partname << "has a StatusBarExtension" << endl;
+		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 		if (window)
 			sb->setStatusBar(window->statusBar());
 	}

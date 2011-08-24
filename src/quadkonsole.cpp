@@ -719,6 +719,15 @@ void QuadKonsole::goUp()
 
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
+	if (part)
+	{
+		part->setFactory(guiFactory());
+		if (! guiFactory()->clients().contains(part))
+			guiFactory()->addClient(part);
+
+		if (! factory()->clients().contains(part))
+			factory()->addClient(part);
+	}
 	createGUI(part);
 }
 

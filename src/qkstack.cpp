@@ -27,17 +27,21 @@
 #include <KDE/KUrl>
 #include <KDE/KMimeTypeTrader>
 #include <KDE/KXmlGuiWindow>
+#include <KDE/KTabWidget>
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
 #include <KDE/KParts/PartManager>
 #include <KDE/KIO/TransferJob>
 #include <KDE/KIO/Scheduler>
 
-#include <QtGui/QTabWidget>
-#include <QtGui/QTabBar>
+#ifdef HAVE_LIBKONQ
+#include <konq_popupmenu.h>
+#else
+#include <KDE/KMenu>
+#endif
 
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
-	: QTabWidget(parent),
+	: KTabWidget(parent),
 	m_partManager(partManager),
 	m_browserInterface(new QKBrowserInterface(this))
 {
@@ -47,7 +51,7 @@ QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
-	: QTabWidget(parent),
+	: KTabWidget(parent),
 	m_partManager(partManager),
 	m_browserInterface(new QKBrowserInterface(this))
 {
@@ -62,6 +66,11 @@ QKStack::~QKStack()
 	while (count())
 	{
 		QWidget* w = currentWidget();
+
+		QKView* view;
+		if ((view = qobject_cast<QKView*>(w)))
+			view->disconnect();
+
 		removeTab(currentIndex());
 		delete w;
 	}
@@ -126,7 +135,10 @@ int QKStack::addViews(const QStringList& partNames)
 		QString name = it.next();
 		view = new QKView(m_partManager, m_browserInterface, name);
 		m_loadedViews << name;
-		index = addTab(view, view->icon(), view->partName());
+		if (view->icon())
+			index = addTab(view, *(view->icon()), view->partName());
+		else
+			index = addTab(view, view->partName());
 		addViewActions(view);
 	}
 	return index;
@@ -233,13 +245,17 @@ void QKStack::switchView(int index, const KUrl& url)
 
 	if (! m_blockHistory)
 	{
-		// remove forward entries
-		while (m_historyPosition < m_history.count() -1)
-			m_history.pop_back();
+		// sanity checks (there was a crash related to history cleaning)
+		if (m_historyPosition < 0)
+			m_historyPosition = 0;
 
-		// filter duplicate entries
-		if (m_history.size())
+		if (! m_history.isEmpty())
 		{
+			// remove forward entries
+			while (m_historyPosition < m_history.count() -1)
+				m_history.pop_back();
+
+			// filter duplicate entries
 			if (m_history.back() != url)
 				m_history.append(url);
 		}
@@ -247,6 +263,9 @@ void QKStack::switchView(int index, const KUrl& url)
 			m_history.append(url);
 
 		m_historyPosition = m_history.count() -1;
+
+		while (static_cast<unsigned>(m_history.size()) > Settings::historySize())
+			m_history.pop_front();
 	}
 	checkEnableActions();
 
@@ -272,17 +291,14 @@ void QKStack::settingsChanged()
 	switch (Settings::showTabBar())
 	{
 		case Settings::EnumShowTabBar::always :
-			tabBar()->show();
+			setTabBarHidden(false);
 			break;
 		case Settings::EnumShowTabBar::whenNeeded :
-			if (count() > 1)
-				tabBar()->show();
-			else
-				tabBar()->hide();
+			setTabBarHidden(count() <= 1);
 			break;
 		case Settings::EnumShowTabBar::never :
 		default:
-			tabBar()->hide();
+			setTabBarHidden(true);
 			break;
 	}
 
@@ -303,10 +319,6 @@ void QKStack::toggleUrlBar()
 
 void QKStack::slotTabCloseRequested(int index)
 {
-	// do not close the first view
-	if (index == 0)
-		return;
-
 	QKView* view = qobject_cast<QKView*>(widget(index));
 	if (view)
 	{
@@ -315,8 +327,16 @@ void QKStack::slotTabCloseRequested(int index)
 		delete view;
 	}
 
+	// closed last view
+	if (count() == 0)
+	{
+		// for some reason the destroyed signal is not emitted when calling deleteLater
+		emit destroyed(this);
+		deleteLater();
+	}
+
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded && count() <= 1)
-		tabBar()->hide();
+		setTabBarHidden(true);
 }
 
 
@@ -421,10 +441,7 @@ void QKStack::slotCurrentChanged()
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)
 	{
-		if (count() > 1)
-			tabBar()->show();
-		else
-			tabBar()->hide();
+		setTabBarHidden(count() <= 1);
 	}
 
 	checkEnableActions();
@@ -443,6 +460,78 @@ void QKStack::enableAction(const char* action, bool enable)
 }
 
 
+void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+	{
+#ifdef HAVE_LIBKONQ
+		KActionCollection popupActions(static_cast<QWidget*>(0));
+		KAction* back = popupActions.addAction("go_back", KStandardAction::back(this, SLOT(goBack()), &popupActions));
+		back->setEnabled(m_historyPosition > 0);
+
+		KAction* forward = popupActions.addAction("go_forward", KStandardAction::forward(this, SLOT(goForward()), &popupActions));
+		forward->setEnabled(m_historyPosition < m_history.count() -1);
+
+		KAction* up = popupActions.addAction("go_up", KStandardAction::up(this, SLOT(goUp()), &popupActions));
+		up->setEnabled(view->getURL().upUrl() != view->getURL());
+
+		popupActions.addAction("cut", KStandardAction::cut(0, 0, this));
+		popupActions.addAction("copy", KStandardAction::copy(0, 0, this));
+		popupActions.addAction("paste", KStandardAction::paste(0, 0, this));
+		QAction* separator = new QAction(&popupActions);
+		separator->setSeparator(true);
+		popupActions.addAction("separator", separator);
+
+		KonqPopupMenu::Flags konqFlags = 0;
+		KonqPopupMenu* menu = new KonqPopupMenu(items, view->getURL(), popupActions, 0, konqFlags, flags, view->part()->widget(), 0, map);
+#else // HAVE_LIBKONQ
+		KMenu* menu = new KMenu(this);
+		QList<QActionGroup*> groups = view->part()->actionCollection()->actionGroups();
+		QListIterator<QActionGroup*> it(groups);
+		while (it.hasNext())
+		{
+			QActionGroup* group = it.next();
+			if (group->isVisible() && group->isEnabled())
+			{
+				KMenu* submenu = new KMenu;
+				submenu->addActions(group->actions());
+				menu->addMenu(submenu);
+			}
+		}
+		menu->addActions(view->part()->actionCollection()->actionsWithoutGroup());
+#endif // HAVE_LIBKONQ
+		menu->exec(where);
+		delete menu;
+	}
+}
+
+
+void QKStack::slotMiddleClick(QWidget* widget)
+{
+	int index;
+	index = indexOf(widget);
+	if (index < 0)
+		kDebug() << "unable to find widget for removal by MMB" << endl;
+
+	slotTabCloseRequested(index);
+}
+
+
+void QKStack::slotIconChanged()
+{
+	QKView* view = qobject_cast<QKView*>(sender());
+	if (view)
+	{
+		int index = indexOf(view);
+		setTabIcon(index, *(view->icon()));
+		kDebug() << "setting icon for tab page" << index << endl;
+	}
+	else
+		kDebug() << "which view changed it's icon???" << endl;
+}
+
+
 void QKStack::setupUi(KParts::ReadOnlyPart* part)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -452,6 +541,8 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	setDocumentMode(true);
 	setTabsClosable(true);
 
+	connect(this, SIGNAL(mouseMiddleClick(QWidget*)), SLOT(slotMiddleClick(QWidget*)));
+
 	QKView* view;
 	QStringList partNames = Settings::views();
 	if (part)
@@ -459,7 +550,7 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 		view = new QKView(m_partManager, m_browserInterface, part);
 		partNames.removeOne(view->partName());
 		m_loadedViews << view->partName();
-		addTab(view, view->icon(), view->partName());
+		addTab(view, *(view->icon()), view->partName());
 		addViewActions(view);
 	}
 	addViews(partNames);
@@ -485,6 +576,8 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
+	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
+	connect(view, SIGNAL(iconChanged()), SLOT(slotIconChanged()));
 }
 
 

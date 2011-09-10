@@ -33,7 +33,7 @@
 #include <KDE/KUrl>
 #include <KDE/KFile>
 #include <KDE/KFileItemList>
-#include <KDE/KMenu>
+
 #include <KDE/KLineEdit>
 #include <KDE/KUrlRequester>
 #include <KDE/KParts/ReadOnlyPart>
@@ -54,7 +54,7 @@ QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
 
 KService::Ptr QKPartFactory::getFactory(const QString& name)
 {
-	if (m_partFactories[name].isNull())
+	if (m_partFactories.count(name) == 0)
 	{
 		kDebug() << "creating factory for" << name << endl;
 		m_partFactories[name] = KService::serviceByDesktopPath(name);
@@ -70,6 +70,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partname(partname),
 	m_part(0),
 	m_partManager(partManager),
+	m_icon(0),
 	m_browserInterface(browserInterface)
 {
 	setupUi();
@@ -80,6 +81,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	: QWidget(parent, f),
 	m_part(part),
 	m_partManager(partManager),
+	m_icon(0),
 	m_browserInterface(browserInterface)
 {
 	m_partname = part->property("QKPartName").toString();
@@ -91,14 +93,16 @@ QKView::~QKView()
 {
 	if (m_part)
 	{
-		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
-		if (window)
-			window->guiFactory()->removeClient(m_part);
-
+		m_partManager.removePart(m_part);
 		m_part->disconnect();
 		if (m_part->widget())
 			m_part->widget()->disconnect();
+
+		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+		if (window)
+			window->guiFactory()->removeClient(m_part);
 	}
+	delete m_urlbar;
 	delete m_part;
 	delete m_icon;
 }
@@ -243,6 +247,12 @@ void QKView::createPart()
 	}
 	m_part->setProperty("QKPartName", m_partname);
 
+	if (! m_icon)
+	{
+		m_icon = new KIcon(service->icon());
+		emit iconChanged();
+	}
+
 	setupPart();
 
 	emit partCreated();
@@ -290,23 +300,18 @@ void QKView::toggleUrlBar()
 }
 
 
-void QKView::popupMenu(QPoint where, KFileItemList)
+void QKView::slotPopupMenu(const QPoint& where, const KUrl &url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
 {
-	KMenu* popup = new KMenu(this);
-	QList<QActionGroup*> groups = m_part->actionCollection()->actionGroups();
-	QListIterator<QActionGroup*> it(groups);
-	while (it.hasNext())
-	{
-		QActionGroup* group = it.next();
-		if (group->isVisible() && group->isEnabled())
-		{
-			KMenu* submenu = new KMenu;
-			submenu->addActions(group->actions());
-			popup->addMenu(submenu);
-		}
-	}
-	popup->addActions(m_part->actionCollection()->actionsWithoutGroup());
-	popup->popup(where);
+	KFileItem item(url, args.mimeType(), mode);
+	KFileItemList list;
+	list.append(item);
+	slotPopupMenu(where, list, args, browserArgs, flags, map);
+}
+
+
+void QKView::slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& /*args*/, const KParts::BrowserArguments& /*browserArgs*/, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
+{
+	emit popupMenu(where, items, flags, map);
 }
 
 
@@ -375,9 +380,7 @@ void QKView::slotOpenUrl(QString url)
 void QKView::setupUi()
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (service.isNull())
-		m_icon = new QIcon;
-	else
+	if (! service.isNull())
 		m_icon = new QIcon(service->icon());
 
 	setContentsMargins(0, 0, 0, 0);
@@ -432,7 +435,8 @@ void QKView::setupPart()
 		kDebug() << "part" << m_partname << "has a BrowserExtension" << endl;
 		b->setBrowserInterface(m_browserInterface);
 
-		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList)));
+		connect(b, SIGNAL(popupMenu(QPoint,KUrl,mode_t,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(slotPopupMenu(QPoint,KUrl,mode_t,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
+		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(slotPopupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 		connect(b, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));
 		connect(b, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));

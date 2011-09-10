@@ -120,6 +120,8 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 QuadKonsole::~QuadKonsole()
 {
 	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
+	m_partManager.disconnect();
+
 	delete mFilter;
 	while (m_stacks.count())
 	{
@@ -205,6 +207,11 @@ void QuadKonsole::setupActions()
 	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
 	actionCollection()->addAction("toggle url bar", toggleUrlBar);
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(toggleUrlBar()));
+
+	KAction* closeView = new KAction(KIcon("document-close"), i18n("&Close view"), this);
+	closeView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
+	actionCollection()->addAction("close view", closeView);
+	connect(closeView, SIGNAL(triggered(bool)), this, SLOT(closeView()));
 
 	// Standard actions
 	KStandardAction::back(this, SLOT(goBack()), actionCollection());
@@ -577,6 +584,7 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 	connect(stack, SIGNAL(partCreated()), SLOT(resetLayouts()));
 	connect(stack, SIGNAL(setStatusBarText(QString)), SLOT(setStatusBarText(QString)));
 	connect(stack, SIGNAL(setWindowCaption(QString)), SLOT(setWindowCaption(QString)));
+	connect(stack, SIGNAL(destroyed(QObject*)), SLOT(slotStackDestroyed()));
 
 	return stack;
 }
@@ -635,7 +643,7 @@ void QuadKonsole::removePart()
 					return;
 			}
 		}
-		m_stacks.removeOne(stack);
+		m_stacks.removeAll(stack);
 
 		delete stack;
 		if (mRowLayouts[row]->count() < 1)
@@ -717,6 +725,14 @@ void QuadKonsole::goUp()
 }
 
 
+void QuadKonsole::closeView()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->slotTabCloseRequested(stack->currentIndex());
+}
+
+
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	if (part)
@@ -729,6 +745,19 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 			factory()->addClient(part);
 	}
 	createGUI(part);
+}
+
+
+void QuadKonsole::slotStackDestroyed()
+{
+	QKStack* stack = qobject_cast<QKStack*>(sender());
+	if (stack)
+		m_stacks.removeAll(stack);
+	else
+		kDebug() << "sender is no QKStack" << endl;
+
+	if (m_stacks.empty())
+		quit();
 }
 
 

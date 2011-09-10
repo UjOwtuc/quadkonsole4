@@ -1,3 +1,13 @@
+2011-09-10  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* New context menus
+	* Per stack history
+	* Fixed startup if primary KPart is not available
+	* Fixed crash on closing window after removing a Konsole KPart
+	* Removed duplicate error windows on loading KParts
+	* Added shortcut to close the current view
+	* Release 0.4.2
+
 2011-08-18  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Fixed opening of remote files

@@ -21,9 +21,10 @@
 #ifndef QKVIEW_H
 #define QKVIEW_H
 
-#include <KDE/KFileItemList>
 #include <KDE/KUrl>
 #include <KDE/KService>
+#include <KDE/KFileItemList>
+#include <KDE/KParts/BrowserExtension>
 
 #include <QtGui/QWidget>
 
@@ -73,13 +74,15 @@ class QKView : public QWidget
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type);
-		const QIcon& icon() const { return *m_icon; }
+		const QIcon* icon() const { return m_icon; }
 
 	signals:
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
 		void openUrlRequest(KUrl);
+		void popupMenu(QPoint, KFileItemList, KParts::BrowserExtension::PopupFlags flags, KParts::BrowserExtension::ActionGroupMap);
+		void iconChanged();
 
 	public slots:
 		void show();
@@ -89,7 +92,8 @@ class QKView : public QWidget
 
 	protected slots:
 		void createPart();
-		void popupMenu(QPoint where, KFileItemList);
+		void slotPopupMenu(const QPoint& where, const KUrl& url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
+		void slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void selectionInfo(KFileItemList items);
 		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
 		void enableAction(const char* action, bool enable);

@@ -22,8 +22,9 @@
 #define QKSTACK_H
 
 #include <KDE/KUrl>
-
-#include <QtGui/QTabWidget>
+#include <KDE/KFileItemList>
+#include <KDE/KTabWidget>
+#include <KDE/KParts/BrowserExtension>
 
 class QKView;
 class QKBrowserInterface;
@@ -37,7 +38,7 @@ namespace KIO
 	class Job;
 }
 
-class QKStack : public QTabWidget
+class QKStack : public KTabWidget
 {
 	Q_OBJECT
 	public:
@@ -79,6 +80,9 @@ class QKStack : public QTabWidget
 		void slotOpenUrlRequest(KUrl url);
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);
+		void popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
+		void slotMiddleClick(QWidget* widget);
+		void slotIconChanged();
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);

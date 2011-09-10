@@ -10,6 +10,11 @@
 			<label>Focus follows mouse</label>
 			<default>false</default>
 		</entry>
+		<entry name="historySize" type="UInt" min="5">
+			<label>Maximum length of history</label>
+			<default>100</default>
+			<min>5</min>
+		</entry>
 		<entry name="startMaximized" type="bool">
 			<label>Start maximized</label>
 			<default>true</default>
@@ -51,7 +56,7 @@
 		</entry>
 		<entry name="viewHasToolbar" type="bool">
 			<label>Display a toolbar for each view</label>
-			<default>true</default>
+			<default>false</default>
 		</entry>
 		<entry name="autoloadView" type="bool">
 			<label>Load new views automatically for unhandles MIME types</label>

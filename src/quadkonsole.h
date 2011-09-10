@@ -77,9 +77,11 @@ class QuadKonsole : public KParts::MainWindow
 		void goBack();
 		void goForward();
 		void goUp();
+		void closeView();
 
 	private slots:
 		void slotActivePartChanged(KParts::Part* part);
+		void slotStackDestroyed();
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();

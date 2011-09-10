@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-08-17 16:16+0200\n"
-"PO-Revision-Date: 2011-08-17 16:21+0200\n"
-"Last-Translator: Karsten Borgwaldt <k.borgwaldt@soit.de>\n"
+"POT-Creation-Date: 2011-09-10 15:53+0200\n"
+"PO-Revision-Date: 2011-09-10 15:58+0200\n"
+"Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -19,145 +19,15 @@ msgstr ""
 "X-Generator: Lokalize 1.2\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: src/closedialog.cpp:42
-msgid "Don't detach"
-msgstr "Nicht abtrennen"
-
-#: src/closedialog.cpp:46
-msgid "Detach selected"
-msgstr "Ausgewählte abtrennen"
-
-#: src/main.cpp:32
-msgid "Embeds multiple Konsoles in a grid layout"
-msgstr "Ordnet mehrere Konsolen in einem Gitter an"
-
-#: src/main.cpp:37
-msgid "quadkonsole4"
-msgstr "quadkonsole4"
-
-#: src/main.cpp:37
-msgid ""
-"(C) 2005 Simon Perreault\n"
-"(C) 2009 - 2011 Karsten Borgwaldt"
-msgstr ""
-"(C) 2005 Simon Perreault\n"
-"(C) 2009 - 2011 Karsten Borgwaldt"
-
-#: src/main.cpp:38
-msgid "Simon Perreault"
-msgstr "Simon Perrault"
-
-#: src/main.cpp:39
-msgid "Karsten Borgwaldt"
-msgstr "Karsten Borgwaldt"
-
-#: src/main.cpp:43
-msgid "Number of rows of terminal emulators"
-msgstr "Anzahl Zeilen von Terminalemulatoren"
-
-#: src/main.cpp:44
-msgid "Number of columns of terminal emulators"
-msgstr "Anzahl Spalten von Terminalemulatoren"
-
-#: src/main.cpp:45
-msgid "Run command (may be used multiple times)"
-msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
-
-#: src/qkstack.cpp:161
-msgid "No view is able to open \"%1\""
-msgstr "Keine Ansicht kann \"%1\" öffnen"
-
-#: src/qkview.cpp:54
-msgid "Could not create a factory for %1."
-msgstr "Konnte Factory für %1 nicht erstellen."
-
-#: src/qkview.cpp:222
-msgid "The factory for %1 could not create a KPart."
-msgstr "Die Factory für %1 konnte kein KPart laden."
-
-#: src/qkview.cpp:281
-msgid "%1 files selected (%2)"
-msgstr "%1 Dateien ausgewählt (%2)"
-
-#: src/quadkonsole.cpp:151
-msgid "Go &right"
-msgstr "Gehe nach &rechts"
-
-#: src/quadkonsole.cpp:156
-msgid "Go &left"
-msgstr "Gehe nach &links"
-
-#: src/quadkonsole.cpp:161
-msgid "Go &up"
-msgstr "Gehe &hoch"
-
-#: src/quadkonsole.cpp:166
-msgid "Go &down"
-msgstr "Gehe her&unter"
-
-#: src/quadkonsole.cpp:172
-msgid "De&tach"
-msgstr "&Abtrennen"
-
-#: src/quadkonsole.cpp:177
-msgid "Insert &horizontal"
-msgstr "Einfügen: &horizontal"
-
-#: src/quadkonsole.cpp:182
-msgid "Insert &vertical"
-msgstr "Einfügen: &vertikal"
-
-#: src/quadkonsole.cpp:187
-msgid "Re&move part"
-msgstr "Ansicht &entfernen"
-
-#: src/quadkonsole.cpp:193
-msgid "R&eset layouts"
-msgstr "Gitter &zurücksezten"
-
-#: src/quadkonsole.cpp:197
-msgid "S&witch view"
-msgstr "Ansicht &welchseln"
-
-#: src/quadkonsole.cpp:211
-msgid "Save session"
-msgstr "Sitzung speichern"
-
-#: src/quadkonsole.cpp:215
-msgid "Restore session"
-msgstr "Sitzung wiederherstellen"
-
-#. i18n: file: src/prefs_base.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
-#: src/quadkonsole.cpp:401 rc.cpp:12
-msgid "General"
-msgstr "Allgemein"
-
-#. i18n: file: src/prefs_shutdown.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
-#: src/quadkonsole.cpp:406 rc.cpp:30
-msgid "Shutdown"
-msgstr "Beenden"
-
-#. i18n: file: src/prefs_views.ui:14
-#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
-#: src/quadkonsole.cpp:409 rc.cpp:36
-msgid "Views"
-msgstr "Ansichten"
-
-#: src/quadkonsole.cpp:614
-msgid "The process \"%1\" is still running. Do you want to terminate it?"
-msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
-
 #. i18n: file: src/detach_processes.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
-#: rc.cpp:3
+#: i18n/rc.cpp:3 rc.cpp:3
 msgid "Detach processes"
 msgstr "Prozesse Ab&trennen"
 
 #. i18n: file: src/detach_processes.ui:20
 #. i18n: ectx: property (text), widget (QLabel, lTitle)
-#: rc.cpp:6
+#: i18n/rc.cpp:6 rc.cpp:6
 msgid ""
 "The following processes are still running. Do you wish to detach the "
 "containing windows before exiting?"
@@ -167,107 +37,391 @@ msgstr ""
 
 #. i18n: file: src/detach_processes.ui:36
 #. i18n: ectx: property (text), widget (QTableWidget, processTable)
-#: rc.cpp:9
+#: i18n/rc.cpp:9 rc.cpp:9
 msgid "Process"
 msgstr "Prozess"
+
+#. i18n: file: src/prefs_base.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
+#: i18n/rc.cpp:12 src/quadkonsole.cpp:428 rc.cpp:12
+msgid "General"
+msgstr "Allgemein"
 
 #. i18n: file: src/prefs_base.ui:20
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
 #. i18n: file: src/quadkonsole4.kcfg:10
 #. i18n: ectx: label, entry (sloppyFocus), group (General)
-#: rc.cpp:15 rc.cpp:48
+#. i18n: file: src/prefs_base.ui:20
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
+#. i18n: file: src/quadkonsole4.kcfg:10
+#. i18n: ectx: label, entry (sloppyFocus), group (General)
+#: i18n/rc.cpp:15 i18n/rc.cpp:75 rc.cpp:15 rc.cpp:75
 msgid "Focus follows mouse"
 msgstr "Aktivierung unter Mauszeiger"
 
 #. i18n: file: src/prefs_base.ui:27
 #. i18n: ectx: property (title), widget (QGroupBox, groupBox)
-#: rc.cpp:18
+#: i18n/rc.cpp:18 rc.cpp:18
 msgid "Startup"
 msgstr "Start"
 
 #. i18n: file: src/prefs_base.ui:46
 #. i18n: ectx: property (text), widget (QLabel, labelRows)
-#. i18n: file: src/quadkonsole4.kcfg:18
+#. i18n: file: src/quadkonsole4.kcfg:23
 #. i18n: ectx: label, entry (numRows), group (General)
-#: rc.cpp:21 rc.cpp:54
+#. i18n: file: src/prefs_base.ui:46
+#. i18n: ectx: property (text), widget (QLabel, labelRows)
+#. i18n: file: src/quadkonsole4.kcfg:23
+#. i18n: ectx: label, entry (numRows), group (General)
+#: i18n/rc.cpp:21 i18n/rc.cpp:84 rc.cpp:21 rc.cpp:84
 msgid "Number of rows"
 msgstr "Anzahl Zeilen"
 
 #. i18n: file: src/prefs_base.ui:63
 #. i18n: ectx: property (text), widget (QLabel, labelColumns)
-#: rc.cpp:24
+#: i18n/rc.cpp:24 rc.cpp:24
 msgid "Number of Columns"
 msgstr "Anzahl Spalten"
 
 #. i18n: file: src/prefs_base.ui:70
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
-#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: file: src/quadkonsole4.kcfg:19
 #. i18n: ectx: label, entry (startMaximized), group (General)
-#: rc.cpp:27 rc.cpp:51
+#. i18n: file: src/prefs_base.ui:70
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
+#. i18n: file: src/quadkonsole4.kcfg:19
+#. i18n: ectx: label, entry (startMaximized), group (General)
+#: i18n/rc.cpp:27 i18n/rc.cpp:81 rc.cpp:27 rc.cpp:81
 msgid "Start maximized"
 msgstr "Starte maximiert"
 
+#. i18n: file: src/prefs_base.ui:83
+#. i18n: ectx: property (text), widget (QLabel, labelHistorySize)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (historySize), group (General)
+#. i18n: file: src/prefs_base.ui:83
+#. i18n: ectx: property (text), widget (QLabel, labelHistorySize)
+#. i18n: file: src/quadkonsole4.kcfg:14
+#. i18n: ectx: label, entry (historySize), group (General)
+#: i18n/rc.cpp:30 i18n/rc.cpp:78 rc.cpp:30 rc.cpp:78
+msgid "Maximum length of history"
+msgstr "Maximale Länge des Verlaufs"
+
+#. i18n: file: src/prefs_base.ui:96
+#. i18n: ectx: property (suffix), widget (KIntNumInput, kcfg_historySize)
+#: i18n/rc.cpp:33 rc.cpp:33
+msgid " Addreesses"
+msgstr " Adressen"
+
+#. i18n: file: src/prefs_shutdown.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
+#: i18n/rc.cpp:36 src/quadkonsole.cpp:433 rc.cpp:36
+msgid "Shutdown"
+msgstr "Beenden"
+
 #. i18n: file: src/prefs_shutdown.ui:20
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
-#: rc.cpp:33
+#: i18n/rc.cpp:39 rc.cpp:39
 msgid "&Ask before terminating running processes"
 msgstr "Vor dem Beenden laufender Prozesse nachfragen"
 
+#. i18n: file: src/prefs_views.ui:14
+#. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
+#: i18n/rc.cpp:42 src/quadkonsole.cpp:436 rc.cpp:42
+msgid "Views"
+msgstr "Ansichten"
+
 #. i18n: file: src/prefs_views.ui:23
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
-#. i18n: file: src/quadkonsole4.kcfg:36
+#. i18n: file: src/quadkonsole4.kcfg:58
 #. i18n: ectx: label, entry (viewHasToolbar), group (Views)
-#: rc.cpp:39 rc.cpp:63
+#. i18n: file: src/prefs_views.ui:23
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
+#. i18n: file: src/quadkonsole4.kcfg:58
+#. i18n: ectx: label, entry (viewHasToolbar), group (Views)
+#: i18n/rc.cpp:45 i18n/rc.cpp:114 rc.cpp:45 rc.cpp:114
 msgid "Display a toolbar for each view"
 msgstr "Zeige eine Toolbar für jede Ansicht"
 
 #. i18n: file: src/prefs_views.ui:33
 #. i18n: ectx: property (text), widget (QLabel, mimeTypesLabel)
-#: rc.cpp:42
+#: i18n/rc.cpp:48 rc.cpp:48
 msgid "Supported MIME types"
 msgstr "Unterstützte MIME Typen"
 
 #. i18n: file: src/prefs_views.ui:40
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
-#. i18n: file: src/quadkonsole4.kcfg:40
+#. i18n: file: src/quadkonsole4.kcfg:62
 #. i18n: ectx: label, entry (autoloadView), group (Views)
-#: rc.cpp:45 rc.cpp:66
+#. i18n: file: src/prefs_views.ui:40
+#. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
+#. i18n: file: src/quadkonsole4.kcfg:62
+#. i18n: ectx: label, entry (autoloadView), group (Views)
+#: i18n/rc.cpp:51 i18n/rc.cpp:117 rc.cpp:51 rc.cpp:117
 msgid "Load new views automatically for unhandles MIME types"
 msgstr "Lade automatisch weitere Ansichten für neue MIME Typen"
 
-#. i18n: file: src/quadkonsole4.kcfg:23
+#. i18n: file: src/prefs_views.ui:47
+#. i18n: ectx: property (text), widget (QLabel, label)
+#. i18n: file: src/quadkonsole4.kcfg:41
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#. i18n: file: src/prefs_views.ui:47
+#. i18n: ectx: property (text), widget (QLabel, label)
+#. i18n: file: src/quadkonsole4.kcfg:41
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#: i18n/rc.cpp:54 i18n/rc.cpp:93 rc.cpp:54 rc.cpp:93
+msgid "Tab bar display"
+msgstr "Unterfensterleiste anzeigen"
+
+#. i18n: file: src/prefs_views.ui:61
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:43
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#. i18n: file: src/prefs_views.ui:61
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:43
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#: i18n/rc.cpp:57 i18n/rc.cpp:96 rc.cpp:57 rc.cpp:96
+msgid "Always"
+msgstr "Immer anzeigen"
+
+#. i18n: file: src/prefs_views.ui:66
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:44
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#. i18n: file: src/prefs_views.ui:66
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:44
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#: i18n/rc.cpp:60 i18n/rc.cpp:99 rc.cpp:60 rc.cpp:99
+msgid "When needed"
+msgstr "Bei Bedarf anzeigen"
+
+#. i18n: file: src/prefs_views.ui:71
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:45
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#. i18n: file: src/prefs_views.ui:71
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
+#. i18n: file: src/quadkonsole4.kcfg:45
+#. i18n: ectx: label, entry (showTabBar), group (Views)
+#: i18n/rc.cpp:63 i18n/rc.cpp:102 rc.cpp:63 rc.cpp:102
+msgid "Never"
+msgstr "Immer ausblenden"
+
+#. i18n: file: src/prefs_views.ui:79
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#. i18n: file: src/quadkonsole4.kcfg:50
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#. i18n: file: src/prefs_views.ui:79
+#. i18n: ectx: property (text), widget (QLabel, label_2)
+#. i18n: file: src/quadkonsole4.kcfg:50
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#: i18n/rc.cpp:66 i18n/rc.cpp:105 rc.cpp:66 rc.cpp:105
+msgid "Tab bar position"
+msgstr "Postion der Unterfensterleiste"
+
+#. i18n: file: src/prefs_views.ui:93
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
+#. i18n: file: src/quadkonsole4.kcfg:52
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#. i18n: file: src/prefs_views.ui:93
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
+#. i18n: file: src/quadkonsole4.kcfg:52
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#: i18n/rc.cpp:69 i18n/rc.cpp:108 rc.cpp:69 rc.cpp:108
+msgid "Above"
+msgstr "Oberhalb der Ansichten"
+
+#. i18n: file: src/prefs_views.ui:98
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
+#. i18n: file: src/quadkonsole4.kcfg:53
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#. i18n: file: src/prefs_views.ui:98
+#. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
+#. i18n: file: src/quadkonsole4.kcfg:53
+#. i18n: ectx: label, entry (tabBarPosition), group (Views)
+#: i18n/rc.cpp:72 i18n/rc.cpp:111 rc.cpp:72 rc.cpp:111
+msgid "Below"
+msgstr "Unterhalb der Ansichten"
+
+#. i18n: file: src/quadkonsole4.kcfg:28
 #. i18n: ectx: label, entry (numCols), group (General)
-#: rc.cpp:57
+#: i18n/rc.cpp:87 rc.cpp:87
 msgid "Number of columns"
 msgstr "Anzahl Spalten"
 
-#. i18n: file: src/quadkonsole4.kcfg:30
+#. i18n: file: src/quadkonsole4.kcfg:35
 #. i18n: ectx: label, entry (queryClose), group (Shutdown)
-#: rc.cpp:60
+#: i18n/rc.cpp:90 rc.cpp:90
 msgid "Ask before terminating running processes"
 msgstr "Vor dem Beenden laufender Prozesse nachfragen"
 
-#. i18n: file: src/quadkonsole4.kcfg:44
+#. i18n: file: src/quadkonsole4.kcfg:66
 #. i18n: ectx: label, entry (views), group (Views)
-#: rc.cpp:69
+#: i18n/rc.cpp:120 rc.cpp:120
 msgid "Prepare these views"
 msgstr "Bereite diese Ansichten vor"
 
-#. i18n: file: src/quadkonsole4ui.rc:26
+#. i18n: file: src/quadkonsole4ui.rc:10
+#. i18n: ectx: Menu (file)
+#: i18n/rc.cpp:124 rc.cpp:124
+msgid "&File"
+msgstr "&Datei"
+
+#. i18n: file: src/quadkonsole4ui.rc:17
+#. i18n: ectx: Menu (view)
+#: i18n/rc.cpp:127 rc.cpp:127
+msgid "&View"
+msgstr "&Ansicht"
+
+#. i18n: file: src/quadkonsole4ui.rc:25
+#. i18n: ectx: Menu (go)
+#: i18n/rc.cpp:130 rc.cpp:130
+msgid "&Go"
+msgstr "&Gehe zu"
+
+#. i18n: file: src/quadkonsole4ui.rc:31
+#. i18n: ectx: Menu (settings)
+#: i18n/rc.cpp:133 rc.cpp:133
+msgid "&Settings"
+msgstr "&Einstellungen"
+
+#. i18n: file: src/quadkonsole4ui.rc:43
 #. i18n: ectx: ToolBar (mainToolBar)
-#: rc.cpp:73
+#: i18n/rc.cpp:136 rc.cpp:136
 msgid "Main Toolbar"
 msgstr "Haupt-Werkzeugleiste"
 
-#: rc.cpp:74
+#: i18n/rc.cpp:137 rc.cpp:137
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr "Karsten Borgwaldt"
 
-#: rc.cpp:75
+#: i18n/rc.cpp:138 rc.cpp:138
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr "kb@kb.ccchl.de"
+
+#: src/closedialog.cpp:42
+msgid "Don't detach"
+msgstr "Nicht abtrennen"
+
+#: src/closedialog.cpp:46
+msgid "Detach selected"
+msgstr "Ausgewählte abtrennen"
+
+#: src/main.cpp:36
+msgid "Embeds multiple Konsoles in a grid layout"
+msgstr "Ordnet mehrere Konsolen in einem Gitter an"
+
+#: src/main.cpp:41
+msgid "quadkonsole4"
+msgstr "quadkonsole4"
+
+#: src/main.cpp:41
+msgid ""
+"(C) 2005 Simon Perreault\n"
+"(C) 2009 - 2011 Karsten Borgwaldt"
+msgstr ""
+"(C) 2005 Simon Perreault\n"
+"(C) 2009 - 2011 Karsten Borgwaldt"
+
+#: src/main.cpp:42
+msgid "Simon Perreault"
+msgstr "Simon Perrault"
+
+#: src/main.cpp:43
+msgid "Karsten Borgwaldt"
+msgstr "Karsten Borgwaldt"
+
+#: src/main.cpp:47
+msgid "Number of rows of terminal emulators"
+msgstr "Anzahl Zeilen von Terminalemulatoren"
+
+#: src/main.cpp:48
+msgid "Number of columns of terminal emulators"
+msgstr "Anzahl Spalten von Terminalemulatoren"
+
+#: src/main.cpp:49
+msgid "Run command (may be used multiple times)"
+msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
+
+#: src/qkstack.cpp:230
+msgid "No view is able to open \"%1\""
+msgstr "Keine Ansicht kann \"%1\" öffnen"
+
+#: src/qkview.cpp:62
+msgid "Could not create a factory for %1."
+msgstr "Konnte Factory für %1 nicht erstellen."
+
+#: src/qkview.cpp:245
+msgid "The factory for %1 could not create a KPart."
+msgstr "Die Factory für %1 konnte kein KPart laden."
+
+#: src/qkview.cpp:330
+msgid "%1 files selected (%2)"
+msgstr "%1 Dateien ausgewählt (%2)"
+
+#: src/quadkonsole.cpp:155
+msgid "Go &right"
+msgstr "Gehe nach &rechts"
+
+#: src/quadkonsole.cpp:160
+msgid "Go &left"
+msgstr "Gehe nach &links"
+
+#: src/quadkonsole.cpp:165
+msgid "Go &up"
+msgstr "Gehe &hoch"
+
+#: src/quadkonsole.cpp:170
+msgid "Go &down"
+msgstr "Gehe her&unter"
+
+#: src/quadkonsole.cpp:176
+msgid "De&tach"
+msgstr "&Abtrennen"
+
+#: src/quadkonsole.cpp:181
+msgid "Insert &horizontal"
+msgstr "Einfügen: &horizontal"
+
+#: src/quadkonsole.cpp:186
+msgid "Insert &vertical"
+msgstr "Einfügen: &vertikal"
+
+#: src/quadkonsole.cpp:191
+msgid "Re&move part"
+msgstr "Ansicht &entfernen"
+
+#: src/quadkonsole.cpp:197
+msgid "R&eset layouts"
+msgstr "Gitter &zurücksezten"
+
+#: src/quadkonsole.cpp:201
+msgid "S&witch view"
+msgstr "Ansicht &welchseln"
+
+#: src/quadkonsole.cpp:206
+msgid "&Open URL"
+msgstr "Adresse ö&ffnen"
+
+#: src/quadkonsole.cpp:211
+msgid "&Close view"
+msgstr "Ansicht &schließen"
+
+#: src/quadkonsole.cpp:228
+msgid "Save session"
+msgstr "Sitzung speichern"
+
+#: src/quadkonsole.cpp:232
+msgid "Restore session"
+msgstr "Sitzung wiederherstellen"
+
+#: src/quadkonsole.cpp:642
+msgid "The process \"%1\" is still running. Do you want to terminate it?"
+msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
 
 #~ msgid "Paste &selection"
 #~ msgstr "Zwischenablage &einfügen"

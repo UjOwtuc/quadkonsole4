@@ -3,22 +3,11 @@ BASEDIR="../"
 PROJECT="quadkonsole4"
 BUGADDR="quadkonsole4@kb.ccchl.de"
 WDIR=`pwd`
-GIT=no
-if [ -d "$BASEDIR/.git" ] && [ -x `which git 2>&1` ]
-then
-	echo "using 'git ls-files' to find translatable strings"
-	GIT=yes
-fi
 
 echo "Preparing rc files"
 cd ${BASEDIR}
 # we use simple sorting to make sure the lines do not jump around too much from system to system
-if [ $GIT = "yes" ]
-then
-	git ls-files '*.rc' '*.ui' '*.kcfg' | sort > ${WDIR}/rcfiles.list
-else
-	find . -type f \( -name '*.rc' -o -name '*.ui' -o -name '*.kcfg' \) | sort > ${WDIR}/rcfiles.list
-fi
+find . -type f \( -name '*.rc' -o -name '*.ui' -o -name '*.kcfg' \) | sort > ${WDIR}/rcfiles.list
 xargs --arg-file=${WDIR}/rcfiles.list extractrc > ${WDIR}/rc.cpp
 # additional string for KAboutData
 echo 'i18nc("NAME OF TRANSLATORS","Your names");' >> ${WDIR}/rc.cpp
@@ -30,12 +19,7 @@ echo "Done preparing rc files"
 echo "Extracting messages"
 cd ${BASEDIR}
 # see above on sorting
-if [ $GIT = "yes" ]
-then
-	git ls-files '*.cpp' '*.h' '*.c' | sort > ${WDIR}/infiles.list
-else
-	find . -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) | sort > ${WDIR}/infiles.list
-fi
+find . -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) | sort > ${WDIR}/infiles.list
 echo "rc.cpp" >> ${WDIR}/infiles.list
 cd ${WDIR}
 xgettext --from-code=UTF-8 -C -kde -ci18n -ki18n:1 -ki18nc:1c,2 -ki18np:1,2 -ki18ncp:1c,2,3 -ktr2i18n:1 \

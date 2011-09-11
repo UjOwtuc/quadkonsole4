@@ -3,26 +3,27 @@
 # This file is distributed under the same license as the QuadKonsole4 package.
 #
 # Karsten Borgwaldt <kb@kb.ccchl.de>, 2011.
+# Pavel Fric <pavelfric@seznam.cz>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-09-10 15:53+0200\n"
-"PO-Revision-Date: 2011-09-10 15:58+0200\n"
-"Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
-"Language-Team: German <kde-i18n-de@kde.org>\n"
-"Language: \n"
+"Project-Id-Version: amarok\n"
+"Report-Msgid-Bugs-To: http://bugs.kde.org\n"
+"POT-Creation-Date: 2010-05-20 04:55+0200\n"
+"PO-Revision-Date: 2011-09-11 15:16+0200\n"
+"Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
+"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.2\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Language: cs_CZ\n"
 
 #. i18n: file: src/detach_processes.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, DetachProcesses)
 #: i18n/rc.cpp:3 rc.cpp:3
 msgid "Detach processes"
-msgstr "Prozesse Ab&trennen"
+msgstr "Oddělit procesy"
 
 #. i18n: file: src/detach_processes.ui:20
 #. i18n: ectx: property (text), widget (QLabel, lTitle)
@@ -31,20 +32,19 @@ msgid ""
 "The following processes are still running. Do you wish to detach the "
 "containing windows before exiting?"
 msgstr ""
-"Die folgenden Prozesse laufen noch. Möchten Sie diese Fenster vor den "
-"Beenden abtrennen?"
+"Následující procesy ještě běží. Chcete tato okna před ukončením oddělit?"
 
 #. i18n: file: src/detach_processes.ui:36
 #. i18n: ectx: property (text), widget (QTableWidget, processTable)
 #: i18n/rc.cpp:9 rc.cpp:9
 msgid "Process"
-msgstr "Prozess"
+msgstr "Proces"
 
 #. i18n: file: src/prefs_base.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, prefs_base)
 #: i18n/rc.cpp:12 src/quadkonsole.cpp:428 rc.cpp:12
 msgid "General"
-msgstr "Allgemein"
+msgstr "Obecné"
 
 #. i18n: file: src/prefs_base.ui:20
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_sloppyFocus)
@@ -56,13 +56,13 @@ msgstr "Allgemein"
 #. i18n: ectx: label, entry (sloppyFocus), group (General)
 #: i18n/rc.cpp:15 i18n/rc.cpp:75 rc.cpp:15 rc.cpp:75
 msgid "Focus follows mouse"
-msgstr "Aktivierung unter Mauszeiger"
+msgstr "Aktivace pod ukazovátkem myši"
 
 #. i18n: file: src/prefs_base.ui:27
 #. i18n: ectx: property (title), widget (QGroupBox, groupBox)
 #: i18n/rc.cpp:18 rc.cpp:18
 msgid "Startup"
-msgstr "Start"
+msgstr "Spuštění"
 
 #. i18n: file: src/prefs_base.ui:46
 #. i18n: ectx: property (text), widget (QLabel, labelRows)
@@ -74,13 +74,13 @@ msgstr "Start"
 #. i18n: ectx: label, entry (numRows), group (General)
 #: i18n/rc.cpp:21 i18n/rc.cpp:84 rc.cpp:21 rc.cpp:84
 msgid "Number of rows"
-msgstr "Anzahl Zeilen"
+msgstr "Počet řádků"
 
 #. i18n: file: src/prefs_base.ui:63
 #. i18n: ectx: property (text), widget (QLabel, labelColumns)
 #: i18n/rc.cpp:24 rc.cpp:24
 msgid "Number of Columns"
-msgstr "Anzahl Spalten"
+msgstr "Počet sloupců"
 
 #. i18n: file: src/prefs_base.ui:70
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_startMaximized)
@@ -92,7 +92,7 @@ msgstr "Anzahl Spalten"
 #. i18n: ectx: label, entry (startMaximized), group (General)
 #: i18n/rc.cpp:27 i18n/rc.cpp:81 rc.cpp:27 rc.cpp:81
 msgid "Start maximized"
-msgstr "Starte maximiert"
+msgstr "Spustit zvětšené"
 
 #. i18n: file: src/prefs_base.ui:83
 #. i18n: ectx: property (text), widget (QLabel, labelHistorySize)
@@ -104,31 +104,31 @@ msgstr "Starte maximiert"
 #. i18n: ectx: label, entry (historySize), group (General)
 #: i18n/rc.cpp:30 i18n/rc.cpp:78 rc.cpp:30 rc.cpp:78
 msgid "Maximum length of history"
-msgstr "Maximale Länge des Verlaufs"
+msgstr "Největší délka historie"
 
 #. i18n: file: src/prefs_base.ui:96
 #. i18n: ectx: property (suffix), widget (KIntNumInput, kcfg_historySize)
 #: i18n/rc.cpp:33 rc.cpp:33
 msgid " Addreesses"
-msgstr " Adressen"
+msgstr " Adresy"
 
 #. i18n: file: src/prefs_shutdown.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, prefs_shutdown)
 #: i18n/rc.cpp:36 src/quadkonsole.cpp:433 rc.cpp:36
 msgid "Shutdown"
-msgstr "Beenden"
+msgstr "Vypnutí"
 
 #. i18n: file: src/prefs_shutdown.ui:20
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_queryClose)
 #: i18n/rc.cpp:39 rc.cpp:39
 msgid "&Ask before terminating running processes"
-msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+msgstr "&Zeptat se před ukončením běžících procesů"
 
 #. i18n: file: src/prefs_views.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
 #: i18n/rc.cpp:42 src/quadkonsole.cpp:436 rc.cpp:42
 msgid "Views"
-msgstr "Ansichten"
+msgstr "Pohledy"
 
 #. i18n: file: src/prefs_views.ui:23
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
@@ -140,13 +140,13 @@ msgstr "Ansichten"
 #. i18n: ectx: label, entry (viewHasToolbar), group (Views)
 #: i18n/rc.cpp:45 i18n/rc.cpp:114 rc.cpp:45 rc.cpp:114
 msgid "Display a toolbar for each view"
-msgstr "Zeige eine Toolbar für jede Ansicht"
+msgstr "Pro každý pohled zobrazit jeden nástrojový panel"
 
 #. i18n: file: src/prefs_views.ui:33
 #. i18n: ectx: property (text), widget (QLabel, mimeTypesLabel)
 #: i18n/rc.cpp:48 rc.cpp:48
 msgid "Supported MIME types"
-msgstr "Unterstützte MIME Typen"
+msgstr "Podporované MIME typy"
 
 #. i18n: file: src/prefs_views.ui:40
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
@@ -158,7 +158,7 @@ msgstr "Unterstützte MIME Typen"
 #. i18n: ectx: label, entry (autoloadView), group (Views)
 #: i18n/rc.cpp:51 i18n/rc.cpp:117 rc.cpp:51 rc.cpp:117
 msgid "Load new views automatically for unhandles MIME types"
-msgstr "Lade automatisch weitere Ansichten für neue MIME Typen"
+msgstr "Nahrát automaticky další pohledy pro nové MIME typy"
 
 #. i18n: file: src/prefs_views.ui:47
 #. i18n: ectx: property (text), widget (QLabel, label)
@@ -170,7 +170,7 @@ msgstr "Lade automatisch weitere Ansichten für neue MIME Typen"
 #. i18n: ectx: label, entry (showTabBar), group (Views)
 #: i18n/rc.cpp:54 i18n/rc.cpp:93 rc.cpp:54 rc.cpp:93
 msgid "Tab bar display"
-msgstr "Unterfensterleiste anzeigen"
+msgstr "Zobrazit pruh s kartami"
 
 #. i18n: file: src/prefs_views.ui:61
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
@@ -182,7 +182,7 @@ msgstr "Unterfensterleiste anzeigen"
 #. i18n: ectx: label, entry (showTabBar), group (Views)
 #: i18n/rc.cpp:57 i18n/rc.cpp:96 rc.cpp:57 rc.cpp:96
 msgid "Always"
-msgstr "Immer anzeigen"
+msgstr "Vždy"
 
 #. i18n: file: src/prefs_views.ui:66
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
@@ -194,7 +194,7 @@ msgstr "Immer anzeigen"
 #. i18n: ectx: label, entry (showTabBar), group (Views)
 #: i18n/rc.cpp:60 i18n/rc.cpp:99 rc.cpp:60 rc.cpp:99
 msgid "When needed"
-msgstr "Bei Bedarf anzeigen"
+msgstr "V případě potřeby"
 
 #. i18n: file: src/prefs_views.ui:71
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
@@ -206,7 +206,7 @@ msgstr "Bei Bedarf anzeigen"
 #. i18n: ectx: label, entry (showTabBar), group (Views)
 #: i18n/rc.cpp:63 i18n/rc.cpp:102 rc.cpp:63 rc.cpp:102
 msgid "Never"
-msgstr "Immer ausblenden"
+msgstr "Nikdy"
 
 #. i18n: file: src/prefs_views.ui:79
 #. i18n: ectx: property (text), widget (QLabel, label_2)
@@ -218,7 +218,7 @@ msgstr "Immer ausblenden"
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
 #: i18n/rc.cpp:66 i18n/rc.cpp:105 rc.cpp:66 rc.cpp:105
 msgid "Tab bar position"
-msgstr "Postion der Unterfensterleiste"
+msgstr "Poloha pruhu s kartami"
 
 #. i18n: file: src/prefs_views.ui:93
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
@@ -230,7 +230,7 @@ msgstr "Postion der Unterfensterleiste"
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
 #: i18n/rc.cpp:69 i18n/rc.cpp:108 rc.cpp:69 rc.cpp:108
 msgid "Above"
-msgstr "Oberhalb der Ansichten"
+msgstr "Nad pohledy"
 
 #. i18n: file: src/prefs_views.ui:98
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
@@ -242,77 +242,77 @@ msgstr "Oberhalb der Ansichten"
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
 #: i18n/rc.cpp:72 i18n/rc.cpp:111 rc.cpp:72 rc.cpp:111
 msgid "Below"
-msgstr "Unterhalb der Ansichten"
+msgstr "Pod pohledy"
 
 #. i18n: file: src/quadkonsole4.kcfg:28
 #. i18n: ectx: label, entry (numCols), group (General)
 #: i18n/rc.cpp:87 rc.cpp:87
 msgid "Number of columns"
-msgstr "Anzahl Spalten"
+msgstr "Počet sloupců"
 
 #. i18n: file: src/quadkonsole4.kcfg:35
 #. i18n: ectx: label, entry (queryClose), group (Shutdown)
 #: i18n/rc.cpp:90 rc.cpp:90
 msgid "Ask before terminating running processes"
-msgstr "Vor dem Beenden laufender Prozesse nachfragen"
+msgstr "Zeptat se před ukončením běžících procesů"
 
 #. i18n: file: src/quadkonsole4.kcfg:66
 #. i18n: ectx: label, entry (views), group (Views)
 #: i18n/rc.cpp:120 rc.cpp:120
 msgid "Prepare these views"
-msgstr "Bereite diese Ansichten vor"
+msgstr "Připravit tyto pohledy"
 
 #. i18n: file: src/quadkonsole4ui.rc:10
 #. i18n: ectx: Menu (file)
 #: i18n/rc.cpp:124 rc.cpp:124
 msgid "&File"
-msgstr "&Datei"
+msgstr "&Soubor"
 
 #. i18n: file: src/quadkonsole4ui.rc:17
 #. i18n: ectx: Menu (view)
 #: i18n/rc.cpp:127 rc.cpp:127
 msgid "&View"
-msgstr "&Ansicht"
+msgstr "&Pohled"
 
 #. i18n: file: src/quadkonsole4ui.rc:25
 #. i18n: ectx: Menu (go)
 #: i18n/rc.cpp:130 rc.cpp:130
 msgid "&Go"
-msgstr "&Gehe zu"
+msgstr "&Přechod"
 
 #. i18n: file: src/quadkonsole4ui.rc:31
 #. i18n: ectx: Menu (settings)
 #: i18n/rc.cpp:133 rc.cpp:133
 msgid "&Settings"
-msgstr "&Einstellungen"
+msgstr "&Nastavení"
 
 #. i18n: file: src/quadkonsole4ui.rc:43
 #. i18n: ectx: ToolBar (mainToolBar)
 #: i18n/rc.cpp:136 rc.cpp:136
 msgid "Main Toolbar"
-msgstr "Haupt-Werkzeugleiste"
+msgstr "Hlavní nástrojový pruh"
 
 #: i18n/rc.cpp:137 rc.cpp:137
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
-msgstr "Karsten Borgwaldt"
+msgstr "Pavel Fric"
 
 #: i18n/rc.cpp:138 rc.cpp:138
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
-msgstr "kb@kb.ccchl.de"
+msgstr "fripohled.blogspot.com"
 
 #: src/closedialog.cpp:42
 msgid "Don't detach"
-msgstr "Nicht abtrennen"
+msgstr "Neoddělovat"
 
 #: src/closedialog.cpp:46
 msgid "Detach selected"
-msgstr "Ausgewählte abtrennen"
+msgstr "Oddělit vybrané"
 
 #: src/main.cpp:36
 msgid "Embeds multiple Konsoles in a grid layout"
-msgstr "Ordnet mehrere Konsolen in einem Gitter an"
+msgstr "Uspořádá více konzolí v jedné mřížce"
 
 #: src/main.cpp:41
 msgid "quadkonsole4"
@@ -336,97 +336,89 @@ msgstr "Karsten Borgwaldt"
 
 #: src/main.cpp:47
 msgid "Number of rows of terminal emulators"
-msgstr "Anzahl Zeilen von Terminalemulatoren"
+msgstr "Počet řádků emulátorů terminálů"
 
 #: src/main.cpp:48
 msgid "Number of columns of terminal emulators"
-msgstr "Anzahl Spalten von Terminalemulatoren"
+msgstr "Počet sloupců emulátorů terminálů"
 
 #: src/main.cpp:49
 msgid "Run command (may be used multiple times)"
-msgstr "Befehl ausführen (kann mehrere Male angegeben werden)"
+msgstr "Spustit příkaz (lze použít vícekrát)"
 
 #: src/qkstack.cpp:230
 msgid "No view is able to open \"%1\""
-msgstr "Keine Ansicht kann \"%1\" öffnen"
+msgstr "Žádný pohled nedokáže otevřít \"%1\""
 
 #: src/qkview.cpp:62
 msgid "Could not create a factory for %1."
-msgstr "Konnte Factory für %1 nicht erstellen."
+msgstr "Nepodařilo se vytvořit továrnu (factory) pro %1."
 
 #: src/qkview.cpp:245
 msgid "The factory for %1 could not create a KPart."
-msgstr "Die Factory für %1 konnte kein KPart laden."
+msgstr "Továrně (factory) pro %1 se nepodařilo nahrát žádnou KPart."
 
 #: src/qkview.cpp:330
 msgid "%1 files selected (%2)"
-msgstr "%1 Dateien ausgewählt (%2)"
+msgstr "%1 soubory(ů) vybrány(o) (%2)"
 
 #: src/quadkonsole.cpp:155
 msgid "Go &right"
-msgstr "Gehe nach &rechts"
+msgstr "Jít &vpravo"
 
 #: src/quadkonsole.cpp:160
 msgid "Go &left"
-msgstr "Gehe nach &links"
+msgstr "Jít v&levo"
 
 #: src/quadkonsole.cpp:165
 msgid "Go &up"
-msgstr "Gehe &hoch"
+msgstr "Jít &nahoru"
 
 #: src/quadkonsole.cpp:170
 msgid "Go &down"
-msgstr "Gehe her&unter"
+msgstr "Jít &dolů"
 
 #: src/quadkonsole.cpp:176
 msgid "De&tach"
-msgstr "&Abtrennen"
+msgstr "&Oddělit"
 
 #: src/quadkonsole.cpp:181
 msgid "Insert &horizontal"
-msgstr "Einfügen: &horizontal"
+msgstr "Vložit &vodorovně"
 
 #: src/quadkonsole.cpp:186
 msgid "Insert &vertical"
-msgstr "Einfügen: &vertikal"
+msgstr "Vložit &svisle"
 
 #: src/quadkonsole.cpp:191
 msgid "Re&move part"
-msgstr "Ansicht &entfernen"
+msgstr "&Odstranit pohled"
 
 #: src/quadkonsole.cpp:197
 msgid "R&eset layouts"
-msgstr "Gitter &zurücksezten"
+msgstr "&Nastavit mřížku znovu"
 
 #: src/quadkonsole.cpp:201
 msgid "S&witch view"
-msgstr "Ansicht &welchseln"
+msgstr "&Změnit pohled"
 
 #: src/quadkonsole.cpp:206
 msgid "&Open URL"
-msgstr "Adresse ö&ffnen"
+msgstr "O&tevřít adresu (URL)"
 
 #: src/quadkonsole.cpp:211
 msgid "&Close view"
-msgstr "Ansicht &schließen"
+msgstr "Za&vřít pohled"
 
 #: src/quadkonsole.cpp:228
 msgid "Save session"
-msgstr "Sitzung speichern"
+msgstr "Uložit sezení"
 
 #: src/quadkonsole.cpp:232
 msgid "Restore session"
-msgstr "Sitzung wiederherstellen"
+msgstr "Obnovit sezení"
 
 #: src/quadkonsole.cpp:642
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
-msgstr "Der Prozess \"%1\" läuft noch. Möchten Sie ihn beenden?"
+msgstr "Proces \"%1\" ještě běží. Chcete jej ukončit?"
 
-#~ msgid "Paste &selection"
-#~ msgstr "Zwischenablage &einfügen"
-
-#~ msgid ""
-#~ "Unable to create a factory for \"libkonsolepart\". Is Konsole installed?"
-#~ msgstr ""
-#~ "Konnte Factory für \"libkonsolepart\" nicht erstellen. Ist Konsole "
-#~ "installiert?"

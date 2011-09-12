@@ -81,6 +81,7 @@ class QKView : public QWidget
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
 		void openUrlRequest(KUrl);
+		void openUrlNotify();
 		void popupMenu(QPoint, KFileItemList, KParts::BrowserExtension::PopupFlags flags, KParts::BrowserExtension::ActionGroupMap);
 		void iconChanged();
 

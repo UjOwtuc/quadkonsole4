@@ -103,7 +103,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 
 
 // for detaching parts
-QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
+QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition)
 	: mFilter(0),
 	m_partManager(this, this)
 {
@@ -112,6 +112,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 	setupActions();
 	setupUi(1, 1, parts);
+	m_stacks.front()->setHistory(history, historyPosition);
 	setupGUI();
 	showNormal();
 }
@@ -363,7 +364,7 @@ void QuadKonsole::detach(QKStack* stack)
 
 	KParts::ReadOnlyPart* part = stack->part();
 	stack->partDestroyed();
-	QuadKonsole* external = new QuadKonsole(part);
+	QuadKonsole* external = new QuadKonsole(part, stack->history(), stack->historyPosition());
 	external->setAttribute(Qt::WA_DeleteOnClose);
 	stack->switchView(KUrl("~"), "inode/directory", true);
 }

@@ -96,7 +96,7 @@ class QuadKonsole : public KParts::MainWindow
 		void readProperties(const KConfigGroup& config);
 
 	private:
-		QuadKonsole(KParts::ReadOnlyPart* part);
+		QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition);
 		void setupActions();
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
 		void emitPaste(QClipboard::Mode mode);

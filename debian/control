@@ -7,7 +7,7 @@ Standards-Version: 3.8.4
 Homepage: http://kb.ccchl.de/quadkonsole4
 
 Package: quadkonsole4
-Architecture: amd64
+Architecture: amd64 i386
 Depends: konsole (>= 4.0.0), ${shlibs:Depends}, ${misc:Depends}
 Description: X terminal emulator
  QuadKonsole4 embeds Konsole KParts in a grid layout.

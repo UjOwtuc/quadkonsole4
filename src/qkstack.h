@@ -53,6 +53,9 @@ class QKStack : public KTabWidget
 		void partDestroyed();
 		int addViews(const QStringList& partNames);
 		int historyLength() const { return m_history.count(); }
+		const QList<KUrl>& history() { return m_history; }
+		int historyPosition() { return m_historyPosition; }
+		void setHistory(const QList<KUrl>& history, int historyPosition);
 
 	signals:
 		void partCreated();
@@ -78,6 +81,7 @@ class QKStack : public KTabWidget
 		void slotSetWindowCaption(QString text);
 		void slotMimetype(KIO::Job* job, QString mimeType);
 		void slotOpenUrlRequest(KUrl url);
+		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);
 		void popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
@@ -88,6 +92,7 @@ class QKStack : public KTabWidget
 		void setupUi(KParts::ReadOnlyPart* part=0);
 		void addViewActions(QKView* view);
 		void checkEnableActions();
+		void addHistoryEntry(const KUrl& url);
 
 		KParts::PartManager& m_partManager;
 		QKBrowserInterface* m_browserInterface;

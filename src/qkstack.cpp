@@ -145,6 +145,14 @@ int QKStack::addViews(const QStringList& partNames)
 }
 
 
+void QKStack::setHistory(const QList< KUrl >& history, int historyPosition)
+{
+	m_history = history;
+	m_historyPosition = historyPosition;
+	checkEnableActions();
+}
+
+
 void QKStack::switchView()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
@@ -243,31 +251,7 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (index != currentIndex())
 		setCurrentIndex(index);
 
-	if (! m_blockHistory)
-	{
-		// sanity checks (there was a crash related to history cleaning)
-		if (m_historyPosition < 0)
-			m_historyPosition = 0;
-
-		if (! m_history.isEmpty())
-		{
-			// remove forward entries
-			while (m_historyPosition < m_history.count() -1)
-				m_history.pop_back();
-
-			// filter duplicate entries
-			if (m_history.back() != url)
-				m_history.append(url);
-		}
-		else
-			m_history.append(url);
-
-		m_historyPosition = m_history.count() -1;
-
-		while (static_cast<unsigned>(m_history.size()) > Settings::historySize())
-			m_history.pop_front();
-	}
-	checkEnableActions();
+	addHistoryEntry(url);
 
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	view->show();
@@ -430,6 +414,14 @@ void QKStack::slotOpenUrlRequest(KUrl url)
 }
 
 
+void QKStack::slotOpenUrlNotify()
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+		addHistoryEntry(view->getURL());
+}
+
+
 void QKStack::slotCurrentChanged()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
@@ -576,6 +568,7 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
+	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
 	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 	connect(view, SIGNAL(iconChanged()), SLOT(slotIconChanged()));
 }
@@ -592,6 +585,36 @@ void QKStack::checkEnableActions()
 		enableAction("go_forward", true);
 	else
 		enableAction("go_forward", false);
+}
+
+
+void QKStack::addHistoryEntry(const KUrl& url)
+{
+	if (! m_blockHistory)
+	{
+		// sanity checks (there was a crash related to history cleaning)
+		if (m_historyPosition < 0)
+			m_historyPosition = 0;
+
+		if (! m_history.isEmpty())
+		{
+			// remove forward entries
+			while (m_historyPosition < m_history.count() -1)
+				m_history.pop_back();
+
+			// filter duplicate entries
+			if (m_history.back() != url)
+				m_history.append(url);
+		}
+		else
+			m_history.append(url);
+
+		m_historyPosition = m_history.count() -1;
+
+		while (static_cast<unsigned>(m_history.size()) > Settings::historySize())
+			m_history.pop_front();
+	}
+	checkEnableActions();
 }
 
 #include "qkstack.moc"

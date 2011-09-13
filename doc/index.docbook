@@ -44,7 +44,9 @@ and use `&George.N.Ugnacious; &George.N.Ugnacious.mail;' in the author element.
 
 <abstract>
 <para>
-&kmyapplication; embeds multiple Konsole KParts in one window. It provides several shortcuts to switch focus, create or remove KParts. You can also detach a Konsole into a new &kmyapplication; main window.
+&kmyapplication; tries to provide a keyboard focused interface to multiple KParts in one window. The default setting opens four Konsole KParts and defines some shortcuts for navigation. Because there is only one window decoration, it "wastes" a bit less screen space and all KParts are aligned automatically. You can open and close KParts at runtime using keyboard shortcuts or detach any KPart from the main window. Detaching a KPart will open a new &kmyapplication; that can be used exactly like the original.
+
+To use other KParts within &kmyapplication; you can either open a new URL using the URL bar (default: Ctrl+Shift+G) or have &kmyapplication; find another KPart for the current URL use KDE's global settings. Example: Create some tarball or other file using your favoutie commands, switch to dolphin and attach the new file to an email using drag'n'drop.
 </para>
 </abstract>
 

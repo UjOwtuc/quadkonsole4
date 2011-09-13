@@ -753,7 +753,20 @@ void QuadKonsole::slotStackDestroyed()
 {
 	QKStack* stack = qobject_cast<QKStack*>(sender());
 	if (stack)
+	{
 		m_stacks.removeAll(stack);
+		std::vector<QSplitter*>::iterator it;
+		for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
+		{
+			QSplitter* splitter = *it;
+			if (splitter->indexOf(stack) >= 0 && splitter->count() <= 1)
+			{
+				splitter->deleteLater();
+				mRowLayouts.erase(it);
+				break;
+			}
+		}
+	}
 	else
 		kDebug() << "sender is no QKStack" << endl;
 

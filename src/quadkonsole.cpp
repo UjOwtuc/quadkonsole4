@@ -173,6 +173,16 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("go down", goDown);
 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
 
+	KAction* tabLeft = new KAction(i18n("&Previous tab"), this);
+	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
+	actionCollection()->addAction("tab left", tabLeft);
+	connect(tabLeft, SIGNAL(triggered(bool)), this, SLOT(tabLeft()));
+
+	KAction* tabRight = new KAction(i18n("&Next tab"), this);
+	tabRight->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Right));
+	actionCollection()->addAction("tab right", tabRight);
+	connect(tabRight, SIGNAL(triggered(bool)), this, SLOT(tabRight()));
+
 	// Adding and removing parts
 	KAction* detach = new KAction(KIcon("document-new"), i18n("De&tach"), this);
 	detach->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
@@ -731,6 +741,27 @@ void QuadKonsole::closeView()
 	QKStack* stack = getFocusStack();
 	if (stack)
 		stack->slotTabCloseRequested(stack->currentIndex());
+}
+
+
+void QuadKonsole::tabLeft()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+	{
+		int index = stack->currentIndex() -1;
+		if (index < 0)
+			index = stack->count() -1;
+		stack->setCurrentIndex(index);
+	}
+}
+
+
+void QuadKonsole::tabRight()
+{
+	QKStack* stack = getFocusStack();
+	if (stack)
+		stack->setCurrentIndex((stack->currentIndex() +1) % stack->count());
 }
 
 

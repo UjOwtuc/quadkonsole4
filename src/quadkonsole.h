@@ -78,6 +78,8 @@ class QuadKonsole : public KParts::MainWindow
 		void goForward();
 		void goUp();
 		void closeView();
+		void tabLeft();
+		void tabRight();
 
 	private slots:
 		void slotActivePartChanged(KParts::Part* part);

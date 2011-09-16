@@ -46,7 +46,8 @@ int main(int argc, char **argv)
 	KCmdLineOptions options;
 	options.add("rows <rows>", ki18n("Number of rows of terminal emulators"), "2");
 	options.add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
-	options.add("cmd <command>", ki18n("Run command (may be used multiple times)"));
+	options.add("cmd [number:]<command>", ki18n("Run command [in given view] (may be used multiple times)"));
+	options.add("url [number:]<url>", ki18n("Open URL [in given view] (may be used multiple times)"));
 	KCmdLineArgs::addCmdLineOptions(options);
 	KApplication app;
 
@@ -65,8 +66,9 @@ int main(int argc, char **argv)
 		if (args->isSet("columns"))
 			columns = args->getOption("columns").toInt();
 		QStringList cmds = args->getOptionList("cmd");
+		QStringList urls = args->getOptionList("url");
 
-		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds);
+		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds, urls);
 		app.setTopWidget(mainWin);
 
 		if (Settings::startMaximized())

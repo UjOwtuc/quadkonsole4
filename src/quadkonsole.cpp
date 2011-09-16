@@ -56,6 +56,26 @@
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
 
+QString splitIndex(const QString& s, int* index)
+{
+	int pos = s.indexOf(':');
+	bool hasIndex = false;
+	int indexOut;
+
+	if (pos > -1)
+		indexOut = s.left(pos).toUInt(&hasIndex);
+
+	if (hasIndex)
+	{
+		if (index)
+			*index = indexOut;
+
+		return s.mid(pos +1);
+	}
+	return s;
+}
+
+
 // Only for restoring a session.
 QuadKonsole::QuadKonsole()
 	: mFilter(0),
@@ -67,7 +87,7 @@ QuadKonsole::QuadKonsole()
 }
 
 
-QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
+QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
 	: mFilter(0),
 	m_partManager(this, this)
 {
@@ -94,11 +114,9 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds)
 	setupGUI();
 
 	if (cmds.size())
-	{
-		int max = std::min(cmds.size(), m_stacks.count());
-		for (int i=0; i<max; ++i)
-			m_stacks[i]->sendInput(cmds[i] + "\n");
-	}
+		sendCommands(cmds);
+	if (urls.size())
+		openUrls(urls);
 }
 
 
@@ -762,6 +780,34 @@ void QuadKonsole::tabRight()
 	QKStack* stack = getFocusStack();
 	if (stack)
 		stack->setCurrentIndex((stack->currentIndex() +1) % stack->count());
+}
+
+
+void QuadKonsole::sendCommands(const QStringList& cmds)
+{
+	kDebug() << "sending commands" << cmds << endl;
+	for (int i=0; i<cmds.size(); ++i)
+	{
+		int index = i;
+		QString cmd = splitIndex(cmds[i], &index);
+
+		if (index < m_stacks.count())
+			m_stacks[index]->sendInput(cmd + "\n");
+	}
+}
+
+
+void QuadKonsole::openUrls(const QStringList& urls)
+{
+	kDebug() << "opening urls" << urls << endl;
+	for (int i=0; i<urls.size(); ++i)
+	{
+		int index = i;
+		QString url = splitIndex(urls[i], &index);
+
+		if (index < m_stacks.count())
+			m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+	}
 }
 
 

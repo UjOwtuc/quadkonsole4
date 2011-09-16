@@ -74,13 +74,13 @@ class QKStack : public KTabWidget
 		void goForward();
 		void goUp();
 		void goHistory(int steps);
+		void slotOpenUrlRequest(KUrl url);
 
 	private slots:
 		void slotPartCreated();
 		void slotSetStatusBarText(QString text);
 		void slotSetWindowCaption(QString text);
 		void slotMimetype(KIO::Job* job, QString mimeType);
-		void slotOpenUrlRequest(KUrl url);
 		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);

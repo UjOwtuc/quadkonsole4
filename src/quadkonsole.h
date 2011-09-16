@@ -51,7 +51,7 @@ class QuadKonsole : public KParts::MainWindow
 	Q_OBJECT
 	public:
 		QuadKonsole();
-		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList());
+		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
 
 	public slots:
@@ -80,6 +80,9 @@ class QuadKonsole : public KParts::MainWindow
 		void closeView();
 		void tabLeft();
 		void tabRight();
+
+		void sendCommands(const QStringList& cmds);
+		void openUrls(const QStringList& urls);
 
 	private slots:
 		void slotActivePartChanged(KParts::Part* part);

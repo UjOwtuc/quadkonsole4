@@ -785,21 +785,24 @@ void QuadKonsole::tabRight()
 
 void QuadKonsole::sendCommands(const QStringList& cmds)
 {
-	kDebug() << "sending commands" << cmds << endl;
 	for (int i=0; i<cmds.size(); ++i)
 	{
 		int index = i;
 		QString cmd = splitIndex(cmds[i], &index);
-
-		if (index < m_stacks.count())
-			m_stacks[index]->sendInput(cmd + "\n");
+		sendInput(index, cmd + "\n");
 	}
+}
+
+
+void QuadKonsole::sendInput(uint view, const QString& text)
+{
+	if (view < static_cast<uint>(m_stacks.count()))
+		m_stacks[view]->sendInput(text);
 }
 
 
 void QuadKonsole::openUrls(const QStringList& urls)
 {
-	kDebug() << "opening urls" << urls << endl;
 	for (int i=0; i<urls.size(); ++i)
 	{
 		int index = i;

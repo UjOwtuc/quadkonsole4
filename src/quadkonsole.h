@@ -49,10 +49,12 @@ namespace KParts
 class QuadKonsole : public KParts::MainWindow
 {
 	Q_OBJECT
+	Q_PROPERTY(uint numViews READ numViews)
 	public:
 		QuadKonsole();
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
+		uint numViews() const { return m_stacks.size(); }
 
 	public slots:
 		void focusKonsoleRight();
@@ -80,8 +82,8 @@ class QuadKonsole : public KParts::MainWindow
 		void closeView();
 		void tabLeft();
 		void tabRight();
-
 		void sendCommands(const QStringList& cmds);
+		void sendInput(uint view, const QString& text);
 		void openUrls(const QStringList& urls);
 
 	private slots:

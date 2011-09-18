@@ -16,3 +16,7 @@ obj-*/
 
 # autoversion
 src/version.h
+
+# Lokalize
+i18n/index.lokalize
+i18n/lokalize-scripts/

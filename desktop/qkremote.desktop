@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=qkremote
+Name[x-test]=xxqkremotexx
+Exec=qkremote %i -caption "%c"
+Icon=qkremote
+Type=Application
+X-DocPath=qkremote/index.html
+GenericName=A KDE KPart Application
+Terminal=false

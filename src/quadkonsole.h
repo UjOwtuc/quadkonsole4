@@ -54,27 +54,34 @@ class QuadKonsole : public KParts::MainWindow
 		QuadKonsole();
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
+
 		uint numViews() const { return m_stacks.size(); }
 
 	public slots:
-		void focusKonsoleRight();
-		void focusKonsoleLeft();
-		void focusKonsoleUp();
-		void focusKonsoleDown();
-		void detach(QKStack* stack=0);
-		void pasteClipboard();
-		void pasteSelection();
 		void resetLayouts();
 		void toggleMenu();
 		void optionsPreferences();
 		void settingsChanged();
 		void quit();
-		void insertHorizontal(int row=-1, int col=-1);
-		void insertVertical(int row=-1, int col=-1);
+		void insertHorizontal(int row, int col);
+		void insertVertical(int row, int col);
+		void sendCommands(const QStringList& cmds);
+		void sendInput(uint view, const QString& text);
+		void openUrls(const QStringList& urls);
+		void identifyStacks(QString format);
+
+	private slots:
+		void focusKonsoleRight();
+		void focusKonsoleLeft();
+		void focusKonsoleUp();
+		void focusKonsoleDown();
+		void insertHorizontal();
+		void insertVertical();
+		void detach(QKStack* stack=0);
+		void pasteClipboard();
+		void pasteSelection();
 		void removePart();
 		void switchView();
-		void setStatusBarText(QString text);
-		void setWindowCaption(QString text);
 		void toggleUrlBar();
 		void goBack();
 		void goForward();
@@ -82,11 +89,8 @@ class QuadKonsole : public KParts::MainWindow
 		void closeView();
 		void tabLeft();
 		void tabRight();
-		void sendCommands(const QStringList& cmds);
-		void sendInput(uint view, const QString& text);
-		void openUrls(const QStringList& urls);
-
-	private slots:
+		void setStatusBarText(const QString& text);
+		void setWindowCaption(const QString& text);
 		void slotActivePartChanged(KParts::Part* part);
 		void slotStackDestroyed();
 #ifdef DEBUG

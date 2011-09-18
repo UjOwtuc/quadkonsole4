@@ -34,6 +34,7 @@ add_subdirectory( doc )
 add_subdirectory( src )
 add_subdirectory( icons )
 add_subdirectory( i18n )
+add_subdirectory( desktop )
 
 set(CPACK_SOURCE_GENERATOR "TBZ2")
 set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;/.kdev4/;.*.kdev4;.*.swp")

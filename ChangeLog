@@ -1,3 +1,8 @@
+2011-09-18  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Added DBUS interface to send input to QuadKonsole4
+	* Added a KPart and shell for remote control (QKRemote)
+
 2011-09-10  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* New context menus

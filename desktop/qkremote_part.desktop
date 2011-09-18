@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=qkremotepart
+MimeType=
+ServiceTypes=KParts/ReadOnlyPart
+X-KDE-Library=qkremotepart
+Type=Service

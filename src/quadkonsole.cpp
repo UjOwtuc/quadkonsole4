@@ -52,6 +52,7 @@
 #include <QtGui/QClipboard>
 #include <QtGui/QLayout>
 #include <QtGui/QSplitter>
+#include <QtCore/QTimer>
 
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
@@ -619,11 +620,16 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 }
 
 
+void QuadKonsole::insertHorizontal()
+{
+	int row, col;
+	getFocusCoords(row, col);
+	insertHorizontal(row, col);
+}
+
+
 void QuadKonsole::insertHorizontal(int row, int col)
 {
-	if (row == -1 || col == -1)
-		getFocusCoords(row, col);
-
 	if (row >= 0 && col >= 0)
 	{
 		QKStack* stack = addStack(row, col);
@@ -634,11 +640,16 @@ void QuadKonsole::insertHorizontal(int row, int col)
 }
 
 
+void QuadKonsole::insertVertical()
+{
+	int row, col;
+	getFocusCoords(row, col);
+	insertVertical(row, col);
+}
+
+
 void QuadKonsole::insertVertical(int row, int col)
 {
-	if (row == -1 || col == -1)
-		getFocusCoords(row, col);
-
 	if (row >= 0 && col >= 0)
 	{
 		QSplitter *newRow = new QSplitter(Qt::Horizontal);
@@ -706,7 +717,7 @@ void QuadKonsole::switchView()
 }
 
 
-void QuadKonsole::setStatusBarText(QString text)
+void QuadKonsole::setStatusBarText(const QString& text)
 {
 	QKStack* stack = qobject_cast<QKStack*>(sender());
 	if (stack && stack->hasFocus())
@@ -714,7 +725,7 @@ void QuadKonsole::setStatusBarText(QString text)
 }
 
 
-void QuadKonsole::setWindowCaption(QString text)
+void QuadKonsole::setWindowCaption(const QString& text)
 {
 	QKStack* stack = qobject_cast<QKStack*>(sender());
 	if (stack && stack->hasFocus())
@@ -811,6 +822,29 @@ void QuadKonsole::openUrls(const QStringList& urls)
 		if (index < m_stacks.count())
 			m_stacks[index]->slotOpenUrlRequest(KUrl(url));
 	}
+}
+
+
+void QuadKonsole::identifyStacks(QString format)
+{
+	QTimer* idTimer = new QTimer;
+	connect(idTimer, SIGNAL(timeout()), idTimer, SLOT(deleteLater()));
+
+	if (! format.contains("%1"))
+		format += " %1";
+
+	for (int i=0; i<m_stacks.size(); ++i)
+	{
+		QLabel* label = new QLabel(format.arg(i));
+		label->setAlignment(Qt::AlignCenter);
+		label->setMargin(20);
+		label->setFont(QFont(fontInfo().family(), 3* fontInfo().pointSize()));
+		m_stacks[i]->currentWidget()->layout()->addWidget(label);
+		connect(idTimer, SIGNAL(timeout()), label, SLOT(deleteLater()));
+	}
+
+	idTimer->setSingleShot(true);
+	idTimer->start(3500);
 }
 
 

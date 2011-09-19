@@ -24,6 +24,7 @@
 #include <KDE/KComponentData>
 #include <KDE/KParts/GenericFactory>
 
+#include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QHBoxLayout>
@@ -42,12 +43,176 @@ typedef KParts::GenericFactory<QKRemotePart> QKRemotePartFactory;
 K_EXPORT_COMPONENT_FACTORY(qkremotepart, QKRemotePartFactory)
 
 
+namespace
+{
+	const char interfaceName[] = "de.ccchl.quadkonsole4.QuadKonsole";
+	const char introspectInterface[] = "org.freedesktop.DBus.Introspectable";
+	const QString destinationBase = "de.ccchl.quadkonsole4-%1";
+}
+
+
+QKRMainWindow::QKRMainWindow(QKRInstance* parent, const QString& dbusName, const QString& name)
+	: QObject(parent),
+	QTreeWidgetItem(parent),
+	m_dbusName(dbusName),
+	m_name(name)
+{
+	setText(0, m_name);
+	setIcon(0, KIcon("quadkonsole4"));
+	setData(0, Qt::UserRole, dbusName);
+	setData(1, Qt::UserRole, name);
+	parent->addChild(this);
+
+	update();
+}
+
+
+QKRMainWindow::~QKRMainWindow()
+{
+	while (m_views.count())
+		delete m_views.takeFirst();
+}
+
+
+void QKRMainWindow::update()
+{
+	QDBusInterface dbusIface(m_dbusName, QString("/quadkonsole4/")+m_name, interfaceName);
+	QVariant numViews = dbusIface.property("numViews");
+
+	if (numViews.canConvert<uint>())
+		m_numViews = numViews.toUInt();
+	else
+		kDebug() << "could not get numViews from" << m_dbusName << endl;
+
+	QDBusReply<QStringList> urls = dbusIface.call(QDBus::BlockWithGui, "urls");
+	if (! urls.isValid())
+		kDebug() << "could not get URL list from" << m_dbusName << urls.error().message() << endl;
+
+	QDBusReply<QStringList> icons = dbusIface.call(QDBus::BlockWithGui, "partIcons");
+	if (! icons.isValid())
+		kDebug() << "could not get part icons from" << m_dbusName << icons.error().message() << endl;
+
+	while (static_cast<uint>(m_views.count()) < m_numViews)
+	{
+		QTreeWidgetItem* item = new QTreeWidgetItem(this);
+		m_views.append(item);
+		addChild(item);
+	}
+	for (uint i=0; i<m_numViews; ++i)
+	{
+		m_views[i]->setText(0, QString::number(i));
+
+		if (static_cast<uint>(urls.value().count()) > i)
+			m_views[i]->setText(1, urls.value().at(i));
+
+		if (static_cast<uint>(icons.value().count()) > i)
+			m_views[i]->setIcon(0, KIcon(icons.value().at(i)));
+
+		m_views[i]->setData(0, Qt::UserRole, m_dbusName);
+		m_views[i]->setData(1, Qt::UserRole, m_name);
+		m_views[i]->setData(2, Qt::UserRole, i);
+	}
+	while (static_cast<uint>(m_views.count()) > m_numViews)
+	{
+		delete m_views.last();
+		m_views.pop_back();
+	}
+}
+
+
+void QKRMainWindow::sendInput(const QString& text)
+{
+	QDBusInterface iface(m_dbusName, QString("/quadkonsole4/")+m_name, interfaceName);
+	for (uint i=0; i<static_cast<uint>(m_views.count()); ++i)
+	{
+		if (m_views.at(i)->isSelected())
+			iface.call(QDBus::NoBlock, "sendInput", i, text);
+	}
+}
+
+
+QKRInstance::QKRInstance(QTreeWidget* parent, const QString& dbusName)
+	: QObject(parent),
+	QTreeWidgetItem(parent),
+	m_dbusName(dbusName)
+{
+	setText(0, m_dbusName);
+	setIcon(0, KIcon("qkremote"));
+	setData(0, Qt::UserRole, m_dbusName);
+	parent->addTopLevelItem(this);
+
+	update();
+}
+
+
+QKRInstance::~QKRInstance()
+{
+	QList<QKRMainWindow*> win = m_mainWindows.values();
+	while (win.count())
+	{
+		delete win.front();
+		win.pop_front();
+	}
+	win.clear();
+}
+
+
+void QKRInstance::update()
+{
+	QDBusInterface iface(m_dbusName, "/quadkonsole4", introspectInterface);
+	QDBusReply<QString> reply = iface.call(QDBus::BlockWithGui, "Introspect");
+	if (reply.isValid())
+	{
+		QString label(m_dbusName);
+		if (m_dbusName == destinationBase.arg(getpid()))
+			label += " (this process)";
+
+		QDomDocument doc;
+		doc.setContent(reply.value());
+		QDomElement root = doc.documentElement();
+		QDomNodeList nodes = root.elementsByTagName("node");
+
+		QStringList mainWindows;
+		for (uint i=0; i<nodes.length(); ++i)
+		{
+			QDomNamedNodeMap attrs = nodes.item(i).attributes();
+			QDomNode name = attrs.namedItem("name");
+			if (m_mainWindows.contains(name.nodeValue()))
+				m_mainWindows[name.nodeValue()]->update();
+			else
+				m_mainWindows[name.nodeValue()] = new QKRMainWindow(this, m_dbusName, name.nodeValue());
+
+			mainWindows << name.nodeValue();
+		}
+
+		QStringList cached = m_mainWindows.keys();
+		QStringListIterator it(cached);
+		while (it.hasNext())
+		{
+			QString name = it.next();
+			if (! mainWindows.contains(name))
+			{
+				kDebug() << "MainWindow" << name << "disappeared" << endl;
+				QKRMainWindow* win = m_mainWindows.take(name);
+				delete win;
+			}
+		}
+	}
+	else
+		kDebug() << "invalid reply to Introspect from" << m_dbusName << endl;
+}
+
+
+void QKRInstance::sendInput(const QString& text)
+{
+	QMapIterator<QString, QKRMainWindow*> it(m_mainWindows);
+	while (it.hasNext())
+		it.next().value()->sendInput(text);
+}
+
+
 const char QKRemotePart::version[] = QUADKONSOLE4_VERSION;
 const char QKRemotePart::partName[] = "qkremotepart";
-const QString QKRemotePart::destinationBase = "de.ccchl.quadkonsole4-%1";
-const char QKRemotePart::interfaceName[] = "de.ccchl.quadkonsole4.QuadKonsole";
-const char QKRemotePart::introspectInterface[] = "org.freedesktop.DBus.Introspectable";
-const char QKRemotePart::propertiesInterface[] = "org.freedesktop.DBus.Properties";
 
 
 QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStringList & /*args*/ )
@@ -67,6 +232,10 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	m_dbusConn = new QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SessionBus, partName));
 	m_dbusConn->registerService(partName);
 
+	m_updateTimer = new QTimer(this);
+	m_updateTimer->start(0);
+
+	connect(m_updateTimer, SIGNAL(timeout()), SLOT(refreshAvailableSlaves()));
 	connect(m_remote->refreshButton, SIGNAL(clicked(bool)), SLOT(refreshAvailableSlaves()));
 	connect(m_remote->identifyButton, SIGNAL(clicked(bool)), SLOT(identifyViews()));
 	connect(m_remote->availableSlaves, SIGNAL(itemActivated(QTreeWidgetItem*,int)), SLOT(focusInputLine()));
@@ -75,8 +244,9 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 
 	setXMLFile("qkremote_part.rc");
 
-	m_remote->availableSlaves->setHeaderLabel(i18n("Available slaves"));
-	refreshAvailableSlaves();
+	QStringList headerLabels;
+	headerLabels << i18n("Available slaves") << i18n("Current URL");
+	m_remote->availableSlaves->setHeaderLabels(headerLabels);
 
 	qApp->installEventFilter(m_eventFilter);
 }
@@ -85,6 +255,10 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 QKRemotePart::~QKRemotePart()
 {
 	delete m_eventFilter;
+	QList<QKRInstance*> instances = m_instances.values();
+	while (instances.count())
+		delete instances.takeFirst();
+	m_instances.clear();
 }
 
 
@@ -119,37 +293,9 @@ void QKRemotePart::sendInput(const QString& text)
 	m_remote->inputLine->clear();
 	setStatusBarText("");
 
-	QMap< QPair<QString, QString>, QList<uint> > targets;
-
-	QList<QTreeWidgetItem*> selected = m_remote->availableSlaves->selectedItems();
-	QListIterator<QTreeWidgetItem*> it(selected);
+	QMapIterator<QString, QKRInstance*> it(m_instances);
 	while (it.hasNext())
-	{
-		bool viewSelected = false;
-		QTreeWidgetItem* item = it.next();
-
-		QString dbusName = item->data(0, Qt::UserRole).toString();
-		QString window = item->data(1, Qt::UserRole).toString();
-		uint view = item->data(2, Qt::UserRole).toUInt(&viewSelected);
-
-		if (window.isEmpty())
-			setStatusBarText(i18n("No window selected for %1", dbusName));
-		else if (!viewSelected)
-			setStatusBarText(i18n("No view selected for %1 %2", dbusName, window));
-		else
-			targets[QPair<QString, QString>(dbusName, window)].append(view);
-	}
-
-	QMapIterator< QPair<QString, QString>, QList<uint> > targetIt(targets);
-	while (targetIt.hasNext())
-	{
-		QPair<QString, QString> dest = targetIt.next().key();
-		QDBusInterface iface(dest.first, QString("/quadkonsole4/")+dest.second, interfaceName);
-		QListIterator<uint> viewIt(targetIt.value());
-		while (viewIt.hasNext())
-			iface.call(QDBus::BlockWithGui, "sendInput", viewIt.next(), text);
-	}
-
+		it.next().value()->sendInput(text);
 }
 
 
@@ -191,8 +337,8 @@ void QKRemotePart::identifyViews()
 
 void QKRemotePart::refreshAvailableSlaves()
 {
+	m_updateTimer->setInterval(2500);
 	m_remote->refreshButton->setEnabled(false);
-	m_remote->availableSlaves->clear();
 
 	QStringList services = m_dbusConn->interface()->registeredServiceNames();
 	services = services.filter(destinationBase.arg(""));
@@ -201,67 +347,26 @@ void QKRemotePart::refreshAvailableSlaves()
 	while (it.hasNext())
 	{
 		QString dest = it.next();
-		addSlave(dest);
+		if (m_instances.count(dest))
+			m_instances[dest]->update();
+		else
+			m_instances[dest] = new QKRInstance(m_remote->availableSlaves, dest);
+	}
+
+	QStringList cached = m_instances.keys();
+	QStringListIterator cacheIt(cached);
+	while (cacheIt.hasNext())
+	{
+		QString name = cacheIt.next();
+		if (! services.contains(name))
+		{
+			QKRInstance* instance = m_instances.take(name);
+			delete instance;
+		}
 	}
 	m_remote->refreshButton->setEnabled(true);
 	m_remote->availableSlaves->expandAll();
-}
-
-
-void QKRemotePart::addSlave(const QString& dbusName)
-{
-	QDBusInterface iface(dbusName, "/quadkonsole4", introspectInterface);
-	QDBusReply<QString> reply = iface.call(QDBus::BlockWithGui, "Introspect");
-	if (reply.isValid())
-	{
-		QString label(dbusName);
-		if (dbusName == destinationBase.arg(getpid()))
-			label += " (this process)";
-
-		QTreeWidgetItem* item = new QTreeWidgetItem(m_remote->availableSlaves, QStringList(label));
-		item->setData(0, Qt::UserRole, dbusName);
-		m_remote->availableSlaves->addTopLevelItem(item);
-
-		QDomDocument doc;
-		doc.setContent(reply.value());
-		QDomElement root = doc.documentElement();
-		QDomNodeList nodes = root.elementsByTagName("node");
-
-		for (uint i=0; i<nodes.length(); ++i)
-		{
-			QDomNamedNodeMap attrs = nodes.item(i).attributes();
-			QDomNode name = attrs.namedItem("name");
-			addMainWindow(dbusName, item, name.nodeValue());
-		}
-	}
-	else
-		kDebug() << "invalid reply to Introspect from" << dbusName << endl;
-}
-
-
-void QKRemotePart::addMainWindow(const QString& dbusName, QTreeWidgetItem* parent, QString name)
-{
-	QTreeWidgetItem* iface = new QTreeWidgetItem(parent, QStringList(name));
-	iface->setData(0, Qt::UserRole, dbusName);
-	iface->setData(1, Qt::UserRole, name);
-	parent->addChild(iface);
-
-	QDBusInterface dbusIface(dbusName, QString("/quadkonsole4/")+name, interfaceName);
-	QVariant numViews = dbusIface.property("numViews");
-
-	if (numViews.canConvert<uint>())
-	{
-		for (uint i=0; i<numViews.toUInt(); ++i)
-		{
-			QTreeWidgetItem* view = new QTreeWidgetItem(iface, QStringList(QString::number(i)));
-			view->setData(0, Qt::UserRole, dbusName);
-			view->setData(1, Qt::UserRole, name);
-			view->setData(2, Qt::UserRole, i);
-			iface->addChild(view);
-		}
-	}
-	else
-		kDebug() << "could not get numViews for" << dbusName << endl;
+	m_remote->availableSlaves->resizeColumnToContents(0);
 }
 
 

@@ -848,6 +848,28 @@ void QuadKonsole::identifyStacks(QString format)
 }
 
 
+QStringList QuadKonsole::urls() const
+{
+	QStringList result;
+	QListIterator<QKStack*> it(m_stacks);
+	while (it.hasNext())
+		result << it.next()->url();
+
+	return result;
+}
+
+
+QStringList QuadKonsole::partIcons() const
+{
+	QStringList result;
+	QListIterator<QKStack*> it(m_stacks);
+	while (it.hasNext())
+		result << it.next()->partIcon();
+
+	return result;
+}
+
+
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	if (part)

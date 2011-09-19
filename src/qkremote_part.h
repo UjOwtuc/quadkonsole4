@@ -23,6 +23,8 @@
 
 #include <KDE/KParts/ReadOnlyPart>
 
+#include <QtGui/QTreeWidgetItem>
+
 namespace Ui
 {
 	class qkremoteWidget;
@@ -35,6 +37,41 @@ class QKeyEvent;
 class QKREventFilter;
 class QHBoxLayout;
 class QLabel;
+class QKRInstance;
+
+class QKRMainWindow : public QObject, public QTreeWidgetItem
+{
+	Q_OBJECT
+	public:
+		QKRMainWindow(QKRInstance* parent, const QString& dbusName, const QString& name);
+		virtual ~QKRMainWindow();
+
+	public slots:
+		void update();
+		void sendInput(const QString& text);
+
+	private:
+		QString m_dbusName;
+		QString m_name;
+		uint m_numViews;
+		QList<QTreeWidgetItem*> m_views;
+};
+
+class QKRInstance : public QObject, public QTreeWidgetItem
+{
+	Q_OBJECT
+	public:
+		QKRInstance(QTreeWidget* parent, const QString& dbusName);
+		virtual ~QKRInstance();
+
+	public slots:
+		void update();
+		void sendInput(const QString& text);
+
+	private:
+		QString m_dbusName;
+		QMap<QString, QKRMainWindow*> m_mainWindows;
+};
 
 class QKRemotePart : public KParts::ReadOnlyPart
 {
@@ -42,10 +79,6 @@ class QKRemotePart : public KParts::ReadOnlyPart
 	public:
 		static const char version[];
 		static const char partName[];
-		static const QString destinationBase;
-		static const char interfaceName[];
-		static const char introspectInterface[];
-		static const char propertiesInterface[];
 
 		QKRemotePart(QWidget *parentWidget,QObject *parent, const QStringList &);
 		virtual ~QKRemotePart();
@@ -66,13 +99,12 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		void identifyViews();
 
 	private:
-		void addSlave(const QString& dbusName);
-		void addMainWindow(const QString& dbusName, QTreeWidgetItem* parent, QString name);
-
 		QWidget* m_widget;
 		Ui::qkremoteWidget* m_remote;
 		QDBusConnection* m_dbusConn;
 		QKREventFilter* m_eventFilter;
+		QTimer* m_updateTimer;
+		QMap<QString, QKRInstance*> m_instances;
 };
 
 

@@ -213,6 +213,15 @@ bool QKView::hasMimeType(const QString& type)
 }
 
 
+QString QKView::partIcon() const
+{
+	KService::Ptr service = QKPartFactory::getFactory(m_partname);
+	if (! service.isNull())
+		return service->icon();
+	return "";
+}
+
+
 void QKView::show()
 {
 	if (m_part == 0)

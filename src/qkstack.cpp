@@ -153,6 +153,24 @@ void QKStack::setHistory(const QList< KUrl >& history, int historyPosition)
 }
 
 
+QString QKStack::url() const
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+		return view->getURL().pathOrUrl();
+	return "";
+}
+
+
+QString QKStack::partIcon() const
+{
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+		return view->partIcon();
+	return "";
+}
+
+
 void QKStack::switchView()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());

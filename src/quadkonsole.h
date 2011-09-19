@@ -69,6 +69,8 @@ class QuadKonsole : public KParts::MainWindow
 		void sendInput(uint view, const QString& text);
 		void openUrls(const QStringList& urls);
 		void identifyStacks(QString format);
+		QStringList urls() const;
+		QStringList partIcons() const;
 
 	private slots:
 		void focusKonsoleRight();

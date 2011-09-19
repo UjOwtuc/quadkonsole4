@@ -56,6 +56,8 @@ class QKStack : public KTabWidget
 		const QList<KUrl>& history() { return m_history; }
 		int historyPosition() { return m_historyPosition; }
 		void setHistory(const QList<KUrl>& history, int historyPosition);
+		QString url() const;
+		QString partIcon() const;
 
 	signals:
 		void partCreated();

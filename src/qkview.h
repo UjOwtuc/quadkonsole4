@@ -75,6 +75,7 @@ class QKView : public QWidget
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type);
 		const QIcon* icon() const { return m_icon; }
+		QString partIcon() const;
 
 	signals:
 		void partCreated();

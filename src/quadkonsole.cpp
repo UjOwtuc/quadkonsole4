@@ -57,6 +57,13 @@
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
 
+namespace
+{
+	// action name => vertical layout (default), horizontal layout
+	QMap<QString, QPair<QString, QString> > movementMap;
+}
+
+
 QString splitIndex(const QString& s, int* index)
 {
 	int pos = s.indexOf(':');
@@ -85,6 +92,7 @@ QuadKonsole::QuadKonsole()
 	setupActions();
 	setupUi(0, 0);
 	setupGUI();
+	reconnectMovement();
 }
 
 
@@ -118,6 +126,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 		sendCommands(cmds);
 	if (urls.size())
 		openUrls(urls);
+	reconnectMovement();
 }
 
 
@@ -134,6 +143,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history,
 	m_stacks.front()->setHistory(history, historyPosition);
 	setupGUI();
 	showNormal();
+	reconnectMovement();
 }
 
 
@@ -175,22 +185,22 @@ void QuadKonsole::setupActions()
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
 	actionCollection()->addAction("go right", goRight);
-	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
+// 	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
 
 	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("Go &left"), this);
 	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
-	connect(goLeft, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleLeft()));
+// 	connect(goLeft, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleLeft()));
 
 	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("Go &up"), this);
 	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
-	connect(goUp, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleUp()));
+// 	connect(goUp, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleUp()));
 
 	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("Go &down"), this);
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
-	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
+// 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
 
 	KAction* tabLeft = new KAction(i18n("&Previous tab"), this);
 	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
@@ -211,12 +221,12 @@ void QuadKonsole::setupActions()
 	KAction* insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
-	connect(insertHorizontal, SIGNAL(triggered(bool)), this, SLOT(insertHorizontal()));
+// 	connect(insertHorizontal, SIGNAL(triggered(bool)), this, SLOT(insertHorizontal()));
 
 	KAction* insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
-	connect(insertVertical, SIGNAL(triggered(bool)), this, SLOT(insertVertical()));
+// 	connect(insertVertical, SIGNAL(triggered(bool)), this, SLOT(insertVertical()));
 
 	KAction* removePart = new KAction(KIcon("view-left-close"), i18n("Re&move part"), this);
 	removePart->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
@@ -252,6 +262,11 @@ void QuadKonsole::setupActions()
 	KToggleAction* toggleMenu = KStandardAction::showMenubar(this, SLOT(toggleMenu()), actionCollection());
 	toggleMenu->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
 
+	KAction* changeLayout = new KAction(KIcon(""), i18n("C&hange layout"), this);
+	changeLayout->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L));
+	actionCollection()->addAction("change layout", changeLayout);
+	connect(changeLayout, SIGNAL(triggered(bool)), SLOT(changeLayout()));
+
 	// Debug
 #ifdef DEBUG
 	kDebug() << "adding debugging actions" << endl;
@@ -274,7 +289,11 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	QGridLayout* grid = new QGridLayout(centralWidget);
 	grid->setContentsMargins(0, 0, 0, 0);
 
-	m_rows = new QSplitter(Qt::Vertical);
+	if (Settings::layoutVertical())
+		m_rows = new QSplitter(Qt::Vertical);
+	else
+		m_rows = new QSplitter(Qt::Horizontal);
+
 	m_rows->setChildrenCollapsible(false);
 	grid->addWidget(m_rows, 0, 0);
 
@@ -282,7 +301,12 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 
 	for (int i=0; i<rows; ++i)
 	{
-		QSplitter* row = new QSplitter(Qt::Horizontal);
+		QSplitter* row;
+		if (Settings::layoutVertical())
+			row = new QSplitter(Qt::Horizontal);
+		else
+			row = new QSplitter(Qt::Vertical);
+
 		row->setChildrenCollapsible(false);
 		mRowLayouts.push_back(row);
 		m_rows->addWidget(row);
@@ -424,6 +448,43 @@ void QuadKonsole::resetLayout(QSplitter* layout, int targetSize)
 }
 
 
+void QuadKonsole::fillMovementMap()
+{
+	if (movementMap.isEmpty())
+	{
+		movementMap.insert("go up",		QPair<QString, QString>(SLOT(focusKonsoleUp()), SLOT(focusKonsoleLeft())));
+		movementMap.insert("go down",		QPair<QString, QString>(SLOT(focusKonsoleDown()), SLOT(focusKonsoleRight())));
+		movementMap.insert("go left",		QPair<QString, QString>(SLOT(focusKonsoleLeft()), SLOT(focusKonsoleUp())));
+		movementMap.insert("go right",		QPair<QString, QString>(SLOT(focusKonsoleRight()), SLOT(focusKonsoleDown())));
+		movementMap.insert("insert horizontal",	QPair<QString, QString>(SLOT(insertHorizontal()), SLOT(insertVertical())));
+		movementMap.insert("insert vertical",	QPair<QString, QString>(SLOT(insertVertical()), SLOT(insertHorizontal())));
+	}
+}
+
+
+void QuadKonsole::reconnectMovement()
+{
+	fillMovementMap();
+
+	QMapIterator<QString, QPair<QString, QString> > it(movementMap);
+	while (it.hasNext())
+	{
+		it.next();
+		QAction* action = actionCollection()->action(it.key());
+		if (action)
+		{
+			action->disconnect(this);
+			if (m_rows->orientation() == Qt::Vertical)
+				connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), it.value().first.toLatin1().data());
+			else
+				connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), it.value().second.toLatin1().data());
+		}
+		else
+			kDebug() << "action" << it.key() << "not in actionCollection" << endl;
+	}
+}
+
+
 void QuadKonsole::resetLayouts()
 {
 	kDebug() << "resetting layouts" << endl;
@@ -483,6 +544,9 @@ void QuadKonsole::settingsChanged()
 		delete mFilter;
 		mFilter = 0;
 	}
+
+	if ((m_rows->orientation() == Qt::Vertical && ! Settings::layoutVertical()) || (m_rows->orientation() == Qt::Horizontal && Settings::layoutVertical()))
+		changeLayout();
 }
 
 
@@ -652,7 +716,13 @@ void QuadKonsole::insertVertical(int row, int col)
 {
 	if (row >= 0 && col >= 0)
 	{
-		QSplitter *newRow = new QSplitter(Qt::Horizontal);
+		QSplitter *newRow;
+
+		if (m_rows->orientation() == Qt::Vertical)
+			newRow = new QSplitter(Qt::Horizontal);
+		else
+			newRow = new QSplitter(Qt::Vertical);
+
 		newRow->setChildrenCollapsible(false);
 		m_rows->insertWidget(row, newRow);
 
@@ -867,6 +937,21 @@ QStringList QuadKonsole::partIcons() const
 		result << it.next()->partIcon();
 
 	return result;
+}
+
+
+void QuadKonsole::changeLayout()
+{
+	std::vector<QSplitter*>::iterator it;
+	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
+		(*it)->setOrientation(m_rows->orientation());
+
+	if (m_rows->orientation() == Qt::Vertical)
+		m_rows->setOrientation(Qt::Horizontal);
+	else
+		m_rows->setOrientation(Qt::Vertical);
+
+	reconnectMovement();
 }
 
 

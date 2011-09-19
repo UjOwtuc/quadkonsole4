@@ -6,18 +6,44 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>353</width>
-    <height>184</height>
+    <width>385</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>General</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" colspan="2">
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0">
     <widget class="QCheckBox" name="kcfg_sloppyFocus">
      <property name="text">
       <string>Focus follows mouse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="labelHistorySize">
+     <property name="text">
+      <string>Maximum length of history</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="KIntNumInput" name="kcfg_historySize">
+     <property name="label">
+      <string comment="Max"/>
+     </property>
+     <property name="minimum">
+      <number>5</number>
+     </property>
+     <property name="suffix">
+      <string> Addreesses</string>
+     </property>
+     <property name="specialValueText">
+      <string/>
+     </property>
+     <property name="sliderEnabled">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -77,33 +103,33 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="labelHistorySize">
-     <property name="text">
-      <string>Maximum length of history</string>
+   <item row="3" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Layout</string>
      </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="kcfg_layoutVertical">
+        <property name="text">
+         <string>Left to right, top to bottom</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="layoutHorizontal">
+        <property name="text">
+         <string>Top to bottom, left to right</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="KIntNumInput" name="kcfg_historySize">
-     <property name="label">
-      <string comment="Max"/>
-     </property>
-     <property name="minimum">
-      <number>5</number>
-     </property>
-     <property name="suffix">
-      <string> Addreesses</string>
-     </property>
-     <property name="specialValueText">
-      <string/>
-     </property>
-     <property name="sliderEnabled">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

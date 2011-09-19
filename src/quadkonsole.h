@@ -71,6 +71,7 @@ class QuadKonsole : public KParts::MainWindow
 		void identifyStacks(QString format);
 		QStringList urls() const;
 		QStringList partIcons() const;
+		void changeLayout();
 
 	private slots:
 		void focusKonsoleRight();
@@ -114,6 +115,8 @@ class QuadKonsole : public KParts::MainWindow
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
 		void emitPaste(QClipboard::Mode mode);
 		void resetLayout(QSplitter* layout, int targetSize);
+		static void fillMovementMap();
+		void reconnectMovement();
 
 		QList<QKStack*> m_stacks;
 		QSplitter* m_rows;

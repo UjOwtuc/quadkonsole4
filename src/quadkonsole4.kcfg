@@ -29,6 +29,10 @@
 			<default>2</default>
 			<min>1</min>
 		</entry>
+		<entry name="layoutVertical" type="bool">
+			<label>Left to right, top to bottom</label>
+			<default>true</default>
+		</entry>
 	</group>
 	<group name="Shutdown">
 		<entry name="queryClose" type="bool">

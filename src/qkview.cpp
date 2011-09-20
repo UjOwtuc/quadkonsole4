@@ -195,8 +195,11 @@ QString QKView::foregroundProcess() const
 }
 
 
-bool QKView::hasMimeType(const QString& type)
+bool QKView::hasMimeType(const QString& type, const KUrl& url)
 {
+	if (m_partname == "konsolepart.desktop" && url.protocol() != "file")
+		return false;
+
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
 	if (service.isNull())
 		return false;

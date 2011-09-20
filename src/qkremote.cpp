@@ -47,7 +47,7 @@ QKRemote::QKRemote()
 	}
 	else
 	{
-		KMessageBox::error(this, i18n("Could not create a factory for %1.", "qkremotepart"));
+		KMessageBox::error(this, i18n("Could not create a factory for %1.", QString("qkremotepart")));
 		deleteLater();
 		return;
 	}

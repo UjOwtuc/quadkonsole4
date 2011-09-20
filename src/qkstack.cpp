@@ -33,6 +33,7 @@
 #include <KDE/KParts/PartManager>
 #include <KDE/KIO/TransferJob>
 #include <KDE/KIO/Scheduler>
+#include <kio/udsentry.h>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_popupmenu.h>
@@ -175,21 +176,7 @@ void QKStack::switchView()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	if (view)
-	{
-		KUrl url = view->getURL();
-		if (url.protocol() == "file")
-		{
-			KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
-			switchView(url, item.mimetype(), false);
-		}
-		else
-		{
-			KIO::JobFlags flags = KIO::HideProgressInfo;
-			KIO::TransferJob* job = KIO::get(url, KIO::NoReload, flags);
-			job->setProperty("tryCurrent", false);
-			connect(job, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*,QString)));
-		}
-	}
+		slotOpenUrlRequest(view->getURL(), false);
 }
 
 
@@ -197,7 +184,7 @@ void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 
-	if (tryCurrent && view->hasMimeType(mimeType))
+	if (tryCurrent && view->hasMimeType(mimeType, url))
 		switchView(currentIndex(), url);
 	else
 	{
@@ -207,7 +194,7 @@ void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
 		for (int i=1; i<count(); ++i)
 		{
 			view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
-			if (view->hasMimeType(mimeType))
+			if (view->hasMimeType(mimeType, url))
 			{
 				kDebug() << "switching to" << view->partName() << "for mime type" << mimeType << endl;
 				targetIndex = (currentIndex() +i) % count();
@@ -402,7 +389,7 @@ void QKStack::slotSetWindowCaption(QString text)
 }
 
 
-void QKStack::slotMimetype(KIO::Job* job, QString mimeType)
+void QKStack::slotMimetype(KJob* job, QString mimeType)
 {
 	KIO::TransferJob* transfer = qobject_cast<KIO::TransferJob*>(job);
 	if (transfer)
@@ -415,19 +402,42 @@ void QKStack::slotMimetype(KIO::Job* job, QString mimeType)
 }
 
 
-void QKStack::slotOpenUrlRequest(KUrl url)
+void QKStack::slotJobResult(KJob* job)
+{
+	if (job->error())
+		emit setStatusBarText(QString("Error opening URL: %1").arg(job->errorString()));
+}
+
+
+void QKStack::slotStatResult(KJob* job)
+{
+	KIO::StatJob* stat = qobject_cast<KIO::StatJob*>(job);
+	if (stat->statResult().isDir())
+		switchView(stat->url(), "inode/directory", job->property("tryCurrent").toBool());
+	else
+	{
+		KIO::JobFlags flags = KIO::HideProgressInfo;
+		KIO::TransferJob* transfer = KIO::get(stat->url(), KIO::NoReload, flags);
+		transfer->setProperty("tryCurrent", job->property("tryCurrent").toBool());
+		connect(transfer, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*)));
+		connect(transfer, SIGNAL(result(KJob*)), SLOT(slotJobResult(KJob*)));
+	}
+}
+
+
+void QKStack::slotOpenUrlRequest(KUrl url, bool tryCurrent)
 {
 	if (url.protocol() == "file")
 	{
 		KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
-		switchView(url, item.mimetype(), true);
+		switchView(url, item.mimetype(), tryCurrent);
 	}
 	else
 	{
 		KIO::JobFlags flags = KIO::HideProgressInfo;
-		KIO::TransferJob* job = KIO::get(url, KIO::NoReload, flags);
-		job->setProperty("tryCurrent", true);
-		connect(job, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*,QString)));
+		KIO::StatJob* stat = KIO::stat(url, true, 0, flags);
+		stat->setProperty("tryCurrent", tryCurrent);
+		connect(stat, SIGNAL(result(KJob*)), SLOT(slotStatResult(KJob*)));
 	}
 }
 

@@ -73,7 +73,7 @@ class QKView : public QWidget
 		QString foregroundProcess() const;
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
-		bool hasMimeType(const QString& type);
+		bool hasMimeType(const QString& type, const KUrl& url);
 		const QIcon* icon() const { return m_icon; }
 		QString partIcon() const;
 

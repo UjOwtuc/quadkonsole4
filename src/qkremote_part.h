@@ -46,6 +46,8 @@ class QKRMainWindow : public QObject, public QTreeWidgetItem
 		QKRMainWindow(QKRInstance* parent, const QString& dbusName, const QString& name);
 		virtual ~QKRMainWindow();
 
+		uint numViews() const { return m_numViews; }
+
 	public slots:
 		void update();
 		void sendInput(const QString& text);

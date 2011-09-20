@@ -57,13 +57,16 @@ QKRMainWindow::QKRMainWindow(QKRInstance* parent, const QString& dbusName, const
 	m_dbusName(dbusName),
 	m_name(name)
 {
-	setText(0, m_name);
-	setIcon(0, KIcon("quadkonsole4"));
-	setData(0, Qt::UserRole, dbusName);
-	setData(1, Qt::UserRole, name);
-	parent->addChild(this);
-
 	update();
+
+	if (m_numViews > 0)
+	{
+		setText(0, m_name);
+		setIcon(0, KIcon("quadkonsole4"));
+		setData(0, Qt::UserRole, dbusName);
+		setData(1, Qt::UserRole, name);
+		parent->addChild(this);
+	}
 }
 
 
@@ -82,7 +85,7 @@ void QKRMainWindow::update()
 	if (numViews.canConvert<uint>())
 		m_numViews = numViews.toUInt();
 	else
-		kDebug() << "could not get numViews from" << m_dbusName << endl;
+		m_numViews = 0;
 
 	QDBusReply<QStringList> urls = dbusIface.call(QDBus::BlockWithGui, "urls");
 	if (! urls.isValid())
@@ -149,10 +152,7 @@ QKRInstance::~QKRInstance()
 {
 	QList<QKRMainWindow*> win = m_mainWindows.values();
 	while (win.count())
-	{
-		delete win.front();
-		win.pop_front();
-	}
+		delete win.takeFirst();
 	win.clear();
 }
 
@@ -182,7 +182,8 @@ void QKRInstance::update()
 			else
 				m_mainWindows[name.nodeValue()] = new QKRMainWindow(this, m_dbusName, name.nodeValue());
 
-			mainWindows << name.nodeValue();
+			if (m_mainWindows[name.nodeValue()]->numViews() > 0)
+				mainWindows << name.nodeValue();
 		}
 
 		QStringList cached = m_mainWindows.keys();
@@ -191,11 +192,7 @@ void QKRInstance::update()
 		{
 			QString name = it.next();
 			if (! mainWindows.contains(name))
-			{
-				kDebug() << "MainWindow" << name << "disappeared" << endl;
-				QKRMainWindow* win = m_mainWindows.take(name);
-				delete win;
-			}
+				delete m_mainWindows.take(name);
 		}
 	}
 	else

@@ -87,18 +87,19 @@ QString splitIndex(const QString& s, int* index)
 // Only for restoring a session.
 QuadKonsole::QuadKonsole()
 	: mFilter(0),
-	m_partManager(this, this)
+	m_partManager(this)
 {
 	setupActions();
 	setupUi(0, 0);
 	setupGUI();
+	createGUI(m_stacks.front()->part());
 	reconnectMovement();
 }
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
 	: mFilter(0),
-	m_partManager(this, this)
+	m_partManager(this)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -121,6 +122,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	setupActions();
 	setupUi(rows, columns);
 	setupGUI();
+	createGUI(m_stacks.front()->part());
 
 	if (cmds.size())
 		sendCommands(cmds);
@@ -133,7 +135,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 // for detaching parts
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition)
 	: mFilter(0),
-	m_partManager(this, this)
+	m_partManager(this)
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
@@ -142,6 +144,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history,
 	setupUi(1, 1, parts);
 	m_stacks.front()->setHistory(history, historyPosition);
 	setupGUI();
+	createGUI(m_stacks.front()->part());
 	showNormal();
 	reconnectMovement();
 }
@@ -154,10 +157,7 @@ QuadKonsole::~QuadKonsole()
 
 	delete mFilter;
 	while (m_stacks.count())
-	{
-		delete m_stacks.front();
-		m_stacks.pop_front();
-	}
+		delete m_stacks.takeFirst();
 }
 
 
@@ -182,25 +182,22 @@ void QuadKonsole::setupActions()
 	}
 
 	// Movement
+	// directions depend on main layout's orientation, so connections are made in reconnectMovement()
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
 	actionCollection()->addAction("go right", goRight);
-// 	connect(goRight, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleRight()));
 
 	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("Go &left"), this);
 	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
-// 	connect(goLeft, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleLeft()));
 
 	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("Go &up"), this);
 	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
-// 	connect(goUp, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleUp()));
 
 	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("Go &down"), this);
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
-// 	connect(goDown, SIGNAL(triggered(bool)), this, SLOT(focusKonsoleDown()));
 
 	KAction* tabLeft = new KAction(i18n("&Previous tab"), this);
 	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
@@ -221,12 +218,10 @@ void QuadKonsole::setupActions()
 	KAction* insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
-// 	connect(insertHorizontal, SIGNAL(triggered(bool)), this, SLOT(insertHorizontal()));
 
 	KAction* insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
-// 	connect(insertVertical, SIGNAL(triggered(bool)), this, SLOT(insertVertical()));
 
 	KAction* removePart = new KAction(KIcon("view-left-close"), i18n("Re&move part"), this);
 	removePart->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
@@ -957,16 +952,19 @@ void QuadKonsole::changeLayout()
 
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
+	createGUI(part);
+
 	if (part)
 	{
-		part->setFactory(guiFactory());
+		if (! part->factory())
+			part->setFactory(guiFactory());
+
 		if (! guiFactory()->clients().contains(part))
 			guiFactory()->addClient(part);
 
 		if (! factory()->clients().contains(part))
 			factory()->addClient(part);
 	}
-	createGUI(part);
 }
 
 
@@ -1020,15 +1018,9 @@ void QuadKonsole::restoreSession()
 	if (sessionTest)
 	{
 		while (m_stacks.count())
-		{
-			delete m_stacks.front();
-			m_stacks.pop_front();
-		}
+			delete m_stacks.takeFirst();
 		while (mRowLayouts.size())
-		{
-			delete mRowLayouts.front();
-			mRowLayouts.erase(mRowLayouts.begin());
-		}
+			delete mRowLayouts.takeFirst();
 		readProperties(*sessionTest);
 	}
 	else

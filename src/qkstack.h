@@ -76,13 +76,15 @@ class QKStack : public KTabWidget
 		void goForward();
 		void goUp();
 		void goHistory(int steps);
-		void slotOpenUrlRequest(KUrl url);
+		void slotOpenUrlRequest(KUrl url, bool tryCurrent=true);
 
 	private slots:
 		void slotPartCreated();
 		void slotSetStatusBarText(QString text);
 		void slotSetWindowCaption(QString text);
-		void slotMimetype(KIO::Job* job, QString mimeType);
+		void slotMimetype(KJob* job, QString mimeType);
+		void slotStatResult(KJob* job);
+		void slotJobResult(KJob* job);
 		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);

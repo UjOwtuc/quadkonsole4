@@ -21,6 +21,7 @@
 #include "qkstack.h"
 #include "qkview.h"
 #include "qkbrowseriface.h"
+#include "qkurlhandler.h"
 #include "settings.h"
 
 #include <KDE/KDebug>
@@ -31,9 +32,6 @@
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
 #include <KDE/KParts/PartManager>
-#include <KDE/KIO/TransferJob>
-#include <KDE/KIO/Scheduler>
-#include <kio/udsentry.h>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_popupmenu.h>
@@ -389,56 +387,26 @@ void QKStack::slotSetWindowCaption(QString text)
 }
 
 
-void QKStack::slotMimetype(KJob* job, QString mimeType)
-{
-	KIO::TransferJob* transfer = qobject_cast<KIO::TransferJob*>(job);
-	if (transfer)
-	{
-		transfer->disconnect(SIGNAL(mimetype(KIO::Job*,QString)), this);
-		transfer->putOnHold();
-		KIO::Scheduler::publishSlaveOnHold();
-		switchView(transfer->url(), mimeType, transfer->property("tryCurrent").toBool());
-	}
-}
-
-
-void QKStack::slotJobResult(KJob* job)
-{
-	if (job->error())
-		emit setStatusBarText(QString("Error opening URL: %1").arg(job->errorString()));
-}
-
-
-void QKStack::slotStatResult(KJob* job)
-{
-	KIO::StatJob* stat = qobject_cast<KIO::StatJob*>(job);
-	if (stat->statResult().isDir())
-		switchView(stat->url(), "inode/directory", job->property("tryCurrent").toBool());
-	else
-	{
-		KIO::JobFlags flags = KIO::HideProgressInfo;
-		KIO::TransferJob* transfer = KIO::get(stat->url(), KIO::NoReload, flags);
-		transfer->setProperty("tryCurrent", job->property("tryCurrent").toBool());
-		connect(transfer, SIGNAL(mimetype(KIO::Job*,QString)), SLOT(slotMimetype(KIO::Job*)));
-		connect(transfer, SIGNAL(result(KJob*)), SLOT(slotJobResult(KJob*)));
-	}
-}
-
-
 void QKStack::slotOpenUrlRequest(KUrl url, bool tryCurrent)
 {
-	if (url.protocol() == "file")
+	QKUrlHandler* handler = new QKUrlHandler(url, this);
+	handler->setProperty("tryCurrent", tryCurrent);
+	connect(handler, SIGNAL(finished(QKUrlHandler*)), SLOT(slotUrlFiltered(QKUrlHandler*)));
+}
+
+
+void QKStack::slotUrlFiltered(QKUrlHandler* handler)
+{
+	if (handler->error().isEmpty())
 	{
-		KFileItem item(KFileItem::Unknown, KFileItem::Unknown, url);
-		switchView(url, item.mimetype(), tryCurrent);
+		bool tryCurrent = handler->property("tryCurrent").toBool();
+		switchView(handler->url(), handler->mimetype(), tryCurrent);
 	}
 	else
 	{
-		KIO::JobFlags flags = KIO::HideProgressInfo;
-		KIO::StatJob* stat = KIO::stat(url, true, 0, flags);
-		stat->setProperty("tryCurrent", tryCurrent);
-		connect(stat, SIGNAL(result(KJob*)), SLOT(slotStatResult(KJob*)));
+		emit setStatusBarText(i18n("Could not open url '%1': %2", handler->url().pathOrUrl(), handler->error()));
 	}
+	delete handler;
 }
 
 

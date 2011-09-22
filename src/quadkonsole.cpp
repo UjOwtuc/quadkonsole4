@@ -92,7 +92,9 @@ QuadKonsole::QuadKonsole()
 	setupActions();
 	setupUi(0, 0);
 	setupGUI();
-	createGUI(m_stacks.front()->part());
+
+	// there is no KPart loaded
+	//createGUI(m_stacks.front()->part());
 	reconnectMovement();
 }
 

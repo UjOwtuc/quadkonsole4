@@ -8,6 +8,7 @@ set(quadkonsole4_SRCS
 	qkview.cpp
 	prefsviews.cpp
 	qkbrowseriface.cpp
+	qkurlhandler.cpp
 )
 
 kde4_add_ui_files(quadkonsole4_SRCS

@@ -26,6 +26,7 @@
 #include <KDE/KTabWidget>
 #include <KDE/KParts/BrowserExtension>
 
+class QKUrlHandler;
 class QKView;
 class QKBrowserInterface;
 namespace KParts
@@ -82,9 +83,7 @@ class QKStack : public KTabWidget
 		void slotPartCreated();
 		void slotSetStatusBarText(QString text);
 		void slotSetWindowCaption(QString text);
-		void slotMimetype(KJob* job, QString mimeType);
-		void slotStatResult(KJob* job);
-		void slotJobResult(KJob* job);
+		void slotUrlFiltered(QKUrlHandler* handler);
 		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);

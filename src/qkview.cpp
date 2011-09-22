@@ -383,11 +383,7 @@ void QKView::slotSetWindowCaption(QString text)
 
 void QKView::slotOpenUrl(QString url)
 {
-	KUrl real(url);
-	if (real.protocol().isEmpty() && ! url.startsWith('/'))
-		real = QString("http://") + url;
-
-	emit openUrlRequest(real);
+	emit openUrlRequest(KUrl(url));
 }
 
 

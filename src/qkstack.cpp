@@ -254,15 +254,14 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (index != currentIndex())
 		setCurrentIndex(index);
 
-	addHistoryEntry(url);
-
 	QKView* view = qobject_cast<QKView*>(currentWidget());
 	view->show();
-	view->setURL(url);
 	setFocusProxy(view);
-
-	emit setStatusBarText(view->statusBarText());
-	emit setWindowCaption(view->windowCaption());
+	if (! url.isEmpty())
+	{
+		addHistoryEntry(url);
+		view->setURL(url);
+	}
 }
 
 
@@ -399,14 +398,22 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 {
 	if (handler->error().isEmpty())
 	{
-		bool tryCurrent = handler->property("tryCurrent").toBool();
-		switchView(handler->url(), handler->mimetype(), tryCurrent);
+		if (handler->partName().isEmpty())
+		{
+			bool tryCurrent = handler->property("tryCurrent").toBool();
+			switchView(handler->url(), handler->mimetype(), tryCurrent);
+		}
+		else
+		{
+			int index = addViews(QStringList(handler->partName()));
+			switchView(index, handler->url());
+		}
 	}
 	else
 	{
 		emit setStatusBarText(i18n("Could not open url '%1': %2", handler->url().pathOrUrl(), handler->error()));
 	}
-	delete handler;
+	handler->deleteLater();
 }
 
 
@@ -425,6 +432,8 @@ void QKStack::slotCurrentChanged()
 	{
 		view->show();
 		view->setFocus();
+		emit setStatusBarText(view->statusBarText());
+		emit setWindowCaption(view->windowCaption());
 	}
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)

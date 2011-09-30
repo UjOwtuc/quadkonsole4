@@ -15,7 +15,20 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="4" column="0" colspan="3">
-    <widget class="KEditListBox" name="kcfg_views"/>
+    <widget class="KEditListBox" name="kcfg_views">
+     <property name="title">
+      <string>Preload views</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0" colspan="3">
     <widget class="QCheckBox" name="kcfg_viewHasToolbar">

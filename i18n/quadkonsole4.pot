@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
-"POT-Creation-Date: 2011-09-22 20:45+0200\n"
+"POT-Creation-Date: 2011-09-30 19:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr ""
 #. i18n: file: src/quadkonsole4.kcfg:10
 #. i18n: ectx: label, entry (sloppyFocus), group (General)
 #: build/src/settings.cpp:38 build/src/ui_prefs_base.h:146 i18n/rc.cpp:39
-#: i18n/rc.cpp:117 rc.cpp:39 rc.cpp:117
+#: i18n/rc.cpp:120 rc.cpp:39 rc.cpp:120
 msgid "Focus follows mouse"
 msgstr ""
 
@@ -39,7 +39,7 @@ msgstr ""
 #. i18n: file: src/quadkonsole4.kcfg:14
 #. i18n: ectx: label, entry (historySize), group (General)
 #: build/src/settings.cpp:43 build/src/ui_prefs_base.h:147 i18n/rc.cpp:42
-#: i18n/rc.cpp:120 rc.cpp:42 rc.cpp:120
+#: i18n/rc.cpp:123 rc.cpp:42 rc.cpp:123
 msgid "Maximum length of history"
 msgstr ""
 
@@ -52,7 +52,7 @@ msgstr ""
 #. i18n: file: src/quadkonsole4.kcfg:19
 #. i18n: ectx: label, entry (startMaximized), group (General)
 #: build/src/settings.cpp:47 build/src/ui_prefs_base.h:154 i18n/rc.cpp:57
-#: i18n/rc.cpp:123 rc.cpp:57 rc.cpp:123
+#: i18n/rc.cpp:126 rc.cpp:57 rc.cpp:126
 msgid "Start maximized"
 msgstr ""
 
@@ -65,13 +65,13 @@ msgstr ""
 #. i18n: file: src/quadkonsole4.kcfg:23
 #. i18n: ectx: label, entry (numRows), group (General)
 #: build/src/settings.cpp:52 build/src/ui_prefs_base.h:152 i18n/rc.cpp:51
-#: i18n/rc.cpp:126 rc.cpp:51 rc.cpp:126
+#: i18n/rc.cpp:129 rc.cpp:51 rc.cpp:129
 msgid "Number of rows"
 msgstr ""
 
 #. i18n: file: src/quadkonsole4.kcfg:28
 #. i18n: ectx: label, entry (numCols), group (General)
-#: build/src/settings.cpp:57 i18n/rc.cpp:129 rc.cpp:129
+#: build/src/settings.cpp:57 i18n/rc.cpp:132 rc.cpp:132
 msgid "Number of columns"
 msgstr ""
 
@@ -84,136 +84,136 @@ msgstr ""
 #. i18n: file: src/quadkonsole4.kcfg:33
 #. i18n: ectx: label, entry (layoutVertical), group (General)
 #: build/src/settings.cpp:61 build/src/ui_prefs_base.h:156 i18n/rc.cpp:63
-#: i18n/rc.cpp:132 rc.cpp:63 rc.cpp:132
+#: i18n/rc.cpp:135 rc.cpp:63 rc.cpp:135
 msgid "Left to right, top to bottom"
 msgstr ""
 
 #. i18n: file: src/quadkonsole4.kcfg:39
 #. i18n: ectx: label, entry (queryClose), group (Shutdown)
-#: build/src/settings.cpp:68 i18n/rc.cpp:135 rc.cpp:135
+#: build/src/settings.cpp:68 i18n/rc.cpp:138 rc.cpp:138
 msgid "Ask before terminating running processes"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:61
+#. i18n: file: src/prefs_views.ui:74
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:47
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#. i18n: file: src/prefs_views.ui:61
+#. i18n: file: src/prefs_views.ui:74
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:47
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#: build/src/settings.cpp:77 build/src/ui_prefs_views.h:119 i18n/rc.cpp:90
-#: i18n/rc.cpp:141 rc.cpp:90 rc.cpp:141
+#: build/src/settings.cpp:77 build/src/ui_prefs_views.h:123 i18n/rc.cpp:93
+#: i18n/rc.cpp:144 rc.cpp:93 rc.cpp:144
 msgid "Always"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:66
+#. i18n: file: src/prefs_views.ui:79
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:48
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#. i18n: file: src/prefs_views.ui:66
+#. i18n: file: src/prefs_views.ui:79
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:48
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#: build/src/settings.cpp:83 build/src/ui_prefs_views.h:120 i18n/rc.cpp:93
-#: i18n/rc.cpp:144 rc.cpp:93 rc.cpp:144
+#: build/src/settings.cpp:83 build/src/ui_prefs_views.h:124 i18n/rc.cpp:96
+#: i18n/rc.cpp:147 rc.cpp:96 rc.cpp:147
 msgid "When needed"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:71
+#. i18n: file: src/prefs_views.ui:84
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:49
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#. i18n: file: src/prefs_views.ui:71
+#. i18n: file: src/prefs_views.ui:84
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_showTabBar)
 #. i18n: file: src/quadkonsole4.kcfg:49
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#: build/src/settings.cpp:89 build/src/ui_prefs_views.h:121 i18n/rc.cpp:96
-#: i18n/rc.cpp:147 rc.cpp:96 rc.cpp:147
+#: build/src/settings.cpp:89 build/src/ui_prefs_views.h:125 i18n/rc.cpp:99
+#: i18n/rc.cpp:150 rc.cpp:99 rc.cpp:150
 msgid "Never"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:47
+#. i18n: file: src/prefs_views.ui:60
 #. i18n: ectx: property (text), widget (QLabel, label)
 #. i18n: file: src/quadkonsole4.kcfg:45
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#. i18n: file: src/prefs_views.ui:47
+#. i18n: file: src/prefs_views.ui:60
 #. i18n: ectx: property (text), widget (QLabel, label)
 #. i18n: file: src/quadkonsole4.kcfg:45
 #. i18n: ectx: label, entry (showTabBar), group (Views)
-#: build/src/settings.cpp:94 build/src/ui_prefs_views.h:116 i18n/rc.cpp:87
-#: i18n/rc.cpp:138 rc.cpp:87 rc.cpp:138
+#: build/src/settings.cpp:94 build/src/ui_prefs_views.h:120 i18n/rc.cpp:90
+#: i18n/rc.cpp:141 rc.cpp:90 rc.cpp:141
 msgid "Tab bar display"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:93
+#. i18n: file: src/prefs_views.ui:106
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
 #. i18n: file: src/quadkonsole4.kcfg:56
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#. i18n: file: src/prefs_views.ui:93
+#. i18n: file: src/prefs_views.ui:106
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
 #. i18n: file: src/quadkonsole4.kcfg:56
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#: build/src/settings.cpp:100 build/src/ui_prefs_views.h:126 i18n/rc.cpp:102
-#: i18n/rc.cpp:153 rc.cpp:102 rc.cpp:153
+#: build/src/settings.cpp:100 build/src/ui_prefs_views.h:130 i18n/rc.cpp:105
+#: i18n/rc.cpp:156 rc.cpp:105 rc.cpp:156
 msgid "Above"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:98
+#. i18n: file: src/prefs_views.ui:111
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
 #. i18n: file: src/quadkonsole4.kcfg:57
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#. i18n: file: src/prefs_views.ui:98
+#. i18n: file: src/prefs_views.ui:111
 #. i18n: ectx: property (text), item, widget (QComboBox, kcfg_tabBarPosition)
 #. i18n: file: src/quadkonsole4.kcfg:57
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#: build/src/settings.cpp:106 build/src/ui_prefs_views.h:127 i18n/rc.cpp:105
-#: i18n/rc.cpp:156 rc.cpp:105 rc.cpp:156
+#: build/src/settings.cpp:106 build/src/ui_prefs_views.h:131 i18n/rc.cpp:108
+#: i18n/rc.cpp:159 rc.cpp:108 rc.cpp:159
 msgid "Below"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:79
+#. i18n: file: src/prefs_views.ui:92
 #. i18n: ectx: property (text), widget (QLabel, label_2)
 #. i18n: file: src/quadkonsole4.kcfg:54
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#. i18n: file: src/prefs_views.ui:79
+#. i18n: file: src/prefs_views.ui:92
 #. i18n: ectx: property (text), widget (QLabel, label_2)
 #. i18n: file: src/quadkonsole4.kcfg:54
 #. i18n: ectx: label, entry (tabBarPosition), group (Views)
-#: build/src/settings.cpp:111 build/src/ui_prefs_views.h:123 i18n/rc.cpp:99
-#: i18n/rc.cpp:150 rc.cpp:99 rc.cpp:150
+#: build/src/settings.cpp:111 build/src/ui_prefs_views.h:127 i18n/rc.cpp:102
+#: i18n/rc.cpp:153 rc.cpp:102 rc.cpp:153
 msgid "Tab bar position"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:23
+#. i18n: file: src/prefs_views.ui:36
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
 #. i18n: file: src/quadkonsole4.kcfg:62
 #. i18n: ectx: label, entry (viewHasToolbar), group (Views)
-#. i18n: file: src/prefs_views.ui:23
+#. i18n: file: src/prefs_views.ui:36
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_viewHasToolbar)
 #. i18n: file: src/quadkonsole4.kcfg:62
 #. i18n: ectx: label, entry (viewHasToolbar), group (Views)
-#: build/src/settings.cpp:115 build/src/ui_prefs_views.h:113 i18n/rc.cpp:78
-#: i18n/rc.cpp:159 rc.cpp:78 rc.cpp:159
+#: build/src/settings.cpp:115 build/src/ui_prefs_views.h:117 i18n/rc.cpp:81
+#: i18n/rc.cpp:162 rc.cpp:81 rc.cpp:162
 msgid "Display a toolbar for each view"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:40
+#. i18n: file: src/prefs_views.ui:53
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
 #. i18n: file: src/quadkonsole4.kcfg:66
 #. i18n: ectx: label, entry (autoloadView), group (Views)
-#. i18n: file: src/prefs_views.ui:40
+#. i18n: file: src/prefs_views.ui:53
 #. i18n: ectx: property (text), widget (QCheckBox, kcfg_autoloadView)
 #. i18n: file: src/quadkonsole4.kcfg:66
 #. i18n: ectx: label, entry (autoloadView), group (Views)
-#: build/src/settings.cpp:119 build/src/ui_prefs_views.h:115 i18n/rc.cpp:84
-#: i18n/rc.cpp:162 rc.cpp:84 rc.cpp:162
+#: build/src/settings.cpp:119 build/src/ui_prefs_views.h:119 i18n/rc.cpp:87
+#: i18n/rc.cpp:165 rc.cpp:87 rc.cpp:165
 msgid "Load new views automatically for unhandles MIME types"
 msgstr ""
 
 #. i18n: file: src/quadkonsole4.kcfg:70
 #. i18n: ectx: label, entry (views), group (Views)
-#: build/src/settings.cpp:123 i18n/rc.cpp:165 rc.cpp:165
+#: build/src/settings.cpp:123 i18n/rc.cpp:168 rc.cpp:168
 msgid "Prepare these views"
 msgstr ""
 
@@ -289,32 +289,38 @@ msgstr ""
 
 #. i18n: file: src/prefs_views.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, prefs_views)
-#: build/src/ui_prefs_views.h:112 i18n/rc.cpp:75 src/quadkonsole.cpp:524
+#: build/src/ui_prefs_views.h:115 i18n/rc.cpp:75 src/quadkonsole.cpp:524
 #: rc.cpp:75
 msgid "Views"
 msgstr ""
 
-#. i18n: file: src/prefs_views.ui:33
+#. i18n: file: src/prefs_views.ui:20
+#. i18n: ectx: property (title), widget (KEditListBox, kcfg_views)
+#: build/src/ui_prefs_views.h:116 i18n/rc.cpp:78 rc.cpp:78
+msgid "Preload views"
+msgstr ""
+
+#. i18n: file: src/prefs_views.ui:46
 #. i18n: ectx: property (text), widget (QLabel, mimeTypesLabel)
-#: build/src/ui_prefs_views.h:114 i18n/rc.cpp:81 rc.cpp:81
+#: build/src/ui_prefs_views.h:118 i18n/rc.cpp:84 rc.cpp:84
 msgid "Supported MIME types"
 msgstr ""
 
 #. i18n: file: src/qkremotewidget.ui:14
 #. i18n: ectx: property (windowTitle), widget (QWidget, qkremoteWidget)
-#: build/src/ui_qkremotewidget.h:96 i18n/rc.cpp:108 rc.cpp:108
+#: build/src/ui_qkremotewidget.h:96 i18n/rc.cpp:111 rc.cpp:111
 msgid "QKRemote"
 msgstr ""
 
 #. i18n: file: src/qkremotewidget.ui:70
 #. i18n: ectx: property (text), widget (QPushButton, refreshButton)
-#: build/src/ui_qkremotewidget.h:97 i18n/rc.cpp:111 rc.cpp:111
+#: build/src/ui_qkremotewidget.h:97 i18n/rc.cpp:114 rc.cpp:114
 msgid "&Refresh"
 msgstr ""
 
 #. i18n: file: src/qkremotewidget.ui:93
 #. i18n: ectx: property (text), widget (QPushButton, identifyButton)
-#: build/src/ui_qkremotewidget.h:98 i18n/rc.cpp:114 rc.cpp:114
+#: build/src/ui_qkremotewidget.h:98 i18n/rc.cpp:117 rc.cpp:117
 msgid "&Identify"
 msgstr ""
 
@@ -366,12 +372,12 @@ msgstr ""
 msgid "&Go"
 msgstr ""
 
-#: i18n/rc.cpp:167 rc.cpp:167
+#: i18n/rc.cpp:170 rc.cpp:170
 msgctxt "NAME OF TRANSLATORS"
 msgid "Your names"
 msgstr ""
 
-#: i18n/rc.cpp:168 rc.cpp:168
+#: i18n/rc.cpp:171 rc.cpp:171
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
 msgstr ""
@@ -450,15 +456,19 @@ msgstr ""
 msgid "qkremotepart"
 msgstr ""
 
-#: src/qkstack.cpp:243
+#: src/qkstack.cpp:241
 msgid "No view is able to open \"%1\""
 msgstr ""
 
-#: src/qkstack.cpp:409
+#: src/qkstack.cpp:414
 msgid "Could not open url '%1': %2"
 msgstr ""
 
 #: src/qkurlhandler.cpp:111
+msgid "Could not find a part matching '%1'"
+msgstr ""
+
+#: src/qkurlhandler.cpp:173
 msgid "no such file or directory"
 msgstr ""
 
@@ -466,7 +476,7 @@ msgstr ""
 msgid "The factory for %1 could not create a KPart."
 msgstr ""
 
-#: src/qkview.cpp:344
+#: src/qkview.cpp:345
 msgid "%1 files selected (%2)"
 msgstr ""
 
@@ -538,6 +548,6 @@ msgstr ""
 msgid "Restore session"
 msgstr ""
 
-#: src/quadkonsole.cpp:749
+#: src/quadkonsole.cpp:762
 msgid "The process \"%1\" is still running. Do you want to terminate it?"
 msgstr ""

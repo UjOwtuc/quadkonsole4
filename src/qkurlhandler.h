@@ -41,9 +41,13 @@ class QKUrlHandler : public QObject
 		const KUrl& url() const;
 		const QString& mimetype() const;
 		const QString& error() const;
+		const QString& partName() const;
 
 	signals:
 		void finished(QKUrlHandler*);
+
+	public slots:
+		void run();
 
 	private slots:
 		void slotFoundMimetype(KIO::Job* job, const QString& mimetype);
@@ -51,12 +55,10 @@ class QKUrlHandler : public QObject
 		void slotJobFinished(KJob* job);
 
 	private:
-		void handleLocal();
-		void handleRemote();
-
 		KUrl m_url;
 		QString m_mimetype;
 		QString m_error;
+		QString m_partName;
 };
 
 #endif // QKURLHANDLER_H

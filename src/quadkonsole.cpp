@@ -589,6 +589,13 @@ bool QuadKonsole::queryClose()
 
 void QuadKonsole::saveProperties(KConfigGroup& config)
 {
+	bool orientationVertical;
+	if (m_rows->orientation() == Qt::Vertical)
+		orientationVertical = true;
+	else
+		orientationVertical = false;
+	config.writeEntry("layoutOrientationVertical", orientationVertical);
+
 	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
 	kDebug() << "saving session. rowSizes =" << rowSizes << endl;
@@ -626,6 +633,12 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 	}
 
 	m_rows->setSizes(rowSizes);
+
+	bool orientationVertical = config.readEntry("orientationVertical", true);
+	if (orientationVertical && m_rows->orientation() == Qt::Horizontal)
+		changeLayout();
+	else if (! orientationVertical && m_rows->orientation() == Qt::Vertical)
+		changeLayout();
 }
 
 
@@ -955,18 +968,6 @@ void QuadKonsole::changeLayout()
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	createGUI(part);
-
-	if (part)
-	{
-		if (! part->factory())
-			part->setFactory(guiFactory());
-
-		if (! guiFactory()->clients().contains(part))
-			guiFactory()->addClient(part);
-
-		if (! factory()->clients().contains(part))
-			factory()->addClient(part);
-	}
 }
 
 

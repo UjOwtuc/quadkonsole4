@@ -20,6 +20,7 @@
 
 #include "qkurlhandler.h"
 
+#include <KDE/KService>
 #include <KDE/KLocale>
 #include <KDE/KFileItem>
 #include <KDE/KUrl>
@@ -29,18 +30,17 @@
 #include <KDE/KIO/Scheduler>
 
 #include <QtCore/QFile>
+#include <QtCore/QTimer>
 
 
 QKUrlHandler::QKUrlHandler(const KUrl& url, QObject* parent)
-	: QObject(parent)
+	: QObject(parent),
+	m_url(url)
 {
-	KUriFilterData data(url.pathOrUrl());
-	KUriFilter::self()->filterUri(data);
-	m_url = data.uri();
-
-	KIO::JobFlags flags = KIO::HideProgressInfo;
-	KIO::StatJob* stat = KIO::stat(m_url, true, 0, flags);
-	connect(stat, SIGNAL(result(KJob*)), SLOT(slotStatResult(KJob*)));
+	QTimer* timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), SLOT(run()));
+	timer->setSingleShot(true);
+	timer->start(1);
 }
 
 
@@ -63,6 +63,68 @@ const QString& QKUrlHandler::mimetype() const
 const QString& QKUrlHandler::error() const
 {
 	return m_error;
+}
+
+
+const QString& QKUrlHandler::partName() const
+{
+	return m_partName;
+}
+
+
+void QKUrlHandler::run()
+{
+	QString rawUrl = m_url.pathOrUrl();
+	// how about a setting for prefix?
+	if (rawUrl.startsWith("part:"))
+	{
+		QString name = rawUrl.mid(5);
+		int pos = name.indexOf(":");
+		if (pos > -1)
+		{
+			rawUrl = name.mid(pos +1);
+			name = name.left(pos);
+		}
+		else
+		{
+			m_url = "";
+			rawUrl = "";
+		}
+
+		QStringList matches;
+		matches << name + ".desktop" << name + "part.desktop" << name + "_part.desktop";
+		KService::List services = KService::allServices();
+		KService::List::const_iterator it;
+		for (it=services.constBegin(); it!=services.constEnd(); ++it)
+		{
+			KService::Ptr s = *it;
+			if (s->serviceTypes().contains("KParts/ReadOnlyPart", Qt::CaseInsensitive) && matches.contains(s->entryPath()))
+			{
+				// someone wants to handle multiple matches?
+				m_partName = s->entryPath();
+				break;
+			}
+		}
+
+		if (m_partName.isEmpty())
+		{
+			m_error = i18n("Could not find a part matching '%1'", name);
+			emit finished(this);
+		}
+	}
+
+	if (! rawUrl.isEmpty())
+	{
+		KUriFilterData data(rawUrl);
+		KUriFilter::self()->filterUri(data);
+		m_url = data.uri();
+
+		KIO::JobFlags flags = KIO::HideProgressInfo;
+		KIO::StatJob* stat = KIO::stat(m_url, true, 0, flags);
+		connect(stat, SIGNAL(result(KJob*)), SLOT(slotStatResult(KJob*)));
+	}
+	else
+		emit finished(this);
 }
 
 

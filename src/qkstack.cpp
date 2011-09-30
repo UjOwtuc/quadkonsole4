@@ -77,25 +77,6 @@ QKStack::~QKStack()
 }
 
 
-bool QKStack::hasFocus() const
-{
-	if (count())
-	{
-		QKView* view = qobject_cast<QKView*>(currentWidget());
-		return view->hasFocus();
-	}
-	return false;
-}
-
-
-void QKStack::setFocus()
-{
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	view->setFocus();
-	checkEnableActions();
-}
-
-
 QString QKStack::foregroundProcess() const
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());

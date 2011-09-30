@@ -47,8 +47,6 @@ class QKStack : public KTabWidget
 		explicit QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent = 0);
 		virtual ~QKStack();
 
-		bool hasFocus() const;
-		void setFocus();
 		QString foregroundProcess() const;
 		KParts::ReadOnlyPart* part();
 		void partDestroyed();

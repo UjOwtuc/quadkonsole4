@@ -29,8 +29,6 @@
 
 #include <QtGui/QClipboard>
 
-#include <vector>
-
 class QKStack;
 class QGridLayout;
 class QSplitter;
@@ -83,7 +81,7 @@ class QuadKonsole : public KParts::MainWindow
 		void detach(QKStack* stack=0);
 		void pasteClipboard();
 		void pasteSelection();
-		void removePart();
+		void removeStack();
 		void switchView();
 		void toggleUrlBar();
 		void goBack();
@@ -95,7 +93,7 @@ class QuadKonsole : public KParts::MainWindow
 		void setStatusBarText(const QString& text);
 		void setWindowCaption(const QString& text);
 		void slotActivePartChanged(KParts::Part* part);
-		void slotStackDestroyed();
+		void slotStackDestroyed(QKStack* removed=0);
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();
@@ -120,8 +118,8 @@ class QuadKonsole : public KParts::MainWindow
 
 		QList<QKStack*> m_stacks;
 		QSplitter* m_rows;
-		std::vector<QSplitter*> mRowLayouts;
-		MouseMoveFilter* mFilter;
+		QList<QSplitter*> m_rowLayouts;
+		MouseMoveFilter* m_mouseFilter;
 		KParts::PartManager m_partManager;
 };
 

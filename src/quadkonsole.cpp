@@ -57,6 +57,7 @@
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
 
+
 namespace
 {
 	// action name => vertical layout (default), horizontal layout
@@ -86,7 +87,7 @@ QString splitIndex(const QString& s, int* index)
 
 // Only for restoring a session.
 QuadKonsole::QuadKonsole()
-	: mFilter(0),
+	: m_mouseFilter(0),
 	m_partManager(this)
 {
 	setupActions();
@@ -100,7 +101,7 @@ QuadKonsole::QuadKonsole()
 
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
-	: mFilter(0),
+	: m_mouseFilter(0),
 	m_partManager(this)
 {
 	if (rows == 0)
@@ -136,7 +137,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 
 // for detaching parts
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition)
-	: mFilter(0),
+	: m_mouseFilter(0),
 	m_partManager(this)
 {
 	QList<KParts::ReadOnlyPart*> parts;
@@ -158,7 +159,7 @@ QuadKonsole::~QuadKonsole()
 	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	m_partManager.disconnect();
 
-	delete mFilter;
+	delete m_mouseFilter;
 	while (m_stacks.count())
 		delete m_stacks.takeFirst();
 }
@@ -180,8 +181,8 @@ void QuadKonsole::setupActions()
 {
 	if (Settings::sloppyFocus())
 	{
-		mFilter = new MouseMoveFilter(this);
-		qApp->installEventFilter(mFilter);
+		m_mouseFilter = new MouseMoveFilter(this);
+		qApp->installEventFilter(m_mouseFilter);
 	}
 
 	// Movement
@@ -229,7 +230,7 @@ void QuadKonsole::setupActions()
 	KAction* removePart = new KAction(KIcon("view-left-close"), i18n("Re&move part"), this);
 	removePart->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 	actionCollection()->addAction("remove part", removePart);
-	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removePart()));
+	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
 
 	// View
 	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
@@ -306,7 +307,7 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 			row = new QSplitter(Qt::Vertical);
 
 		row->setChildrenCollapsible(false);
-		mRowLayouts.push_back(row);
+		m_rowLayouts.push_back(row);
 		m_rows->addWidget(row);
 		for (int j=0; j<columns; ++j)
 		{
@@ -341,14 +342,12 @@ void QuadKonsole::focusKonsoleRight()
 	if (row >= 0 && col >= 0)
 	{
 		++col;
-		if (col >= mRowLayouts[row]->count())
+		if (col >= m_rowLayouts[row]->count())
 		{
-			row = (row +1) % mRowLayouts.size();
+			row = (row +1) % m_rowLayouts.size();
 			col = 0;
 		}
-		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
-		if (stack)
-			stack->setFocus();
+		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
 
@@ -362,12 +361,10 @@ void QuadKonsole::focusKonsoleLeft()
 		--col;
 		if (col < 0)
 		{
-			row = (row + mRowLayouts.size() -1) % mRowLayouts.size();
-			col = mRowLayouts[row]->count() -1;
+			row = (row + m_rowLayouts.size() -1) % m_rowLayouts.size();
+			col = m_rowLayouts[row]->count() -1;
 		}
-		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
-		if (stack)
-			stack->setFocus();
+		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
 
@@ -378,12 +375,10 @@ void QuadKonsole::focusKonsoleUp()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		row = (row + mRowLayouts.size() -1) % mRowLayouts.size();
-		if (col >= mRowLayouts[row]->count())
-			col = mRowLayouts[row]->count() -1;
-		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
-		if (stack)
-			stack->setFocus();
+		row = (row + m_rowLayouts.size() -1) % m_rowLayouts.size();
+		if (col >= m_rowLayouts[row]->count())
+			col = m_rowLayouts[row]->count() -1;
+		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
 
@@ -394,12 +389,10 @@ void QuadKonsole::focusKonsoleDown()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		row = (row +1) % mRowLayouts.size();
-		if (col >= mRowLayouts[row]->count())
-			col = mRowLayouts[row]->count() -1;
-		QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
-		if (stack)
-			stack->setFocus();
+		row = (row +1) % m_rowLayouts.size();
+		if (col >= m_rowLayouts[row]->count())
+			col = m_rowLayouts[row]->count() -1;
+		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
 
@@ -489,9 +482,12 @@ void QuadKonsole::resetLayouts()
 
 	resetLayout(m_rows, m_rows->height() / m_rows->count());
 
-	std::vector<QSplitter*>::iterator it;
-	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
-		resetLayout(*it, (*it)->width() / (*it)->count());
+	QListIterator<QSplitter*> it(m_rowLayouts);
+	while (it.hasNext())
+	{
+		QSplitter* layout = it.next();
+		resetLayout(layout, layout->width() / layout->count());
+	}
 }
 
 
@@ -532,15 +528,15 @@ void QuadKonsole::optionsPreferences()
 
 void QuadKonsole::settingsChanged()
 {
-	if (Settings::sloppyFocus() && mFilter == 0)
+	if (Settings::sloppyFocus() && m_mouseFilter == 0)
 	{
-		mFilter = new MouseMoveFilter;
-		qApp->installEventFilter(mFilter);
+		m_mouseFilter = new MouseMoveFilter;
+		qApp->installEventFilter(m_mouseFilter);
 	}
 	else if (! Settings::sloppyFocus())
 	{
-		delete mFilter;
-		mFilter = 0;
+		delete m_mouseFilter;
+		m_mouseFilter = 0;
 	}
 
 	if ((m_rows->orientation() == Qt::Vertical && ! Settings::layoutVertical()) || (m_rows->orientation() == Qt::Horizontal && Settings::layoutVertical()))
@@ -601,10 +597,10 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 	config.writeEntry("rowSizes", rowSizes);
 	kDebug() << "saving session. rowSizes =" << rowSizes << endl;
 
-	for (unsigned int i=0; i<mRowLayouts.size(); ++i)
+	for (int i=0; i<m_rowLayouts.size(); ++i)
 	{
-		kDebug() << QString("row_%1").arg(i) << "=" << mRowLayouts[i]->sizes() << endl;
-		config.writeEntry(QString("row_%1").arg(i), mRowLayouts[i]->sizes());
+		kDebug() << QString("row_%1").arg(i) << "=" << m_rowLayouts[i]->sizes() << endl;
+		config.writeEntry(QString("row_%1").arg(i), m_rowLayouts[i]->sizes());
 	}
 }
 
@@ -618,19 +614,19 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		return;
 	}
 
-	kDebug() << "adjusting number of rows:" << mRowLayouts.size() << "=>" << rowSizes.size() << endl;
+	kDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size() << endl;
 	// adjust number of rows
-	while (mRowLayouts.size() < static_cast<unsigned int>(rowSizes.size()))
+	while (m_rowLayouts.size() < rowSizes.size())
 		insertVertical(0, 0);
 
-	for (unsigned int i=0; i<static_cast<unsigned int>(rowSizes.size()); ++i)
+	for (int i=0; i<rowSizes.size(); ++i)
 	{
 		kDebug() << "restoring row" << i << endl;
 		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
-		while (mRowLayouts[i]->count() < sizes.size())
+		while (m_rowLayouts[i]->count() < sizes.size())
 			insertHorizontal(i, 0);
 
-		mRowLayouts[i]->setSizes(sizes);
+		m_rowLayouts[i]->setSizes(sizes);
 	}
 
 	m_rows->setSizes(rowSizes);
@@ -658,11 +654,11 @@ QKStack* QuadKonsole::getFocusStack()
 
 void QuadKonsole::getFocusCoords(int& row, int& col)
 {
-	for (row=0; static_cast<unsigned long>(row)<mRowLayouts.size(); ++row)
+	for (row=0; row<m_rowLayouts.size(); ++row)
 	{
-		for (col=0; col<mRowLayouts[row]->count(); ++col)
+		for (col=0; col<m_rowLayouts[row]->count(); ++col)
 		{
-			QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
+			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[row]->widget(col));
 			if (stack->hasFocus())
 			{
 				return;
@@ -684,7 +680,7 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 		stack = new QKStack(m_partManager);
 
 	m_stacks.append(stack);
-	mRowLayouts[row]->insertWidget(col, stack);
+	m_rowLayouts[row]->insertWidget(col, stack);
 
 	connect(stack, SIGNAL(partCreated()), SLOT(resetLayouts()));
 	connect(stack, SIGNAL(setStatusBarText(QString)), SLOT(setStatusBarText(QString)));
@@ -737,9 +733,9 @@ void QuadKonsole::insertVertical(int row, int col)
 		newRow->setChildrenCollapsible(false);
 		m_rows->insertWidget(row, newRow);
 
-		std::vector<QSplitter*>::iterator it = mRowLayouts.begin();
+		QList<QSplitter*>::iterator it = m_rowLayouts.begin();
 		it += row;
-		mRowLayouts.insert(it, newRow);
+		m_rowLayouts.insert(it, newRow);
 
 		QKStack* stack = addStack(row, 0);
 		stack->setFocus();
@@ -748,7 +744,7 @@ void QuadKonsole::insertVertical(int row, int col)
 }
 
 
-void QuadKonsole::removePart()
+void QuadKonsole::removeStack()
 {
 	int row, col;
 	getFocusCoords(row, col);
@@ -765,27 +761,7 @@ void QuadKonsole::removePart()
 			}
 		}
 		m_stacks.removeAll(stack);
-
-		delete stack;
-		if (mRowLayouts[row]->count() < 1)
-		{
-			QSplitter* splitter = mRowLayouts[row];
-			std::vector<QSplitter*>::iterator it = mRowLayouts.begin();
-			it += row;
-			mRowLayouts.erase(it);
-			delete splitter;
-		}
-
-		if (m_stacks.isEmpty())
-			quit();
-		else
-		{
-			row = row % mRowLayouts.size();
-			col = col % mRowLayouts[row]->count();
-			QKStack* stack = qobject_cast<QKStack*>(mRowLayouts[row]->widget(col));
-			if (stack)
-				stack->setFocus();
-		}
+		slotStackDestroyed(stack);
 	}
 }
 
@@ -953,9 +929,9 @@ QStringList QuadKonsole::partIcons() const
 
 void QuadKonsole::changeLayout()
 {
-	std::vector<QSplitter*>::iterator it;
-	for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
-		(*it)->setOrientation(m_rows->orientation());
+	QListIterator<QSplitter*> it(m_rowLayouts);
+	while (it.hasNext())
+		it.next()->setOrientation(m_rows->orientation());
 
 	if (m_rows->orientation() == Qt::Vertical)
 		m_rows->setOrientation(Qt::Horizontal);
@@ -972,26 +948,31 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 }
 
 
-void QuadKonsole::slotStackDestroyed()
+void QuadKonsole::slotStackDestroyed(QKStack* removed)
 {
-	QKStack* stack = qobject_cast<QKStack*>(sender());
+	QKStack* stack = removed;
+	if (! stack)
+		stack = qobject_cast<QKStack*>(sender());
+
 	if (stack)
 	{
 		m_stacks.removeAll(stack);
-		std::vector<QSplitter*>::iterator it;
-		for (it=mRowLayouts.begin(); it!=mRowLayouts.end(); ++it)
+		stack->deleteLater();
+
+		QList<QSplitter*>::iterator it;
+		for (it=m_rowLayouts.begin(); it!=m_rowLayouts.end(); ++it)
 		{
 			QSplitter* splitter = *it;
 			if (splitter->indexOf(stack) >= 0 && splitter->count() <= 1)
 			{
 				splitter->deleteLater();
-				mRowLayouts.erase(it);
+				m_rowLayouts.erase(it);
 				break;
 			}
 		}
 	}
 	else
-		kDebug() << "sender is no QKStack" << endl;
+		kDebug() << "no stack removed??" << endl;
 
 	if (m_stacks.empty())
 		quit();

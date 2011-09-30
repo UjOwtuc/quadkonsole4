@@ -62,8 +62,6 @@ class QKView : public QWidget
 		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
 
-		bool hasFocus() const;
-		void setFocus();
 		KUrl getURL() const;
 		void setURL(const KUrl& url);
 		void sendInput(const QString& text);

@@ -108,25 +108,6 @@ QKView::~QKView()
 }
 
 
-bool QKView::hasFocus() const
-{
-	if (m_part)
-		return m_part->widget()->hasFocus();
-	return false;
-}
-
-
-void QKView::setFocus()
-{
-	if (m_part)
-	{
-		m_partManager.setActivePart(m_part);
-		m_partManager.setSelectedPart(m_part);
-		m_part->widget()->setFocus();
-	}
-}
-
-
 KUrl QKView::getURL() const
 {
 	if (m_part)

@@ -275,7 +275,10 @@ void QKView::partDestroyed()
 {
 	if (m_part)
 	{
-		m_part->setFactory(0);
+		KXmlGuiWindow* win = qobject_cast<KXmlGuiWindow*>(window());
+		if (win)
+			win->guiFactory()->resetContainer("session-popup-menu");
+
 		m_partManager.removePart(m_part);
 		m_part->disconnect();
 		if (m_part->widget())
@@ -437,10 +440,6 @@ void QKView::setupPart()
 	if (t)
 	{
 		kDebug() << "part" << m_partname << "has a TerminalInterfaceV2" << endl;
-		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
-		if (window)
-			m_part->setFactory(window->guiFactory());
-
 		t->showShellInDir(QString());
 	}
 

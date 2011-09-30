@@ -147,6 +147,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history,
 	m_stacks.front()->setHistory(history, historyPosition);
 	setupGUI();
 	createGUI(m_stacks.front()->part());
+
 	showNormal();
 	reconnectMovement();
 }

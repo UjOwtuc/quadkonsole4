@@ -1,9 +1,18 @@
 [Desktop Entry]
 Name=qkremote
+Name[sr]=ЧкДаљинац
+Name[sr@latin]=ČkDaljinac
+Name[sr@ijekavian]=ЧкДаљинац
+Name[sr@ijekavianlatin]=ČkDaljinac
 Name[x-test]=xxqkremotexx
 Exec=qkremote %i -caption "%c"
 Icon=qkremote
 Type=Application
 X-DocPath=qkremote/index.html
 GenericName=A KDE KPart Application
+GenericName[sr]=Контролер Четверо-конзоле 4
+GenericName[sr@latin]=Kontroler Četvero-konzole 4
+GenericName[sr@ijekavian]=Контролер Четверо-конзоле 4
+GenericName[sr@ijekavianlatin]=Kontroler Četvero-konzole
 Terminal=false
+Categories=Qt;KDE;Utility;

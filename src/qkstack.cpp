@@ -151,6 +151,19 @@ QString QKStack::partIcon() const
 }
 
 
+void QKStack::setCurrentIndex(int index)
+{
+	static_cast<KTabWidget*>(this)->setCurrentIndex(index);
+
+	QKView* view = qobject_cast<QKView*>(currentWidget());
+	if (view)
+	{
+		view->show();
+		setFocusProxy(view);
+	}
+}
+
+
 void QKStack::switchView()
 {
 	QKView* view = qobject_cast<QKView*>(currentWidget());
@@ -235,13 +248,13 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (index != currentIndex())
 		setCurrentIndex(index);
 
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	view->show();
-	setFocusProxy(view);
 	if (! url.isEmpty())
 	{
 		addHistoryEntry(url);
-		view->setURL(url);
+
+		QKView* view = qobject_cast<QKView*>(currentWidget());
+		if (view)
+			view->setURL(url);
 	}
 }
 
@@ -412,6 +425,7 @@ void QKStack::slotCurrentChanged()
 	if (view)
 	{
 		view->show();
+		setFocusProxy(view);
 		view->setFocus();
 		emit setStatusBarText(view->statusBarText());
 		emit setWindowCaption(view->windowCaption());

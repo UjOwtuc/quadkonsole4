@@ -58,6 +58,8 @@ class QKStack : public KTabWidget
 		QString url() const;
 		QString partIcon() const;
 
+		virtual void setCurrentIndex(int index);
+
 	signals:
 		void partCreated();
 		void setStatusBarText(QString);

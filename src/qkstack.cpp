@@ -125,11 +125,12 @@ int QKStack::addViews(const QStringList& partNames)
 }
 
 
-void QKStack::setHistory(const QList< KUrl >& history, int historyPosition)
+void QKStack::setHistory(const QStringList& history, int historyPosition)
 {
 	m_history = history;
 	m_historyPosition = historyPosition;
 	checkEnableActions();
+	emit historyChanged();
 }
 
 
@@ -250,11 +251,11 @@ void QKStack::switchView(int index, const KUrl& url)
 
 	if (! url.isEmpty())
 	{
-		addHistoryEntry(url);
-
 		QKView* view = qobject_cast<QKView*>(currentWidget());
 		if (view)
 			view->setURL(url);
+
+		addHistoryEntry(url);
 	}
 }
 
@@ -286,14 +287,6 @@ void QKStack::settingsChanged()
 		setTabPosition(North);
 	else
 		setTabPosition(South);
-}
-
-
-void QKStack::toggleUrlBar()
-{
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	if (view)
-		view->toggleUrlBar();
 }
 
 
@@ -356,7 +349,7 @@ void QKStack::goHistory(int steps)
 	if (old_pos != m_historyPosition)
 	{
 		m_blockHistory = true;
-		slotOpenUrlRequest(m_history[m_historyPosition]);
+		slotOpenUrlRequest(KUrl(m_history[m_historyPosition]));
 		m_blockHistory = false;
 	}
 }
@@ -385,6 +378,12 @@ void QKStack::slotOpenUrlRequest(KUrl url, bool tryCurrent)
 	QKUrlHandler* handler = new QKUrlHandler(url, this);
 	handler->setProperty("tryCurrent", tryCurrent);
 	connect(handler, SIGNAL(finished(QKUrlHandler*)), SLOT(slotUrlFiltered(QKUrlHandler*)));
+}
+
+
+void QKStack::slotOpenUrlRequest(const QString& url)
+{
+	slotOpenUrlRequest(KUrl(url), true);
 }
 
 
@@ -600,19 +599,21 @@ void QKStack::addHistoryEntry(const KUrl& url)
 		{
 			// remove forward entries
 			while (m_historyPosition < m_history.count() -1)
-				m_history.pop_back();
+				m_history.removeLast();
 
 			// filter duplicate entries
-			if (m_history.back() != url)
-				m_history.append(url);
+			if (m_history.back() != url.pathOrUrl())
+				m_history.append(url.pathOrUrl());
 		}
 		else
-			m_history.append(url);
+			m_history.append(url.pathOrUrl());
 
 		m_historyPosition = m_history.count() -1;
 
 		while (static_cast<unsigned>(m_history.size()) > Settings::historySize())
-			m_history.pop_front();
+			m_history.removeFirst();
+
+		emit historyChanged();
 	}
 	checkEnableActions();
 }

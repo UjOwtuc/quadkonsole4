@@ -35,7 +35,6 @@
 #include <KDE/KFileItemList>
 
 #include <KDE/KLineEdit>
-#include <KDE/KUrlRequester>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
@@ -102,7 +101,6 @@ QKView::~QKView()
 		if (window)
 			window->guiFactory()->removeClient(m_part);
 	}
-	delete m_urlbar;
 	delete m_part;
 	delete m_icon;
 }
@@ -285,20 +283,6 @@ void QKView::partDestroyed()
 }
 
 
-void QKView::toggleUrlBar()
-{
-	if (m_urlbar->isVisible())
-		m_urlbar->hide();
-	else
-	{
-		m_urlbar->setUrl(getURL());
-		m_urlbar->show();
-		m_urlbar->setFocus();
-		m_urlbar->lineEdit()->selectAll();
-	}
-}
-
-
 void QKView::slotPopupMenu(const QPoint& where, const KUrl &url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
 {
 	KFileItem item(url, args.mimeType(), mode);
@@ -366,12 +350,6 @@ void QKView::slotSetWindowCaption(QString text)
 }
 
 
-void QKView::slotOpenUrl(QString url)
-{
-	emit openUrlRequest(KUrl(url));
-}
-
-
 void QKView::setupUi()
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
@@ -387,15 +365,6 @@ void QKView::setupUi()
 
 	m_toolbar = new QToolBar;
 	m_layout->addWidget(m_toolbar);
-
-	m_urlbar = new KUrlRequester;
-	m_urlbar->hide();
-	connect(m_urlbar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
-	connect(m_urlbar, SIGNAL(returnPressed()), m_urlbar, SLOT(hide()));
-	connect(m_urlbar, SIGNAL(urlSelected(KUrl)), SIGNAL(openUrlRequest(KUrl)));
-	connect(m_urlbar, SIGNAL(urlSelected(KUrl)), m_urlbar, SLOT(hide()));
-
-	m_layout->addWidget(m_urlbar);
 
 	if (m_part)
 		setupPart();

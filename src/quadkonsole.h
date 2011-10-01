@@ -33,6 +33,7 @@ class QKStack;
 class QGridLayout;
 class QSplitter;
 class MouseMoveFilter;
+class KHistoryComboBox;
 
 namespace KParts
 {
@@ -70,6 +71,8 @@ class QuadKonsole : public KParts::MainWindow
 		QStringList urls() const;
 		QStringList partIcons() const;
 		void changeLayout();
+		void slotActivateUrlBar();
+		void refreshHistory();
 
 	private slots:
 		void focusKonsoleRight();
@@ -83,7 +86,6 @@ class QuadKonsole : public KParts::MainWindow
 		void pasteSelection();
 		void removeStack();
 		void switchView();
-		void toggleUrlBar();
 		void goBack();
 		void goForward();
 		void goUp();
@@ -108,7 +110,7 @@ class QuadKonsole : public KParts::MainWindow
 		void readProperties(const KConfigGroup& config);
 
 	private:
-		QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition);
+		QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition);
 		void setupActions();
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
 		void emitPaste(QClipboard::Mode mode);
@@ -121,6 +123,8 @@ class QuadKonsole : public KParts::MainWindow
 		QList<QSplitter*> m_rowLayouts;
 		MouseMoveFilter* m_mouseFilter;
 		KParts::PartManager m_partManager;
+		KHistoryComboBox* m_urlBar;
+		QKStack* m_activeStack;
 };
 
 #endif // QUADKONSOLE_H

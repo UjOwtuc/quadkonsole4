@@ -43,6 +43,8 @@
 #include <KDE/KToolBar>
 #include <KDE/KConfigDialog>
 #include <KDE/KMessageBox>
+#include <KDE/KHistoryComboBox>
+#include <KDE/KLineEdit>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/PartManager>
 
@@ -88,11 +90,11 @@ QString splitIndex(const QString& s, int* index)
 // Only for restoring a session.
 QuadKonsole::QuadKonsole()
 	: m_mouseFilter(0),
-	m_partManager(this)
+	m_partManager(this),
+	m_activeStack(0)
 {
 	setupActions();
 	setupUi(0, 0);
-	setupGUI();
 
 	// there is no KPart loaded
 	//createGUI(m_stacks.front()->part());
@@ -124,8 +126,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 
 	setupActions();
 	setupUi(rows, columns);
-	setupGUI();
 	createGUI(m_stacks.front()->part());
+	m_activeStack = m_stacks.front();
 
 	if (cmds.size())
 		sendCommands(cmds);
@@ -136,7 +138,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 
 
 // for detaching parts
-QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history, int historyPosition)
+QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition)
 	: m_mouseFilter(0),
 	m_partManager(this)
 {
@@ -146,8 +148,8 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QList<KUrl>& history,
 	setupActions();
 	setupUi(1, 1, parts);
 	m_stacks.front()->setHistory(history, historyPosition);
-	setupGUI();
 	createGUI(m_stacks.front()->part());
+	m_activeStack = m_stacks.front();
 
 	showNormal();
 	reconnectMovement();
@@ -242,11 +244,6 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("switch view", switchView);
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
 
-	KAction* toggleUrlBar = new KAction(KIcon("document-open-remote"), i18n("&Open URL"), this);
-	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
-	actionCollection()->addAction("toggle url bar", toggleUrlBar);
-	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(toggleUrlBar()));
-
 	KAction* closeView = new KAction(KIcon("document-close"), i18n("&Close view"), this);
 	closeView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
 	actionCollection()->addAction("close view", closeView);
@@ -266,6 +263,13 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("change layout", changeLayout);
 	connect(changeLayout, SIGNAL(triggered(bool)), SLOT(changeLayout()));
 
+
+	// Location toolbar
+	KAction* toggleUrlBar = new KAction(KIcon("document-open-remote"), i18n("&Open URL"), this);
+	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
+	actionCollection()->addAction("toolbar_url_combo", toggleUrlBar);
+	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(slotActivateUrlBar()));
+
 	// Debug
 #ifdef DEBUG
 	kDebug() << "adding debugging actions" << endl;
@@ -282,6 +286,8 @@ void QuadKonsole::setupActions()
 
 void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > parts)
 {
+	setupGUI();
+
 	QWidget* centralWidget = new QWidget(this, 0);
 	setCentralWidget(centralWidget);
 
@@ -322,6 +328,12 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 
 	setWindowIcon(KIcon("quadkonsole4"));
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
+
+	m_urlBar = new KHistoryComboBox(true, 0);
+	toolBar("locationToolBar")->addWidget(m_urlBar);
+	m_urlBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
+	m_urlBar->setFont(KGlobalSettings::generalFont());
 }
 
 
@@ -685,6 +697,7 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 	connect(stack, SIGNAL(partCreated()), SLOT(resetLayouts()));
 	connect(stack, SIGNAL(setStatusBarText(QString)), SLOT(setStatusBarText(QString)));
 	connect(stack, SIGNAL(setWindowCaption(QString)), SLOT(setWindowCaption(QString)));
+	connect(stack, SIGNAL(historyChanged()), SLOT(refreshHistory()));
 	connect(stack, SIGNAL(destroyed(QObject*)), SLOT(slotStackDestroyed()));
 
 	return stack;
@@ -787,14 +800,6 @@ void QuadKonsole::setWindowCaption(const QString& text)
 	QKStack* stack = qobject_cast<QKStack*>(sender());
 	if (stack && stack->hasFocus())
 		setCaption(text);
-}
-
-
-void QuadKonsole::toggleUrlBar()
-{
-	QKStack* stack = getFocusStack();
-	if (stack)
-		stack->toggleUrlBar();
 }
 
 
@@ -942,9 +947,45 @@ void QuadKonsole::changeLayout()
 }
 
 
+void QuadKonsole::slotActivateUrlBar()
+{
+	if (m_urlBar->isHidden())
+		m_urlBar->show();
+
+	m_urlBar->setFocus();
+	m_urlBar->lineEdit()->selectAll();
+}
+
+
+void QuadKonsole::refreshHistory()
+{
+	if (m_activeStack)
+	{
+		m_urlBar->clearHistory();
+		m_urlBar->setHistoryItems(m_activeStack->history(), true);
+		m_urlBar->lineEdit()->setText(m_activeStack->url());
+		m_urlBar->lineEdit()->setCursorPosition(0);
+	}
+}
+
+
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	createGUI(part);
+
+	QKStack* stack = getFocusStack();
+	if (m_activeStack && stack && m_activeStack != stack)
+	{
+		disconnect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
+		disconnect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
+	}
+	if (stack)
+	{
+		m_activeStack = stack;
+		connect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
+		connect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
+		refreshHistory();
+	}
 }
 
 

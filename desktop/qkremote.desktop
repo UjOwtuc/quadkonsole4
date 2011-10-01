@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=qkremote
+Name[de]=qkremote
 Name[sr]=ЧкДаљинац
 Name[sr@latin]=ČkDaljinac
 Name[sr@ijekavian]=ЧкДаљинац
@@ -9,7 +10,8 @@ Exec=qkremote %i -caption "%c"
 Icon=qkremote
 Type=Application
 X-DocPath=qkremote/index.html
-GenericName=A KDE KPart Application
+GenericName=Remote control for QuadKonsole4
+GenericName[de]=Fernsteuerung für QuadKonsole4
 GenericName[sr]=Контролер Четверо-конзоле 4
 GenericName[sr@latin]=Kontroler Četvero-konzole 4
 GenericName[sr@ijekavian]=Контролер Четверо-конзоле 4

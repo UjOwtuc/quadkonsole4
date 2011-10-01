@@ -39,6 +39,7 @@ namespace KIO
 	class Job;
 }
 
+
 class QKStack : public KTabWidget
 {
 	Q_OBJECT
@@ -52,9 +53,9 @@ class QKStack : public KTabWidget
 		void partDestroyed();
 		int addViews(const QStringList& partNames);
 		int historyLength() const { return m_history.count(); }
-		const QList<KUrl>& history() { return m_history; }
+		const QStringList& history() { return m_history; }
 		int historyPosition() { return m_historyPosition; }
-		void setHistory(const QList<KUrl>& history, int historyPosition);
+		void setHistory(const QStringList& history, int historyPosition);
 		QString url() const;
 		QString partIcon() const;
 
@@ -64,6 +65,7 @@ class QKStack : public KTabWidget
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
+		void historyChanged();
 
 	public slots:
 		void sendInput(const QString& text);
@@ -71,13 +73,13 @@ class QKStack : public KTabWidget
 		void switchView(KUrl url, const QString& mimeType, bool tryCurrent);
 		void switchView(int index, const KUrl& url);
 		void settingsChanged();
-		void toggleUrlBar();
 		void slotTabCloseRequested(int index);
 		void goBack();
 		void goForward();
 		void goUp();
 		void goHistory(int steps);
 		void slotOpenUrlRequest(KUrl url, bool tryCurrent=true);
+		void slotOpenUrlRequest(const QString& url);
 
 	private slots:
 		void slotPartCreated();
@@ -100,7 +102,7 @@ class QKStack : public KTabWidget
 		KParts::PartManager& m_partManager;
 		QKBrowserInterface* m_browserInterface;
 		QStringList m_loadedViews;
-		QList<KUrl> m_history;
+		QStringList m_history;
 		int m_historyPosition;
 		bool m_blockHistory;
 };

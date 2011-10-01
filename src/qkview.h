@@ -31,7 +31,6 @@
 class KMenu;
 class QToolBar;
 class QBoxLayout;
-class KUrlRequester;
 namespace KParts
 {
 	class ReadOnlyPart;
@@ -88,7 +87,6 @@ class QKView : public QWidget
 		void show();
 		void settingsChanged();
 		void partDestroyed();
-		void toggleUrlBar();
 
 	protected slots:
 		void createPart();
@@ -99,7 +97,6 @@ class QKView : public QWidget
 		void enableAction(const char* action, bool enable);
 		void slotSetStatusBarText(QString text);
 		void slotSetWindowCaption(QString text);
-		void slotOpenUrl(QString url);
 
 	private:
 		void setupUi();
@@ -108,7 +105,6 @@ class QKView : public QWidget
 		QString m_partname;
 		QBoxLayout* m_layout;
 		QToolBar* m_toolbar;
-		KUrlRequester* m_urlbar;
 		KParts::ReadOnlyPart* m_part;
 		QString m_statusBarText;
 		QString m_windowCaption;

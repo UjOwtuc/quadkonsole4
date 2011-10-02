@@ -49,8 +49,8 @@ class QKStack : public KTabWidget
 		virtual ~QKStack();
 
 		QString foregroundProcess() const;
-		KParts::ReadOnlyPart* part();
-		void partDestroyed();
+		KParts::ReadOnlyPart* part() const;
+		void partDestroyed() const;
 		int addViews(const QStringList& partNames);
 		int historyLength() const { return m_history.count(); }
 		const QStringList& history() { return m_history; }
@@ -60,17 +60,19 @@ class QKStack : public KTabWidget
 		QString partIcon() const;
 
 		virtual void setCurrentIndex(int index);
+		virtual QKView* currentWidget() const;
 
 	signals:
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
 		void historyChanged();
+		void setLocationBarUrl(QString);
 
 	public slots:
-		void sendInput(const QString& text);
+		void sendInput(const QString& text) const;
 		void switchView();
-		void switchView(KUrl url, const QString& mimeType, bool tryCurrent);
+		void switchView(const KUrl& url, const QString& mimeType, bool tryCurrent);
 		void switchView(int index, const KUrl& url);
 		void settingsChanged();
 		void slotTabCloseRequested(int index);
@@ -78,20 +80,19 @@ class QKStack : public KTabWidget
 		void goForward();
 		void goUp();
 		void goHistory(int steps);
-		void slotOpenUrlRequest(KUrl url, bool tryCurrent=true);
+		void slotOpenUrlRequest(const KUrl& url, bool tryCurrent=true);
 		void slotOpenUrlRequest(const QString& url);
 
 	private slots:
 		void slotPartCreated();
-		void slotSetStatusBarText(QString text);
-		void slotSetWindowCaption(QString text);
+		void slotSetStatusBarText(const QString& text);
+		void slotSetWindowCaption(const QString& text);
 		void slotUrlFiltered(QKUrlHandler* handler);
 		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);
 		void popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void slotMiddleClick(QWidget* widget);
-		void slotIconChanged();
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0);

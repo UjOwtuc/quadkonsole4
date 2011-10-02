@@ -64,14 +64,10 @@ QKStack::~QKStack()
 	this->disconnect();
 	while (count())
 	{
-		QWidget* w = currentWidget();
-
-		QKView* view;
-		if ((view = qobject_cast<QKView*>(w)))
-			view->disconnect();
-
+		QKView* view = currentWidget();
+		view->disconnect();
 		removeTab(currentIndex());
-		delete w;
+		delete view;
 	}
 	delete m_browserInterface;
 }
@@ -79,29 +75,25 @@ QKStack::~QKStack()
 
 QString QKStack::foregroundProcess() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	return view->foregroundProcess();
+	return currentWidget()->foregroundProcess();
 }
 
 
-KParts::ReadOnlyPart* QKStack::part()
+KParts::ReadOnlyPart* QKStack::part() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	return view->part();
+	return currentWidget()->part();
 }
 
 
-void QKStack::partDestroyed()
+void QKStack::partDestroyed() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	view->partDestroyed();
+	currentWidget()->partDestroyed();
 }
 
 
-void QKStack::sendInput(const QString& text)
+void QKStack::sendInput(const QString& text) const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	view->sendInput(text);
+	currentWidget()->sendInput(text);
 }
 
 
@@ -114,12 +106,9 @@ int QKStack::addViews(const QStringList& partNames)
 	{
 		QString name = it.next();
 		view = new QKView(m_partManager, m_browserInterface, name);
-		m_loadedViews << name;
-		if (view->icon())
-			index = addTab(view, *(view->icon()), view->partName());
-		else
-			index = addTab(view, view->partName());
 		addViewActions(view);
+		m_loadedViews << name;
+		index = addTab(view, view->partCaption());
 	}
 	return index;
 }
@@ -136,16 +125,13 @@ void QKStack::setHistory(const QStringList& history, int historyPosition)
 
 QString QKStack::url() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	if (view)
-		return view->getURL().pathOrUrl();
-	return "";
+	return currentWidget()->getURL().pathOrUrl();
 }
 
 
 QString QKStack::partIcon() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
+	QKView* view = currentWidget();
 	if (view)
 		return view->partIcon();
 	return "";
@@ -156,7 +142,7 @@ void QKStack::setCurrentIndex(int index)
 {
 	static_cast<KTabWidget*>(this)->setCurrentIndex(index);
 
-	QKView* view = qobject_cast<QKView*>(currentWidget());
+	QKView* view = currentWidget();
 	if (view)
 	{
 		view->show();
@@ -165,17 +151,28 @@ void QKStack::setCurrentIndex(int index)
 }
 
 
-void QKStack::switchView()
+QKView* QKStack::currentWidget() const
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	if (view)
-		slotOpenUrlRequest(view->getURL(), false);
+	QKView* view = qobject_cast<QKView*>( static_cast<const KTabWidget*>(this)->currentWidget() );
+	if (! view)
+	{
+		kDebug() << "could not get current QKView" << endl;
+		return 0;
+	}
+
+	return view;
 }
 
 
-void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
+void QKStack::switchView()
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
+	slotOpenUrlRequest(currentWidget()->getURL(), false);
+}
+
+
+void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurrent)
+{
+	QKView* view = currentWidget();
 
 	if (tryCurrent && view->hasMimeType(mimeType, url))
 		switchView(currentIndex(), url);
@@ -202,7 +199,7 @@ void QKStack::switchView(KUrl url, const QString& mimeType, bool tryCurrent)
 			// load a new KPart to display mimeType
 			if (Settings::autoloadView())
 			{
-				view = qobject_cast<QKView*>(currentWidget());
+				view = currentWidget();
 				KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
 
 				// only load a new part if it is different from the current one
@@ -251,10 +248,7 @@ void QKStack::switchView(int index, const KUrl& url)
 
 	if (! url.isEmpty())
 	{
-		QKView* view = qobject_cast<QKView*>(currentWidget());
-		if (view)
-			view->setURL(url);
-
+		currentWidget()->setURL(url);
 		addHistoryEntry(url);
 	}
 }
@@ -327,9 +321,7 @@ void QKStack::goForward()
 
 void QKStack::goUp()
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	if (view)
-		slotOpenUrlRequest(view->getURL().upUrl());
+	slotOpenUrlRequest(currentWidget()->getURL().upUrl());
 }
 
 
@@ -361,19 +353,19 @@ void QKStack::slotPartCreated()
 }
 
 
-void QKStack::slotSetStatusBarText(QString text)
+void QKStack::slotSetStatusBarText(const QString& text)
 {
 	emit setStatusBarText(text);
 }
 
 
-void QKStack::slotSetWindowCaption(QString text)
+void QKStack::slotSetWindowCaption(const QString& text)
 {
 	emit setWindowCaption(text);
 }
 
 
-void QKStack::slotOpenUrlRequest(KUrl url, bool tryCurrent)
+void QKStack::slotOpenUrlRequest(const KUrl& url, bool tryCurrent)
 {
 	QKUrlHandler* handler = new QKUrlHandler(url, this);
 	handler->setProperty("tryCurrent", tryCurrent);
@@ -412,22 +404,22 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 
 void QKStack::slotOpenUrlNotify()
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
-	if (view)
-		addHistoryEntry(view->getURL());
+	addHistoryEntry(currentWidget()->getURL());
 }
 
 
 void QKStack::slotCurrentChanged()
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
+	QKView* view = currentWidget();
 	if (view)
 	{
 		view->show();
 		setFocusProxy(view);
 		view->setFocus();
+
 		emit setStatusBarText(view->statusBarText());
 		emit setWindowCaption(view->windowCaption());
+		emit setLocationBarUrl(view->getURL().pathOrUrl());
 	}
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)
@@ -453,7 +445,7 @@ void QKStack::enableAction(const char* action, bool enable)
 
 void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
 {
-	QKView* view = qobject_cast<QKView*>(currentWidget());
+	QKView* view = currentWidget();
 	if (view)
 	{
 #ifdef HAVE_LIBKONQ
@@ -509,20 +501,6 @@ void QKStack::slotMiddleClick(QWidget* widget)
 }
 
 
-void QKStack::slotIconChanged()
-{
-	QKView* view = qobject_cast<QKView*>(sender());
-	if (view)
-	{
-		int index = indexOf(view);
-		setTabIcon(index, *(view->icon()));
-		kDebug() << "setting icon for tab page" << index << endl;
-	}
-	else
-		kDebug() << "which view changed it's icon???" << endl;
-}
-
-
 void QKStack::setupUi(KParts::ReadOnlyPart* part)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -531,6 +509,7 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	// don't draw a frame
 	setDocumentMode(true);
 	setTabsClosable(true);
+	setMovable(true);
 
 	connect(this, SIGNAL(mouseMiddleClick(QWidget*)), SLOT(slotMiddleClick(QWidget*)));
 
@@ -539,14 +518,14 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 	if (part)
 	{
 		view = new QKView(m_partManager, m_browserInterface, part);
+		addViewActions(view);
 		partNames.removeOne(view->partName());
 		m_loadedViews << view->partName();
-		addTab(view, *(view->icon()), view->partName());
-		addViewActions(view);
+		addTab(view, view->partCaption());
 	}
 	addViews(partNames);
 
-	view = qobject_cast<QKView*>(currentWidget());
+	view = currentWidget();
 	view->show();
 	view->setFocus();
 	setFocusProxy(view);
@@ -569,7 +548,9 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
 	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
 	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
-	connect(view, SIGNAL(iconChanged()), SLOT(slotIconChanged()));
+
+	// check for current widget before propagating?
+	connect(view, SIGNAL(setLocationBarUrl(QString)), SIGNAL(setLocationBarUrl(QString)));
 }
 
 

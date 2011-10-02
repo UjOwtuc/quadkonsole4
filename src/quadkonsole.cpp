@@ -29,14 +29,9 @@
 #include "qkview.h"
 
 #include <KDE/KDebug>
-#include <kde_terminal_interface_v2.h>
-#include <KDE/KIconLoader>
-#include <KDE/KLibLoader>
 #include <KDE/KLocale>
-#include <KDE/KXMLGUIFactory>
 #include <KDE/KActionCollection>
 #include <KDE/KMenuBar>
-#include <KDE/KMenu>
 #include <KDE/KStandardAction>
 #include <KDE/KToggleAction>
 #include <KDE/KStatusBar>
@@ -48,7 +43,6 @@
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/PartManager>
 
-#include <QtGui/QMouseEvent>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QClipboard>
@@ -167,18 +161,6 @@ QuadKonsole::~QuadKonsole()
 }
 
 
-void QuadKonsole::pasteClipboard()
-{
-	emitPaste(QClipboard::Clipboard);
-}
-
-
-void QuadKonsole::pasteSelection()
-{
-	emitPaste(QClipboard::Selection);
-}
-
-
 void QuadKonsole::setupActions()
 {
 	if (Settings::sloppyFocus())
@@ -284,7 +266,7 @@ void QuadKonsole::setupActions()
 }
 
 
-void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > parts)
+void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts)
 {
 	setupGUI();
 
@@ -324,7 +306,7 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 			addStack(i, j, part);
 		}
 	}
-	kDebug() << "finished setting up layouts for " << m_stacks.count() << " parts" << endl;
+	kDebug() << "finished setting up layouts for" << m_stacks.count() << "parts" << endl;
 
 	setWindowIcon(KIcon("quadkonsole4"));
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
@@ -334,16 +316,6 @@ void QuadKonsole::setupUi(int rows, int columns, QList< KParts::ReadOnlyPart* > 
 	m_urlBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
 	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
 	m_urlBar->setFont(KGlobalSettings::generalFont());
-}
-
-
-void QuadKonsole::emitPaste(QClipboard::Mode mode)
-{
-	kDebug() << "pasting" << mode << endl;
-	QString text = QApplication::clipboard()->text(mode);
-	QKStack* part = getFocusStack();
-	if (part)
-		part->sendInput(text);
 }
 
 
@@ -698,6 +670,7 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 	connect(stack, SIGNAL(setStatusBarText(QString)), SLOT(setStatusBarText(QString)));
 	connect(stack, SIGNAL(setWindowCaption(QString)), SLOT(setWindowCaption(QString)));
 	connect(stack, SIGNAL(historyChanged()), SLOT(refreshHistory()));
+	connect(stack, SIGNAL(setLocationBarUrl(QString)), SLOT(slotSetLocationBarUrl(QString)));
 	connect(stack, SIGNAL(destroyed(QObject*)), SLOT(slotStackDestroyed()));
 
 	return stack;
@@ -1017,6 +990,19 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 
 	if (m_stacks.empty())
 		quit();
+}
+
+
+void QuadKonsole::slotSetLocationBarUrl(const QString& url)
+{
+	QKStack* stack = qobject_cast<QKStack*>(sender());
+	if (getFocusStack() && getFocusStack() == stack)
+	{
+		m_urlBar->lineEdit()->setText(url);
+		m_urlBar->lineEdit()->setCursorPosition(0);
+	}
+	else
+		kDebug() << "won't set location bar url for an inactive stack" << endl;
 }
 
 

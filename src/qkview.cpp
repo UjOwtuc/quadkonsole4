@@ -31,10 +31,8 @@
 #include <KDE/KMessageBox>
 #include <KDE/KActionCollection>
 #include <KDE/KUrl>
-#include <KDE/KFile>
 #include <KDE/KFileItemList>
 
-#include <KDE/KLineEdit>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
@@ -69,7 +67,6 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partname(partname),
 	m_part(0),
 	m_partManager(partManager),
-	m_icon(0),
 	m_browserInterface(browserInterface)
 {
 	setupUi();
@@ -80,7 +77,6 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	: QWidget(parent, f),
 	m_part(part),
 	m_partManager(partManager),
-	m_icon(0),
 	m_browserInterface(browserInterface)
 {
 	m_partname = part->property("QKPartName").toString();
@@ -102,7 +98,6 @@ QKView::~QKView()
 			window->guiFactory()->removeClient(m_part);
 	}
 	delete m_part;
-	delete m_icon;
 }
 
 
@@ -161,6 +156,17 @@ void QKView::sendInput(const QString& text)
 KParts::ReadOnlyPart* QKView::part()
 {
 	return m_part;
+}
+
+
+QString QKView::partCaption() const
+{
+	KService::Ptr service = QKPartFactory::getFactory(m_partname);
+	if (! service.isNull() && ! service->name().isEmpty())
+		return service->name();
+
+	// fallback to names like "konsolepart.desktop". still better than a tab without text
+	return m_partname;
 }
 
 
@@ -237,15 +243,7 @@ void QKView::createPart()
 		return;
 	}
 	m_part->setProperty("QKPartName", m_partname);
-
-	if (! m_icon)
-	{
-		m_icon = new KIcon(service->icon());
-		emit iconChanged();
-	}
-
 	setupPart();
-
 	emit partCreated();
 }
 
@@ -298,7 +296,7 @@ void QKView::slotPopupMenu(const QPoint& where, const KFileItemList& items, cons
 }
 
 
-void QKView::selectionInfo(KFileItemList items)
+void QKView::selectionInfo(const KFileItemList& items)
 {
 	kDebug() << "selected items: " << items << endl;
 	if (items.count() == 1)
@@ -316,7 +314,7 @@ void QKView::selectionInfo(KFileItemList items)
 }
 
 
-void QKView::openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments)
+void QKView::openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments)
 {
 	kDebug() << "url " << url << endl;
 	emit openUrlRequest(url);
@@ -336,14 +334,14 @@ void QKView::enableAction(const char* action, bool enable)
 }
 
 
-void QKView::slotSetStatusBarText(QString text)
+void QKView::slotSetStatusBarText(const QString& text)
 {
 	m_statusBarText = text;
 	emit setStatusBarText(text);
 }
 
 
-void QKView::slotSetWindowCaption(QString text)
+void QKView::slotSetWindowCaption(const QString& text)
 {
 	m_windowCaption = text;
 	emit setWindowCaption(text);
@@ -352,10 +350,6 @@ void QKView::slotSetWindowCaption(QString text)
 
 void QKView::setupUi()
 {
-	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (! service.isNull())
-		m_icon = new QIcon(service->icon());
-
 	setContentsMargins(0, 0, 0, 0);
 
 	m_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
@@ -405,6 +399,7 @@ void QKView::setupPart()
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));
 		connect(b, SIGNAL(openUrlNotify()), SIGNAL(openUrlNotify()));
 		connect(b, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));
+		connect(b, SIGNAL(setLocationBarUrl(QString)), SIGNAL(setLocationBarUrl(QString)));
 	}
 
 	KParts::StatusBarExtension* sb = KParts::StatusBarExtension::childObject(m_part);

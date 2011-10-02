@@ -66,12 +66,12 @@ class QKView : public QWidget
 		void sendInput(const QString& text);
 		KParts::ReadOnlyPart* part();
 		const QString& partName() const { return m_partname; }
+		QString partCaption() const;
 
 		QString foregroundProcess() const;
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type, const KUrl& url);
-		const QIcon* icon() const { return m_icon; }
 		QString partIcon() const;
 
 	signals:
@@ -81,7 +81,7 @@ class QKView : public QWidget
 		void openUrlRequest(KUrl);
 		void openUrlNotify();
 		void popupMenu(QPoint, KFileItemList, KParts::BrowserExtension::PopupFlags flags, KParts::BrowserExtension::ActionGroupMap);
-		void iconChanged();
+		void setLocationBarUrl(QString);
 
 	public slots:
 		void show();
@@ -92,11 +92,11 @@ class QKView : public QWidget
 		void createPart();
 		void slotPopupMenu(const QPoint& where, const KUrl& url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
-		void selectionInfo(KFileItemList items);
-		void openUrlRequest(KUrl url, KParts::OpenUrlArguments, KParts::BrowserArguments);
+		void selectionInfo(const KFileItemList& items);
+		void openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments);
 		void enableAction(const char* action, bool enable);
-		void slotSetStatusBarText(QString text);
-		void slotSetWindowCaption(QString text);
+		void slotSetStatusBarText(const QString& text);
+		void slotSetWindowCaption(const QString& text);
 
 	private:
 		void setupUi();
@@ -109,7 +109,6 @@ class QKView : public QWidget
 		QString m_statusBarText;
 		QString m_windowCaption;
 		KParts::PartManager& m_partManager;
-		QIcon* m_icon;
 		KParts::BrowserInterface* m_browserInterface;
 };
 

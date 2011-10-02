@@ -47,10 +47,11 @@ namespace KParts
  */
 class QuadKonsole : public KParts::MainWindow
 {
+	friend void kRestoreMainWindows<QuadKonsole>();
+
 	Q_OBJECT
 	Q_PROPERTY(uint numViews READ numViews)
 	public:
-		QuadKonsole();
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
 
@@ -82,8 +83,6 @@ class QuadKonsole : public KParts::MainWindow
 		void insertHorizontal();
 		void insertVertical();
 		void detach(QKStack* stack=0);
-		void pasteClipboard();
-		void pasteSelection();
 		void removeStack();
 		void switchView();
 		void goBack();
@@ -96,6 +95,7 @@ class QuadKonsole : public KParts::MainWindow
 		void setWindowCaption(const QString& text);
 		void slotActivePartChanged(KParts::Part* part);
 		void slotStackDestroyed(QKStack* removed=0);
+		void slotSetLocationBarUrl(const QString& url);
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();
@@ -110,10 +110,10 @@ class QuadKonsole : public KParts::MainWindow
 		void readProperties(const KConfigGroup& config);
 
 	private:
+		QuadKonsole();
 		QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition);
 		void setupActions();
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
-		void emitPaste(QClipboard::Mode mode);
 		void resetLayout(QSplitter* layout, int targetSize);
 		static void fillMovementMap();
 		void reconnectMovement();

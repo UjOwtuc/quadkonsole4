@@ -245,6 +245,7 @@ QString QKView::closeModifiedMsg() const
 
 void QKView::show()
 {
+	QWidget::show();
 	if (m_part == 0)
 	{
 		createPart();

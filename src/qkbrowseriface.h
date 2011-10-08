@@ -21,23 +21,23 @@
 #ifndef QKBROWSERIFACE_H
 #define QKBROWSERIFACE_H
 
-#include <KDE/KParts/BrowserInterface>
+#include "qkhistory.h"
 
-class QKStack;
+#include <KDE/KParts/BrowserInterface>
 
 class QKBrowserInterface : public KParts::BrowserInterface
 {
 	Q_OBJECT
 	Q_PROPERTY(uint historyLength READ historyLength)
 	public:
-		explicit QKBrowserInterface(QKStack* parent);
+		explicit QKBrowserInterface(QKHistory& parent);
 		uint historyLength() const;
 
 	public slots:
 		void goHistory(int steps);
 
 	private:
-		QKStack* m_stack;
+		const QKHistory& m_history;
 };
 
 #endif // QKBROWSERIFACE_H

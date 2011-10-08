@@ -33,6 +33,7 @@
 #include <KDE/KActionCollection>
 #include <KDE/KMessageBox>
 #include <KDE/KParts/PartManager>
+#include <KDE/KParts/HistoryProvider>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_popupmenu.h>
@@ -42,25 +43,19 @@
 
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 	: KTabWidget(parent),
-	m_partManager(partManager),
-	m_browserInterface(new QKBrowserInterface(this)),
-	m_history(QStringList()),
-	m_historyPosition(0)
+	m_partManager(partManager)
 {
 	setupUi();
-	m_blockHistory = false;
+	m_browserInterface = new QKBrowserInterface(m_history);
 }
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
 	: KTabWidget(parent),
-	m_partManager(partManager),
-	m_browserInterface(new QKBrowserInterface(this)),
-	m_history(QStringList()),
-	m_historyPosition(0)
+	m_partManager(partManager)
 {
 	setupUi(part);
-	m_blockHistory = false;
+	m_browserInterface = new QKBrowserInterface(m_history);
 }
 
 
@@ -113,10 +108,16 @@ int QKStack::addViews(const QStringList& partNames)
 }
 
 
+const QKHistory& QKStack::history() const
+{
+	return m_history;
+}
+
+
 void QKStack::setHistory(const QStringList& history, int historyPosition)
 {
-	m_history = history;
-	m_historyPosition = historyPosition;
+	m_history.setHistory(history);
+	m_history.setPosition(historyPosition);
 	checkEnableActions();
 	emit historyChanged();
 }
@@ -261,7 +262,9 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (! url.isEmpty())
 	{
 		currentWidget()->setURL(url);
-		addHistoryEntry(url);
+		m_history.addEntry(url.pathOrUrl());
+		checkEnableActions();
+		emit historyChanged();
 	}
 }
 
@@ -344,23 +347,14 @@ void QKStack::goUp()
 
 void QKStack::goHistory(int steps)
 {
-	if (m_history.isEmpty())
-		return;
-
-	int old_pos = m_historyPosition;
-
-	m_historyPosition -= steps;
-	if (m_historyPosition < 0)
-		m_historyPosition = 0;
-	else if (m_historyPosition >= m_history.count())
-		m_historyPosition = m_history.count() -1;
-
-	if (old_pos != m_historyPosition)
+	QString url = m_history.go(steps);
+	if (! url.isEmpty())
 	{
-		m_blockHistory = true;
-		slotOpenUrlRequest(KUrl(m_history[m_historyPosition]));
-		m_blockHistory = false;
+		m_history.lock();
+		slotOpenUrlRequest(KUrl(url));
+		m_history.lock(false);
 	}
+	checkEnableActions();
 }
 
 
@@ -421,7 +415,8 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 
 void QKStack::slotOpenUrlNotify()
 {
-	addHistoryEntry(currentWidget()->getURL());
+	m_history.addEntry(currentWidget()->getURL().pathOrUrl());
+	checkEnableActions();
 }
 
 
@@ -468,10 +463,10 @@ void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts:
 #ifdef HAVE_LIBKONQ
 		KActionCollection popupActions(static_cast<QWidget*>(0));
 		KAction* back = popupActions.addAction("go_back", KStandardAction::back(this, SLOT(goBack()), &popupActions));
-		back->setEnabled(m_historyPosition > 0);
+		back->setEnabled(m_history.canGoBack());
 
 		KAction* forward = popupActions.addAction("go_forward", KStandardAction::forward(this, SLOT(goForward()), &popupActions));
-		forward->setEnabled(m_historyPosition < m_history.count() -1);
+		forward->setEnabled(m_history.canGoForward());
 
 		KAction* up = popupActions.addAction("go_up", KStandardAction::up(this, SLOT(goUp()), &popupActions));
 		up->setEnabled(view->getURL().upUrl() != view->getURL());
@@ -573,47 +568,8 @@ void QKStack::addViewActions(QKView* view)
 
 void QKStack::checkEnableActions()
 {
-	if (m_historyPosition > 0)
-		enableAction("go_back", true);
-	else
-		enableAction("go_back", false);
-
-	if (m_historyPosition < m_history.count() -1)
-		enableAction("go_forward", true);
-	else
-		enableAction("go_forward", false);
-}
-
-
-void QKStack::addHistoryEntry(const KUrl& url)
-{
-	if (! m_blockHistory)
-	{
-		// sanity checks (there was a crash related to history cleaning)
-		if (m_historyPosition < 0)
-			m_historyPosition = 0;
-
-		if (! m_history.isEmpty())
-		{
-			// remove forward entries
-			while (m_historyPosition < m_history.count() -1)
-				m_history.removeLast();
-
-			// filter duplicate entries
-			if (m_history.back() != url.pathOrUrl())
-				m_history.append(url.pathOrUrl());
-		}
-		else
-			m_history.append(url.pathOrUrl());
-
-		m_historyPosition = m_history.count() -1;
-
-		while (static_cast<unsigned>(m_history.size()) > Settings::historySize())
-			m_history.removeFirst();
-
-		emit historyChanged();
-	}
-	checkEnableActions();
+	enableAction("go_back", m_history.canGoBack());
+	enableAction("go_forward", m_history.canGoForward());
 }
 
 #include "qkstack.moc"

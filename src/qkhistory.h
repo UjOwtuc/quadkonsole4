@@ -18,26 +18,60 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "qkbrowseriface.h"
-#include "qkhistory.h"
+#ifndef QKHISTORY_H
+#define QKHISTORY_H
 
-#include <KDE/KDebug>
-#include <KDE/KParts/BrowserInterface>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 
-
-QKBrowserInterface::QKBrowserInterface(QKHistory& parent)
-	: BrowserInterface(&parent),
-	m_history(parent)
-{}
-
-
-uint QKBrowserInterface::historyLength() const
+class QKHistory : public QObject
 {
-	return m_history.count();
-}
+	Q_OBJECT
+	public:
+		explicit QKHistory(const QStringList& history=QStringList(), int pos=-1);
+		QKHistory(const QKHistory& rhs);
+		virtual ~QKHistory();
+
+		QKHistory& operator=(const QKHistory& rhs);
+		void setHistory(const QStringList& history);
+		void setPosition(int pos);
+		const QStringList& history() const { return m_history; }
+		int position() const { return m_historyPosition; }
+		int count() const { return m_history.count(); }
+
+		void lock(bool lock=true);
+
+		bool canGoBack() const;
+		bool canGoForward() const;
+
+	public slots:
+		virtual void addEntry(const QString& url);
+		QString goBack();
+		QString goForward();
+		QString go(int steps);
+
+	protected:
+		QStringList m_history;
+		int m_historyPosition;
+		bool m_locked;
+};
 
 
-void QKBrowserInterface::goHistory(int steps)
+class QKGlobalHistory : public QKHistory
 {
-	kDebug() << "don't know how to _change_ anything" << endl;
-}
+	Q_OBJECT
+	public:
+		static QKGlobalHistory* self();
+		virtual ~QKGlobalHistory();
+
+	public slots:
+		void addEntry(const QString& url);
+
+	private:
+		QKGlobalHistory();
+		QKGlobalHistory(const QKGlobalHistory&);
+
+		static QKGlobalHistory* m_instace;
+};
+
+#endif // QKHISTORY_H

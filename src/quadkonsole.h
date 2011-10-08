@@ -76,6 +76,7 @@ class QuadKonsole : public KParts::MainWindow
 		void slotActivateUrlBar();
 		void refreshHistory();
 		void zoomView(int row, int col);
+		void slotToggleSidebar();
 
 	private slots:
 		void focusKonsoleRight();
@@ -99,6 +100,8 @@ class QuadKonsole : public KParts::MainWindow
 		void slotStackDestroyed(QKStack* removed=0);
 		void slotSetLocationBarUrl(const QString& url);
 		void zoomView();
+		void slotOpenUrl(const QString& url=QString());
+		void slotOpenUrl(const KUrl& url);
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();
@@ -115,6 +118,7 @@ class QuadKonsole : public KParts::MainWindow
 	private:
 		QuadKonsole();
 		QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition);
+		void initHistory();
 		void setupActions();
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());
 		void resetLayout(QSplitter* layout, int targetSize);
@@ -130,6 +134,7 @@ class QuadKonsole : public KParts::MainWindow
 		KHistoryComboBox* m_urlBar;
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
+		QKView* m_sidebar;
 };
 
 #endif // QUADKONSOLE_H

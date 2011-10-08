@@ -27,6 +27,7 @@
 #include "qkstack.h"
 #include "prefsviews.h"
 #include "qkview.h"
+#include "qkbrowseriface.h"
 
 #include <KDE/KDebug>
 #include <KDE/KLocale>
@@ -42,6 +43,11 @@
 #include <KDE/KLineEdit>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/PartManager>
+#include <KDE/KParts/HistoryProvider>
+
+#ifdef HAVE_LIBKONQ
+#include <konq_historyprovider.h>
+#endif
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
@@ -86,8 +92,10 @@ QuadKonsole::QuadKonsole()
 	: m_mouseFilter(0),
 	m_partManager(this),
 	m_activeStack(0),
-	m_zoomed(-1, -1)
+	m_zoomed(-1, -1),
+	m_sidebar(0)
 {
+	initHistory();
 	setupActions();
 	setupUi(0, 0);
 
@@ -100,7 +108,9 @@ QuadKonsole::QuadKonsole()
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
 	: m_mouseFilter(0),
 	m_partManager(this),
-	m_zoomed(-1, -1)
+	m_activeStack(0),
+	m_zoomed(-1, -1),
+	m_sidebar(0)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -120,11 +130,11 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	}
 
 
+	initHistory();
 	setupActions();
 	setupUi(rows, columns);
-	createGUI(m_stacks.front()->part());
-	m_activeStack = m_stacks.front();
 	m_stacks.front()->setFocus();
+	slotActivePartChanged(m_stacks.front()->part());
 
 	if (cmds.size())
 		sendCommands(cmds);
@@ -139,17 +149,18 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	: m_mouseFilter(0),
 	m_partManager(this),
 	m_activeStack(0),
-	m_zoomed(-1, -1)
+	m_zoomed(-1, -1),
+	m_sidebar(0)
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
 
+	initHistory();
 	setupActions();
 	setupUi(1, 1, parts);
 	m_stacks.front()->setHistory(history, historyPosition);
-	createGUI(m_stacks.front()->part());
-	m_activeStack = m_stacks.front();
 	m_stacks.front()->setFocus();
+	slotActivePartChanged(m_stacks.front()->part());
 
 	showNormal();
 	reconnectMovement();
@@ -160,10 +171,19 @@ QuadKonsole::~QuadKonsole()
 {
 	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	m_partManager.disconnect();
-
+	delete m_sidebar;
 	delete m_mouseFilter;
 	while (m_stacks.count())
 		delete m_stacks.takeFirst();
+}
+
+
+void QuadKonsole::initHistory()
+{
+#ifdef HAVE_LIBKONQ
+	KonqHistoryProvider* history = new KonqHistoryProvider;
+	history->loadHistory();
+#endif
 }
 
 
@@ -263,6 +283,13 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("toolbar_url_combo", toggleUrlBar);
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(slotActivateUrlBar()));
 
+
+	// sidebar
+	KAction* toggleSidebar = new KAction(KIcon("view-sidetree"), i18n("Show sidebar"), this);
+	toggleSidebar->setShortcut(Qt::Key_F9);
+	actionCollection()->addAction("toggle sidebar", toggleSidebar);
+	connect(toggleSidebar, SIGNAL(triggered()), SLOT(slotToggleSidebar()));
+
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 
 	// Debug
@@ -289,6 +316,8 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
 	m_urlBar->setFont(KGlobalSettings::generalFont());
 	m_urlBar->setFocusPolicy(Qt::ClickFocus);
+	connect(m_urlBar, SIGNAL(returnPressed()), SLOT(slotOpenUrl()));
+	connect(m_urlBar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
 
 	QWidget* centralWidget = new QWidget(this, 0);
 	setCentralWidget(centralWidget);
@@ -296,13 +325,28 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	QGridLayout* grid = new QGridLayout(centralWidget);
 	grid->setContentsMargins(0, 0, 0, 0);
 
+	QSplitter* sideBarSplitter = new QSplitter(Qt::Horizontal);
+	grid->addWidget(sideBarSplitter, 0, 0);
+
+	m_sidebar = new QKView(m_partManager, new QKBrowserInterface(*(QKGlobalHistory::self())), "konq_sidebartng.desktop");
+	m_sidebar->setFocusPolicy(Qt::ClickFocus);
+	connect(m_sidebar, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrl(KUrl)));
+	sideBarSplitter->addWidget(m_sidebar);
+	if (Settings::showSidebar())
+		m_sidebar->show();
+	else
+		m_sidebar->hide();
+
 	if (Settings::layoutVertical())
 		m_rows = new QSplitter(Qt::Vertical);
 	else
 		m_rows = new QSplitter(Qt::Horizontal);
 
 	m_rows->setChildrenCollapsible(false);
-	grid->addWidget(m_rows, 0, 0);
+	sideBarSplitter->addWidget(m_rows);
+	sideBarSplitter->setCollapsible(1, false);
+	sideBarSplitter->setStretchFactor(0, 1);
+	sideBarSplitter->setStretchFactor(1, 4);
 
 	actionCollection()->addAssociatedWidget(centralWidget);
 
@@ -407,7 +451,7 @@ void QuadKonsole::detach(QKStack* stack, QKView* view)
 
 	KParts::ReadOnlyPart* part = view->part();
 	view->partDestroyed();
-	QuadKonsole* external = new QuadKonsole(part, stack->history(), stack->historyPosition());
+	QuadKonsole* external = new QuadKonsole(part, stack->history().history(), stack->history().position());
 	external->setAttribute(Qt::WA_DeleteOnClose);
 	stack->switchView(KUrl("~"), "inode/directory", true);
 }
@@ -559,6 +603,11 @@ void QuadKonsole::settingsChanged()
 
 	if ((m_rows->orientation() == Qt::Vertical && ! Settings::layoutVertical()) || (m_rows->orientation() == Qt::Horizontal && Settings::layoutVertical()))
 		changeLayout();
+
+	if (Settings::showSidebar())
+		m_sidebar->show();
+	else
+		m_sidebar->hide();
 }
 
 
@@ -993,8 +1042,8 @@ void QuadKonsole::refreshHistory()
 	if (m_activeStack)
 	{
 		m_urlBar->clearHistory();
-		if (m_activeStack->historyLength())
-			m_urlBar->setHistoryItems(m_activeStack->history(), true);
+		if (m_activeStack->history().count())
+			m_urlBar->setHistoryItems(m_activeStack->history().history(), true);
 
 		m_urlBar->lineEdit()->setText(m_activeStack->url());
 		m_urlBar->lineEdit()->setCursorPosition(0);
@@ -1007,16 +1056,9 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 	createGUI(part);
 
 	QKStack* stack = getFocusStack();
-	if (m_activeStack && stack && m_activeStack != stack)
-	{
-		disconnect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
-		disconnect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
-	}
 	if (stack)
 	{
 		m_activeStack = stack;
-		connect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
-		connect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
 		refreshHistory();
 	}
 }
@@ -1096,12 +1138,42 @@ void QuadKonsole::zoomView(int row, int col)
 }
 
 
+void QuadKonsole::slotToggleSidebar()
+{
+	if (m_sidebar->isVisible())
+		m_sidebar->hide();
+	else
+		m_sidebar->show();
+}
+
+
 void QuadKonsole::zoomView()
 {
 	int row, col;
 	getFocusCoords(row, col);
 	if (row > -1 && col > -1)
 		zoomView(row, col);
+}
+
+
+void QuadKonsole::slotOpenUrl(const QString& url)
+{
+	if (m_activeStack)
+	{
+		m_activeStack->setFocus();
+		if (! url.isEmpty())
+			m_activeStack->slotOpenUrlRequest(url);
+	}
+}
+
+
+void QuadKonsole::slotOpenUrl(const KUrl& url)
+{
+	if (m_activeStack)
+	{
+		m_activeStack->setFocus();
+		m_activeStack->slotOpenUrlRequest(url);
+	}
 }
 
 

@@ -23,6 +23,8 @@
 
 #include <KDE/KDialog>
 
+class QKStack;
+class QKView;
 namespace Ui
 {
 	class DetachProcesses;
@@ -35,8 +37,9 @@ class CloseDialog : public KDialog
 		explicit CloseDialog(QWidget* parent = 0, Qt::WindowFlags f = 0);
 		virtual ~CloseDialog();
 
-		void addProcess(int id, const QString& name);
-		virtual bool exec(QList< int >& detach);
+		void addView(QKStack* stack, QKView* view);
+		void addViews(QKStack* stack, QList<QKView*> views);
+		virtual bool exec(QMap<QKView*, QKStack*>& detach);
 		int size() const;
 
 	private slots:
@@ -45,7 +48,8 @@ class CloseDialog : public KDialog
 
 	private:
 		Ui::DetachProcesses* m_widget;
-		QList<int> m_result;
+		QMap<QKView*, QKStack*> m_viewStackMap;
+		QList<QKView*> m_result;
 };
 
 #endif // CLOSEDIALOG_H

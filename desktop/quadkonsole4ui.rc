@@ -22,6 +22,7 @@
 			<Action name="go down" />
 			<Action name="switch view" />
 			<Action name="change layout" />
+			<Action name="zoom view" />
 			<Merge />
 		</Menu>
 		<Menu noMerge="1" name="go">

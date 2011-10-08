@@ -73,6 +73,8 @@ class QKView : public QWidget
 		const QString& windowCaption() const { return m_windowCaption; }
 		bool hasMimeType(const QString& type, const KUrl& url);
 		QString partIcon() const;
+		bool isModified() const;
+		QString closeModifiedMsg() const;
 
 	signals:
 		void partCreated();

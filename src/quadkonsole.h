@@ -30,6 +30,7 @@
 #include <QtGui/QClipboard>
 
 class QKStack;
+class QKView;
 class QGridLayout;
 class QSplitter;
 class MouseMoveFilter;
@@ -74,6 +75,7 @@ class QuadKonsole : public KParts::MainWindow
 		void changeLayout();
 		void slotActivateUrlBar();
 		void refreshHistory();
+		void zoomView(int row, int col);
 
 	private slots:
 		void focusKonsoleRight();
@@ -82,7 +84,7 @@ class QuadKonsole : public KParts::MainWindow
 		void focusKonsoleDown();
 		void insertHorizontal();
 		void insertVertical();
-		void detach(QKStack* stack=0);
+		void detach(QKStack* stack=0, QKView* view=0);
 		void removeStack();
 		void switchView();
 		void goBack();
@@ -96,6 +98,7 @@ class QuadKonsole : public KParts::MainWindow
 		void slotActivePartChanged(KParts::Part* part);
 		void slotStackDestroyed(QKStack* removed=0);
 		void slotSetLocationBarUrl(const QString& url);
+		void zoomView();
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();
@@ -117,6 +120,7 @@ class QuadKonsole : public KParts::MainWindow
 		void resetLayout(QSplitter* layout, int targetSize);
 		static void fillMovementMap();
 		void reconnectMovement();
+		void zoomSplitter(QSplitter* layout, int item);
 
 		QList<QKStack*> m_stacks;
 		QSplitter* m_rows;
@@ -125,6 +129,7 @@ class QuadKonsole : public KParts::MainWindow
 		KParts::PartManager m_partManager;
 		KHistoryComboBox* m_urlBar;
 		QKStack* m_activeStack;
+		QPair<int, int> m_zoomed;
 };
 
 #endif // QUADKONSOLE_H

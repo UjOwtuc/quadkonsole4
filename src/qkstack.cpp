@@ -31,6 +31,7 @@
 #include <KDE/KTabWidget>
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
+#include <KDE/KMessageBox>
 #include <KDE/KParts/PartManager>
 
 #ifdef HAVE_LIBKONQ
@@ -42,7 +43,9 @@
 QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 	: KTabWidget(parent),
 	m_partManager(partManager),
-	m_browserInterface(new QKBrowserInterface(this))
+	m_browserInterface(new QKBrowserInterface(this)),
+	m_history(QStringList()),
+	m_historyPosition(0)
 {
 	setupUi();
 	m_blockHistory = false;
@@ -52,7 +55,9 @@ QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
 	: KTabWidget(parent),
 	m_partManager(partManager),
-	m_browserInterface(new QKBrowserInterface(this))
+	m_browserInterface(new QKBrowserInterface(this)),
+	m_history(QStringList()),
+	m_historyPosition(0)
 {
 	setupUi(part);
 	m_blockHistory = false;
@@ -82,12 +87,6 @@ QString QKStack::foregroundProcess() const
 KParts::ReadOnlyPart* QKStack::part() const
 {
 	return currentWidget()->part();
-}
-
-
-void QKStack::partDestroyed() const
-{
-	currentWidget()->partDestroyed();
 }
 
 
@@ -135,6 +134,19 @@ QString QKStack::partIcon() const
 	if (view)
 		return view->partIcon();
 	return "";
+}
+
+
+QList<QKView*> QKStack::modifiedViews()
+{
+	QList<QKView*> modified;
+	for (int i=0; i<count(); ++i)
+	{
+		QKView* view = qobject_cast<QKView*>(widget(i));
+		if (view->isModified())
+			modified << view;
+	}
+	return modified;
 }
 
 
@@ -289,6 +301,11 @@ void QKStack::slotTabCloseRequested(int index)
 	QKView* view = qobject_cast<QKView*>(widget(index));
 	if (view)
 	{
+		if (Settings::queryClose() && view->isModified())
+		{
+			if (KMessageBox::questionYesNo(this, view->closeModifiedMsg()) == KMessageBox::No)
+				return;
+		}
 		removeTab(index);
 		m_loadedViews.removeOne(view->partName());
 		delete view;

@@ -50,7 +50,6 @@ class QKStack : public KTabWidget
 
 		QString foregroundProcess() const;
 		KParts::ReadOnlyPart* part() const;
-		void partDestroyed() const;
 		int addViews(const QStringList& partNames);
 		int historyLength() const { return m_history.count(); }
 		const QStringList& history() { return m_history; }
@@ -58,6 +57,7 @@ class QKStack : public KTabWidget
 		void setHistory(const QStringList& history, int historyPosition);
 		QString url() const;
 		QString partIcon() const;
+		QList<QKView*> modifiedViews();
 
 		virtual void setCurrentIndex(int index);
 		virtual QKView* currentWidget() const;

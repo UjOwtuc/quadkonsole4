@@ -19,6 +19,8 @@
 ***************************************************************************/
 
 #include "closedialog.h"
+#include "qkstack.h"
+#include "qkview.h"
 
 #include <KDE/KDialog>
 #include <KDE/KPushButton>
@@ -54,7 +56,7 @@ CloseDialog::~CloseDialog()
 }
 
 
-void CloseDialog::addProcess(int id, const QString& name)
+void CloseDialog::addView(QKStack* stack, QKView* view)
 {
 	QTableWidget* pt = m_widget->processTable;
 	int rowId = pt->rowCount();
@@ -64,9 +66,20 @@ void CloseDialog::addProcess(int id, const QString& name)
 	cb->setCheckState(Qt::Checked);
 	pt->setCellWidget(rowId, 0, cb);
 
-	QTableWidgetItem* item = new QTableWidgetItem(name);
-	item->setData(Qt::UserRole, id);
-	pt->setItem(rowId, 1, item);
+	pt->setItem(rowId, 1, new QTableWidgetItem(view->partCaption()));
+	pt->setItem(rowId, 2, new QTableWidgetItem(view->foregroundProcess()));
+	pt->resizeColumnsToContents();
+
+	m_viewStackMap[view] = stack;
+	m_result.append(view);
+}
+
+
+void CloseDialog::addViews(QKStack* stack, QList<QKView*> views)
+{
+	QListIterator<QKView*> it(views);
+	while (it.hasNext())
+		addView(stack, it.next());
 }
 
 
@@ -83,18 +96,20 @@ void CloseDialog::detach()
 	for (int i=0; i<pt->rowCount(); ++i)
 	{
 		QCheckBox* cb = qobject_cast<QCheckBox*>(pt->cellWidget(i, 0));
-		if (cb->checkState() == Qt::Checked)
-			m_result << pt->item(i, 1)->data(Qt::UserRole).toInt();
+		if (cb->checkState() != Qt::Checked)
+		{
+			QKView* view = m_result.takeAt(i);
+			m_viewStackMap.remove(view);
+		}
 	}
 	accept();
 }
 
 
-bool CloseDialog::exec(QList<int>& detach)
+bool CloseDialog::exec(QMap<QKView*, QKStack*>& detach)
 {
 	qobject_cast<QDialog*>(this)->exec();
-	detach = m_result;
-
+	detach = m_viewStackMap;
 	return result();
 }
 

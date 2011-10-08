@@ -85,7 +85,8 @@ QString splitIndex(const QString& s, int* index)
 QuadKonsole::QuadKonsole()
 	: m_mouseFilter(0),
 	m_partManager(this),
-	m_activeStack(0)
+	m_activeStack(0),
+	m_zoomed(-1, -1)
 {
 	setupActions();
 	setupUi(0, 0);
@@ -98,7 +99,8 @@ QuadKonsole::QuadKonsole()
 
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
 	: m_mouseFilter(0),
-	m_partManager(this)
+	m_partManager(this),
+	m_zoomed(-1, -1)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -122,6 +124,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	setupUi(rows, columns);
 	createGUI(m_stacks.front()->part());
 	m_activeStack = m_stacks.front();
+	m_stacks.front()->setFocus();
 
 	if (cmds.size())
 		sendCommands(cmds);
@@ -134,7 +137,9 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 // for detaching parts
 QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition)
 	: m_mouseFilter(0),
-	m_partManager(this)
+	m_partManager(this),
+	m_activeStack(0),
+	m_zoomed(-1, -1)
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
@@ -144,6 +149,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	m_stacks.front()->setHistory(history, historyPosition);
 	createGUI(m_stacks.front()->part());
 	m_activeStack = m_stacks.front();
+	m_stacks.front()->setFocus();
 
 	showNormal();
 	reconnectMovement();
@@ -231,6 +237,11 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("close view", closeView);
 	connect(closeView, SIGNAL(triggered(bool)), this, SLOT(closeView()));
 
+	KAction* zoomView = new KAction(KIcon("zoom-in"), i18n("&Zoom"), this);
+	zoomView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
+	actionCollection()->addAction("zoom view", zoomView);
+	connect(zoomView, SIGNAL(triggered(bool)), SLOT(zoomView()));
+
 	// Standard actions
 	KStandardAction::back(this, SLOT(goBack()), actionCollection());
 	KStandardAction::forward(this, SLOT(goForward()), actionCollection());
@@ -252,6 +263,8 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("toolbar_url_combo", toggleUrlBar);
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(slotActivateUrlBar()));
 
+	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
+
 	// Debug
 #ifdef DEBUG
 	kDebug() << "adding debugging actions" << endl;
@@ -269,6 +282,13 @@ void QuadKonsole::setupActions()
 void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts)
 {
 	setupGUI();
+
+	m_urlBar = new KHistoryComboBox(true, 0);
+	toolBar("locationToolBar")->addWidget(m_urlBar);
+	m_urlBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
+	m_urlBar->setFont(KGlobalSettings::generalFont());
+	m_urlBar->setFocusPolicy(Qt::ClickFocus);
 
 	QWidget* centralWidget = new QWidget(this, 0);
 	setCentralWidget(centralWidget);
@@ -309,13 +329,6 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	kDebug() << "finished setting up layouts for" << m_stacks.count() << "parts" << endl;
 
 	setWindowIcon(KIcon("quadkonsole4"));
-	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
-
-	m_urlBar = new KHistoryComboBox(true, 0);
-	toolBar("locationToolBar")->addWidget(m_urlBar);
-	m_urlBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
-	m_urlBar->setFont(KGlobalSettings::generalFont());
 }
 
 
@@ -381,7 +394,7 @@ void QuadKonsole::focusKonsoleDown()
 }
 
 
-void QuadKonsole::detach(QKStack* stack)
+void QuadKonsole::detach(QKStack* stack, QKView* view)
 {
 	if (stack == 0)
 	{
@@ -389,9 +402,11 @@ void QuadKonsole::detach(QKStack* stack)
 		if (stack == 0)
 			return;
 	}
+	if (view == 0)
+		view = stack->currentWidget();
 
-	KParts::ReadOnlyPart* part = stack->part();
-	stack->partDestroyed();
+	KParts::ReadOnlyPart* part = view->part();
+	view->partDestroyed();
 	QuadKonsole* external = new QuadKonsole(part, stack->history(), stack->historyPosition());
 	external->setAttribute(Qt::WA_DeleteOnClose);
 	stack->switchView(KUrl("~"), "inode/directory", true);
@@ -407,7 +422,7 @@ void QuadKonsole::resetLayout(QSplitter* layout, int targetSize)
 	{
 		if (abs(*it - targetSize) >= 10)
 		{
-			kDebug() << "forcing resize:" << *it << "=>" << targetSize << endl;
+			// kDebug() << "forcing resize:" << *it << "=>" << targetSize << endl;
 			resize = true;
 			break;
 		}
@@ -450,9 +465,9 @@ void QuadKonsole::reconnectMovement()
 		{
 			action->disconnect(this);
 			if (m_rows->orientation() == Qt::Vertical)
-				connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), it.value().first.toLatin1().data());
+				connect(action, SIGNAL(triggered(bool)), it.value().first.toLatin1().data());
 			else
-				connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), it.value().second.toLatin1().data());
+				connect(action, SIGNAL(triggered(bool)), it.value().second.toLatin1().data());
 		}
 		else
 			kDebug() << "action" << it.key() << "not in actionCollection" << endl;
@@ -460,9 +475,27 @@ void QuadKonsole::reconnectMovement()
 }
 
 
+void QuadKonsole::zoomSplitter(QSplitter* layout, int item)
+{
+	QList<int> sizes = layout->sizes();
+	for (int i=0; i<layout->count(); ++i)
+	{
+		if (i == item && layout->orientation() == Qt::Vertical)
+			sizes[i] = layout->height();
+		else if (i == item)
+			sizes[i] = layout->width();
+		else
+			sizes[i] = 0;
+	}
+	layout->setSizes(sizes);
+}
+
+
 void QuadKonsole::resetLayouts()
 {
+#ifdef DEBUG
 	kDebug() << "resetting layouts" << endl;
+#endif
 
 	resetLayout(m_rows, m_rows->height() / m_rows->count());
 
@@ -472,6 +505,7 @@ void QuadKonsole::resetLayouts()
 		QSplitter* layout = it.next();
 		resetLayout(layout, layout->width() / layout->count());
 	}
+	m_zoomed = qMakePair(-1, -1);
 }
 
 
@@ -539,25 +573,27 @@ bool QuadKonsole::queryClose()
 	if (Settings::queryClose())
 	{
 		CloseDialog dialog(this);
-		for (int i=0; i<m_stacks.count(); ++i)
+
+		QListIterator<QKStack*> stackIt(m_stacks);
+		while (stackIt.hasNext())
 		{
-			QString process = m_stacks[i]->foregroundProcess();
-			if (process.size())
-			{
-				dialog.addProcess(i, process);
-			}
+			QKStack* stack = stackIt.next();
+			dialog.addViews(stack, stack->modifiedViews());
 		}
 
 		if (dialog.size())
 		{
-			QList<int> doDetach;
+			QMap<QKView*, QKStack*> doDetach;
 			if (! dialog.exec(doDetach))
 				return false;
 			else
 			{
-				QListIterator<int> it(doDetach);
+				QMapIterator<QKView*, QKStack*> it(doDetach);
 				while (it.hasNext())
-					detach(m_stacks[it.next()]);
+				{
+					it.next();
+					detach(it.value(), it.key());
+				}
 
 				return true;
 			}
@@ -620,6 +656,9 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		changeLayout();
 	else if (! orientationVertical && m_rows->orientation() == Qt::Vertical)
 		changeLayout();
+
+	m_activeStack = m_stacks.front();
+	m_stacks.front()->setFocus();
 }
 
 
@@ -631,7 +670,11 @@ QKStack* QuadKonsole::getFocusStack()
 		if ((*it)->hasFocus())
 			return *it;
 	}
+
+#ifdef DEBUG
 	kDebug() << "could not find focus" << endl;
+#endif
+
 	return 0;
 }
 
@@ -649,7 +692,11 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 			}
 		}
 	}
+
+#ifdef DEBUG
 	kDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
+#endif
+
 	row = -1;
 	col = -1;
 }
@@ -732,21 +779,32 @@ void QuadKonsole::insertVertical(int row, int col)
 
 void QuadKonsole::removeStack()
 {
-	int row, col;
-	getFocusCoords(row, col);
-
-	if (row >= 0 && col >= 0)
+	QKStack* stack = getFocusStack();
+	if (stack)
 	{
-		QKStack* stack = getFocusStack();
 		if (Settings::queryClose())
 		{
-			if (stack->foregroundProcess().size())
+			CloseDialog dialog(this);
+			dialog.addViews(stack, stack->modifiedViews());
+
+			if (dialog.size())
 			{
-				if (KMessageBox::questionYesNo(this, i18n("The process \"%1\" is still running. Do you want to terminate it?", stack->foregroundProcess())) == KMessageBox::No)
+				QMap<QKView*, QKStack*> doDetach;
+				if (! dialog.exec(doDetach))
 					return;
+				else
+				{
+					kDebug() << "detaching" << doDetach.count() << "views" << endl;
+					QMapIterator<QKView*, QKStack*> it(doDetach);
+					while (it.hasNext())
+					{
+						it.next();
+						detach(stack, it.key());
+					}
+				}
 			}
 		}
-		m_stacks.removeAll(stack);
+
 		slotStackDestroyed(stack);
 	}
 }
@@ -935,7 +993,9 @@ void QuadKonsole::refreshHistory()
 	if (m_activeStack)
 	{
 		m_urlBar->clearHistory();
-		m_urlBar->setHistoryItems(m_activeStack->history(), true);
+		if (m_activeStack->historyLength())
+			m_urlBar->setHistoryItems(m_activeStack->history(), true);
+
 		m_urlBar->lineEdit()->setText(m_activeStack->url());
 		m_urlBar->lineEdit()->setCursorPosition(0);
 	}
@@ -970,6 +1030,12 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 
 	if (stack)
 	{
+		if (stack == m_activeStack)
+		{
+			disconnect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
+			disconnect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
+			m_activeStack = 0;
+		}
 		m_stacks.removeAll(stack);
 		stack->deleteLater();
 
@@ -1006,6 +1072,39 @@ void QuadKonsole::slotSetLocationBarUrl(const QString& url)
 }
 
 
+void QuadKonsole::zoomView(int row, int col)
+{
+	if (m_zoomed.first == row && m_zoomed.second == col)
+		resetLayouts();
+	else
+	{
+		if (row < 0 || row >= m_rowLayouts.count())
+		{
+			kDebug() << "invalid row:" << row << endl;
+			return;
+		}
+		if (col < 0 || col >= m_rowLayouts.at(row)->count())
+		{
+			kDebug() << "ivalid column:" << col << endl;
+			return;
+		}
+
+		zoomSplitter(m_rows, row);
+		zoomSplitter(m_rowLayouts.at(row), col);
+		m_zoomed = qMakePair(row, col);
+	}
+}
+
+
+void QuadKonsole::zoomView()
+{
+	int row, col;
+	getFocusCoords(row, col);
+	if (row > -1 && col > -1)
+		zoomView(row, col);
+}
+
+
 #ifdef DEBUG
 namespace
 {
@@ -1031,8 +1130,8 @@ void QuadKonsole::restoreSession()
 	{
 		while (m_stacks.count())
 			delete m_stacks.takeFirst();
-		while (mRowLayouts.size())
-			delete mRowLayouts.takeFirst();
+		while (m_rowLayouts.size())
+			delete m_rowLayouts.takeFirst();
 		readProperties(*sessionTest);
 	}
 	else

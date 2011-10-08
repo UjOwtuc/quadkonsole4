@@ -79,6 +79,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partManager(partManager),
 	m_browserInterface(browserInterface)
 {
+	part->setParent(this);
 	m_partname = part->property("QKPartName").toString();
 	setupUi();
 }
@@ -176,7 +177,8 @@ QString QKView::foregroundProcess() const
 	if (m_part && (t = qobject_cast<TerminalInterfaceV2*>(m_part)))
 		return t->foregroundProcessName();
 
-	return "";
+	// emulate some kind of "process" for other KParts
+	return getURL().pathOrUrl();
 }
 
 
@@ -210,6 +212,37 @@ QString QKView::partIcon() const
 }
 
 
+bool QKView::isModified() const
+{
+	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	if (t)
+	{
+		if (t->foregroundProcessName().size())
+			return true;
+	}
+	else if (m_part && (m_part->metaObject()->indexOfProperty("modified") != 1))
+	{
+		const QVariant prop = m_part->property("modified");
+		return prop.isValid() && prop.toBool();
+	}
+	return false;
+}
+
+
+QString QKView::closeModifiedMsg() const
+{
+	QString msg;
+
+	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	if (t)
+		msg = i18n("The process \"%1\" is still running. Do you want to terminate it?", foregroundProcess());
+	else
+		msg = i18n("The view \"%1\" contains unsaved changes at \"%2\". Do you want to close it without saving?", partCaption(), getURL().pathOrUrl());
+
+	return msg;
+}
+
+
 void QKView::show()
 {
 	if (m_part == 0)
@@ -236,10 +269,11 @@ void QKView::createPart()
 	if (service.isNull())
 		return;
 
-	m_part = service->createInstance<KParts::ReadOnlyPart>(this);
+	QString error;
+	m_part = service->createInstance<KParts::ReadOnlyPart>(this, this, QVariantList(), &error);
 	if (m_part == 0)
 	{
-		KMessageBox::error(this, i18n("The factory for %1 could not create a KPart.", m_partname));
+		KMessageBox::error(this, i18n("The factory for %1 could not create a KPart: %2", m_partname, error));
 		return;
 	}
 	m_part->setProperty("QKPartName", m_partname);
@@ -274,7 +308,6 @@ void QKView::partDestroyed()
 			}
 			m_partManager.removeManagedTopLevelWidget(m_part->widget());
 			disconnect(m_part->widget(), SIGNAL(destroyed(QObject*)), this, SLOT(partDestroyed()));
-
 		}
 	}
 	createPart();

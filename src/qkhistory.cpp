@@ -26,6 +26,10 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
+#ifdef HAVE_LIBKONQ
+#include <konq_historyprovider.h>
+#include <konq_historyentry.h>
+#endif
 
 QKGlobalHistory* QKGlobalHistory::m_instace = 0;
 
@@ -147,8 +151,11 @@ QKGlobalHistory::~QKGlobalHistory()
 
 void QKGlobalHistory::addEntry(const QString& url)
 {
-	m_history.append(url);
-	m_history.removeDuplicates();
+#ifdef HAVE_LIBKONQ
+	KonqHistoryProvider::self()->insert(url);
+#else
+	KParts::HistoryProvider::self()->insert(url);
+#endif
 }
 
 

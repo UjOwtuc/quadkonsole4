@@ -41,6 +41,8 @@ int main(int argc, char **argv)
 	KAboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault\n(C) 2009 - 2011 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
 	about.addAuthor(ki18n("Simon Perreault"), KLocalizedString(), "nomis80@nomis80.org");
 	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
+	about.addCredit(ki18n("Michael Feige"), ki18n("Many ideas and feature requests"));
+
 	KCmdLineArgs::init(argc, argv, &about);
 
 	KCmdLineOptions options;

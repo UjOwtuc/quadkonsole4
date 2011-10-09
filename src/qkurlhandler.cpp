@@ -33,14 +33,12 @@
 #include <QtCore/QTimer>
 
 
-QKUrlHandler::QKUrlHandler(const KUrl& url, QObject* parent)
+QKUrlHandler::QKUrlHandler(const KUrl& url, bool autorun, QObject* parent)
 	: QObject(parent),
 	m_url(url)
 {
-	QTimer* timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SLOT(run()));
-	timer->setSingleShot(true);
-	timer->start(1);
+	if (autorun)
+		QTimer::singleShot(1, this, SLOT(run()));
 }
 
 

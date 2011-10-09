@@ -84,11 +84,13 @@ class QKView : public QWidget
 		void openUrlNotify();
 		void popupMenu(QPoint, KFileItemList, KParts::BrowserExtension::PopupFlags flags, KParts::BrowserExtension::ActionGroupMap);
 		void setLocationBarUrl(QString);
+		void createNewWindow(KUrl, QString, KParts::ReadOnlyPart** target);
 
 	public slots:
 		void show();
 		void settingsChanged();
 		void partDestroyed();
+		void updateUrl();
 
 	protected slots:
 		void createPart();
@@ -96,9 +98,11 @@ class QKView : public QWidget
 		void slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void selectionInfo(const KFileItemList& items);
 		void openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments);
+		void slotCreateNewWindow(const KUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target);
 		void enableAction(const char* action, bool enable);
 		void slotSetStatusBarText(const QString& text);
 		void slotSetWindowCaption(const QString& text);
+		void slotOpenUrlNotify();
 
 	private:
 		void setupUi();
@@ -112,6 +116,10 @@ class QKView : public QWidget
 		QString m_windowCaption;
 		KParts::PartManager& m_partManager;
 		KParts::BrowserInterface* m_browserInterface;
+
+		// update working dir for konsolepart
+		QTimer* m_updateUrlTimer;
+		QString m_workingDir;
 };
 
 #endif // QKVIEW_H

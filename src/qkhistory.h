@@ -50,7 +50,7 @@ class QKHistory : public QObject
 		QString goForward();
 		QString go(int steps);
 
-	protected:
+	private:
 		QStringList m_history;
 		int m_historyPosition;
 		bool m_locked;

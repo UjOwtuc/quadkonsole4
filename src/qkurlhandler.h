@@ -35,7 +35,7 @@ class QKUrlHandler : public QObject
 {
 	Q_OBJECT
 	public:
-		explicit QKUrlHandler(const KUrl& url, QObject* parent = 0);
+		explicit QKUrlHandler(const KUrl& url, bool autorun=true, QObject* parent = 0);
 		virtual ~QKUrlHandler();
 
 		const KUrl& url() const;

@@ -40,6 +40,7 @@
 #include <kde_terminal_interface_v2.h>
 
 #include <QtCore/QFileInfo>
+#include <QtCore/QTimer>
 #include <QtGui/QWidget>
 #include <QtGui/QBoxLayout>
 #include <QtGui/QToolBar>
@@ -67,7 +68,9 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partname(partname),
 	m_part(0),
 	m_partManager(partManager),
-	m_browserInterface(browserInterface)
+	m_browserInterface(browserInterface),
+	m_updateUrlTimer(0),
+	m_workingDir(QString())
 {
 	setupUi();
 }
@@ -77,7 +80,9 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	: QWidget(parent, f),
 	m_part(part),
 	m_partManager(partManager),
-	m_browserInterface(browserInterface)
+	m_browserInterface(browserInterface),
+	m_updateUrlTimer(0),
+	m_workingDir(QString())
 {
 	part->setParent(this);
 	m_partname = part->property("QKPartName").toString();
@@ -87,6 +92,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 
 QKView::~QKView()
 {
+	delete m_updateUrlTimer;
 	if (m_part)
 	{
 		m_partManager.removePart(m_part);
@@ -131,9 +137,17 @@ void QKView::setURL(const KUrl& url)
 			escaped.replace("\"", "\\\"");
 
 			if (! url.hasHost() && QFileInfo(url.path()).isDir())
-				t->sendInput("cd ");
-
-			t->sendInput(QString(" \"%1\"").arg(escaped));
+			{
+				if (t->foregroundProcessName().isEmpty())
+				{
+					t->sendInput(QString("cd \"%1\"\n").arg(escaped));
+					slotOpenUrlNotify();
+				}
+				else
+					t->sendInput(QString("cd \"%1\"").arg(escaped));
+			}
+			else
+				t->sendInput(QString(" \"%1\"").arg(escaped));
 		}
 		else
 			m_part->openUrl(url);
@@ -315,6 +329,16 @@ void QKView::partDestroyed()
 }
 
 
+void QKView::updateUrl()
+{
+	if (hasFocus() && m_workingDir != getURL().pathOrUrl())
+	{
+		m_workingDir = getURL().pathOrUrl();
+		emit openUrlNotify();
+	}
+}
+
+
 void QKView::slotPopupMenu(const QPoint& where, const KUrl &url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
 {
 	KFileItem item(url, args.mimeType(), mode);
@@ -350,8 +374,15 @@ void QKView::selectionInfo(const KFileItemList& items)
 
 void QKView::openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments)
 {
-	kDebug() << "url " << url << endl;
+	kDebug() << "url" << url << endl;
 	emit openUrlRequest(url);
+}
+
+
+void QKView::slotCreateNewWindow(const KUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target)
+{
+	kDebug() << "url" << url << endl;
+	emit createNewWindow(url, args.mimeType(), target);
 }
 
 
@@ -379,6 +410,12 @@ void QKView::slotSetWindowCaption(const QString& text)
 {
 	m_windowCaption = text;
 	emit setWindowCaption(text);
+}
+
+
+void QKView::slotOpenUrlNotify()
+{
+	QTimer::singleShot(10, this, SIGNAL(openUrlNotify()));
 }
 
 
@@ -419,6 +456,9 @@ void QKView::setupPart()
 	{
 		kDebug() << "part" << m_partname << "has a TerminalInterfaceV2" << endl;
 		t->showShellInDir(QString());
+		m_updateUrlTimer = new QTimer;
+		m_updateUrlTimer->start(1500);
+		connect(m_updateUrlTimer, SIGNAL(timeout()), SLOT(updateUrl()));
 	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
@@ -431,9 +471,10 @@ void QKView::setupPart()
 		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(slotPopupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 		connect(b, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));
 		connect(b, SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), SLOT(openUrlRequest(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)));
-		connect(b, SIGNAL(openUrlNotify()), SIGNAL(openUrlNotify()));
+		connect(b, SIGNAL(openUrlNotify()), SLOT (slotOpenUrlNotify()));
 		connect(b, SIGNAL(enableAction(const char*,bool)), SLOT(enableAction(const char*,bool)));
 		connect(b, SIGNAL(setLocationBarUrl(QString)), SIGNAL(setLocationBarUrl(QString)));
+		connect(b, SIGNAL(createNewWindow(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::WindowArgs,KParts::ReadOnlyPart**)), SLOT(slotCreateNewWindow(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::WindowArgs,KParts::ReadOnlyPart**)));
 	}
 
 	KParts::StatusBarExtension* sb = KParts::StatusBarExtension::childObject(m_part);

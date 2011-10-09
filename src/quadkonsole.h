@@ -74,7 +74,7 @@ class QuadKonsole : public KParts::MainWindow
 		QStringList partIcons() const;
 		void changeLayout();
 		void slotActivateUrlBar();
-		void refreshHistory();
+		void refreshHistory(const QString& item);
 		void zoomView(int row, int col);
 		void slotToggleSidebar();
 
@@ -102,6 +102,7 @@ class QuadKonsole : public KParts::MainWindow
 		void zoomView();
 		void slotOpenUrl(const QString& url=QString());
 		void slotOpenUrl(const KUrl& url);
+		void slotNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();

@@ -119,7 +119,6 @@ void QKStack::setHistory(const QStringList& history, int historyPosition)
 	m_history.setHistory(history);
 	m_history.setPosition(historyPosition);
 	checkEnableActions();
-	emit historyChanged();
 }
 
 
@@ -211,20 +210,7 @@ void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurre
 
 			// load a new KPart to display mimeType
 			if (Settings::autoloadView())
-			{
-				view = currentWidget();
-				KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
-
-				// only load a new part if it is different from the current one
-				if (services.count() && services.front()->entryPath() != view->partName())
-				{
-					kDebug() << "loading KPart" << services.front()->entryPath() << "for mime type" << mimeType << endl;
-					int index = addViews(QStringList(services.front()->entryPath()));
-					targetIndex = index;
-				}
-				else if (services.isEmpty())
-					kDebug() << "unable to find a service for mime type" << mimeType << endl;
-			}
+				targetIndex = openViewByMimeType(mimeType, false);
 		}
 
 		if (targetIndex == -1)
@@ -264,7 +250,6 @@ void QKStack::switchView(int index, const KUrl& url)
 		currentWidget()->setURL(url);
 		m_history.addEntry(url.pathOrUrl());
 		checkEnableActions();
-		emit historyChanged();
 	}
 }
 
@@ -390,6 +375,30 @@ void QKStack::slotOpenUrlRequest(const QString& url)
 }
 
 
+void QKStack::slotOpenNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
+{
+	int index = -1;
+	if (mimeType.isEmpty())
+	{
+		index = addViews(QStringList(currentWidget()->partName()));
+		setCurrentIndex(index);
+		if (target)
+			*target = currentWidget()->part();
+		slotOpenUrlRequest(url, true);
+	}
+	else
+	{
+		index = openViewByMimeType(mimeType);
+		if (index > -1)
+		{
+			switchView(index, url);
+			if (target)
+				*target = currentWidget()->part();
+		}
+	}
+}
+
+
 void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 {
 	if (handler->error().isEmpty())
@@ -415,8 +424,9 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 
 void QKStack::slotOpenUrlNotify()
 {
-	m_history.addEntry(currentWidget()->getURL().pathOrUrl());
 	checkEnableActions();
+	m_history.addEntry(currentWidget()->getURL().pathOrUrl());
+	emit setLocationBarUrl(currentWidget()->getURL().pathOrUrl());
 }
 
 
@@ -560,6 +570,7 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
 	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
 	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
+	connect(view, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotOpenNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
 
 	// check for current widget before propagating?
 	connect(view, SIGNAL(setLocationBarUrl(QString)), SIGNAL(setLocationBarUrl(QString)));
@@ -570,6 +581,32 @@ void QKStack::checkEnableActions()
 {
 	enableAction("go_back", m_history.canGoBack());
 	enableAction("go_forward", m_history.canGoForward());
+}
+
+
+int QKStack::openViewByMimeType(const QString& mimeType, bool allowDuplicate)
+{
+	KService::List services = KMimeTypeTrader::self()->query(mimeType, "KParts/ReadOnlyPart");
+
+	int openedIndex = -1;
+	if (services.count())
+	{
+		QString name = services.front()->entryPath();
+
+		if (! allowDuplicate && name == currentWidget()->partName())
+		{
+			openedIndex = currentIndex();
+		}
+		else
+		{
+			kDebug() << "loading KPart" << name << "for mime type" << mimeType << endl;
+			openedIndex = addViews(QStringList(name));
+		}
+	}
+	else
+		kDebug() << "unable to find a service for mime type" << mimeType << endl;
+
+	return openedIndex;
 }
 
 #include "qkstack.moc"

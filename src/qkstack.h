@@ -66,7 +66,6 @@ class QKStack : public KTabWidget
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
-		void historyChanged();
 		void setLocationBarUrl(QString);
 
 	public slots:
@@ -82,6 +81,7 @@ class QKStack : public KTabWidget
 		void goHistory(int steps);
 		void slotOpenUrlRequest(const KUrl& url, bool tryCurrent=true);
 		void slotOpenUrlRequest(const QString& url);
+		void slotOpenNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
 
 	private slots:
 		void slotPartCreated();
@@ -98,6 +98,7 @@ class QKStack : public KTabWidget
 		void setupUi(KParts::ReadOnlyPart* part=0);
 		void addViewActions(QKView* view);
 		void checkEnableActions();
+		int openViewByMimeType(const QString& mimeType, bool allowDuplicate=true);
 
 		KParts::PartManager& m_partManager;
 		QKBrowserInterface* m_browserInterface;

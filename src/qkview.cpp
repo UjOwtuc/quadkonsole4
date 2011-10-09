@@ -32,7 +32,8 @@
 #include <KDE/KActionCollection>
 #include <KDE/KUrl>
 #include <KDE/KFileItemList>
-
+#include <KDE/KStatusBar>
+#include <KDE/KIO/Job>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
@@ -45,6 +46,7 @@
 #include <QtGui/QBoxLayout>
 #include <QtGui/QToolBar>
 #include <QtGui/QApplication>
+#include <QtGui/QProgressBar>
 
 
 QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
@@ -70,7 +72,8 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partManager(partManager),
 	m_browserInterface(browserInterface),
 	m_updateUrlTimer(0),
-	m_workingDir(QString())
+	m_workingDir(QString()),
+	m_progress(0)
 {
 	setupUi();
 }
@@ -82,7 +85,8 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	m_partManager(partManager),
 	m_browserInterface(browserInterface),
 	m_updateUrlTimer(0),
-	m_workingDir(QString())
+	m_workingDir(QString()),
+	m_progress(0)
 {
 	part->setParent(this);
 	m_partname = part->property("QKPartName").toString();
@@ -105,6 +109,7 @@ QKView::~QKView()
 			window->guiFactory()->removeClient(m_part);
 	}
 	delete m_part;
+	delete m_progress;
 }
 
 
@@ -299,6 +304,7 @@ void QKView::createPart()
 
 void QKView::partDestroyed()
 {
+	m_progress->hide();
 	if (m_part)
 	{
 		KXmlGuiWindow* win = qobject_cast<KXmlGuiWindow*>(window());
@@ -314,12 +320,16 @@ void QKView::partDestroyed()
 			if (b)
 			{
 				b->setBrowserInterface(0);
+				b->disconnect(SIGNAL(loadingProgress(int)), m_progress);
 				b->disconnect(SIGNAL(popupMenu(QPoint,KUrl,mode_t,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), this);
 				b->disconnect(SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), this);
 				b->disconnect(SIGNAL(selectionInfo(KFileItemList)), this);
 				b->disconnect(SIGNAL(openUrlRequestDelayed(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments)), this);
 				b->disconnect(SIGNAL(openUrlNotify()), this);
 				b->disconnect(SIGNAL(enableAction(const char*,bool)), this);
+				b->disconnect(SIGNAL(setLocationBarUrl(QString)), this);
+				b->disconnect(SIGNAL(createNewWindow(KUrl,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::WindowArgs,KParts::ReadOnlyPart**)), this);
+
 			}
 			m_partManager.removeManagedTopLevelWidget(m_part->widget());
 			disconnect(m_part->widget(), SIGNAL(destroyed(QObject*)), this, SLOT(partDestroyed()));
@@ -419,6 +429,32 @@ void QKView::slotOpenUrlNotify()
 }
 
 
+void QKView::slotJobStarted(KIO::Job* job)
+{
+	m_progress->show();
+	m_progress->setValue(0);
+	if (job)
+	{
+		connect(job, SIGNAL(percent(KJob*,ulong)), SLOT(slotProgress(KIO::Job*,ulong)));
+		connect(job, SIGNAL(finished(KJob*)), SLOT(slotJobFinished()));
+		connect(job, SIGNAL(destroyed(QObject*)), SLOT(slotJobFinished()));
+	}
+}
+
+
+void QKView::slotProgress(KIO::Job* , ulong percent)
+{
+	kDebug() << percent << "%" << endl;
+	m_progress->setValue(percent);
+}
+
+
+void QKView::slotJobFinished()
+{
+	m_progress->hide();
+}
+
+
 void QKView::setupUi()
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -430,6 +466,14 @@ void QKView::setupUi()
 
 	m_toolbar = new QToolBar;
 	m_layout->addWidget(m_toolbar);
+
+	m_progress = new QProgressBar;
+	m_progress->setRange(0, 100);
+	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+	if (window)
+		window->statusBar()->addWidget(m_progress);
+	m_progress->hide();
+
 
 	if (m_part)
 		setupPart();
@@ -450,6 +494,10 @@ void QKView::setupPart()
 	connect(m_part->widget(), SIGNAL(destroyed()), SLOT(partDestroyed()));
 	connect(m_part, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(m_part, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
+	connect(m_part, SIGNAL(started(KIO::Job*)), SLOT(slotJobStarted(KIO::Job*)));
+	connect(m_part, SIGNAL(canceled(QString)), m_progress, SLOT(hide()));
+	connect(m_part, SIGNAL(completed()), m_progress, SLOT(hide()));
+	connect(m_part, SIGNAL(completed(bool)), m_progress, SLOT(hide()));
 
 	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)
@@ -467,6 +515,7 @@ void QKView::setupPart()
 		kDebug() << "part" << m_partname << "has a BrowserExtension" << endl;
 		b->setBrowserInterface(m_browserInterface);
 
+		connect(b, SIGNAL(loadingProgress(int)), m_progress, SLOT(setValue(int)));
 		connect(b, SIGNAL(popupMenu(QPoint,KUrl,mode_t,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(slotPopupMenu(QPoint,KUrl,mode_t,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 		connect(b, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(slotPopupMenu(QPoint,KFileItemList,KParts::OpenUrlArguments,KParts::BrowserArguments,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 		connect(b, SIGNAL(selectionInfo(KFileItemList)), SLOT(selectionInfo(KFileItemList)));

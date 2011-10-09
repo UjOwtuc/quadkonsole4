@@ -31,6 +31,7 @@
 class KMenu;
 class QToolBar;
 class QBoxLayout;
+class QProgressBar;
 namespace KParts
 {
 	class ReadOnlyPart;
@@ -103,6 +104,9 @@ class QKView : public QWidget
 		void slotSetStatusBarText(const QString& text);
 		void slotSetWindowCaption(const QString& text);
 		void slotOpenUrlNotify();
+		void slotJobStarted(KIO::Job* job);
+		void slotProgress(KIO::Job*, ulong percent);
+		void slotJobFinished();
 
 	private:
 		void setupUi();
@@ -120,6 +124,9 @@ class QKView : public QWidget
 		// update working dir for konsolepart
 		QTimer* m_updateUrlTimer;
 		QString m_workingDir;
+
+		// job progress
+		QProgressBar* m_progress;
 };
 
 #endif // QKVIEW_H

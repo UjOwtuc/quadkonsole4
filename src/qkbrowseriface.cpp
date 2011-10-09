@@ -37,7 +37,7 @@ uint QKBrowserInterface::historyLength() const
 }
 
 
-void QKBrowserInterface::goHistory(int steps)
+void QKBrowserInterface::goHistory(int /*steps*/)
 {
 	kDebug() << "don't know how to _change_ anything" << endl;
 }

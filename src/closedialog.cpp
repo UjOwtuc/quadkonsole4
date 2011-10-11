@@ -86,6 +86,7 @@ void CloseDialog::addViews(QKStack* stack, QList<QKView*> views)
 void CloseDialog::dontDetach()
 {
 	m_result.clear();
+	m_viewStackMap.clear();
 	accept();
 }
 
@@ -118,4 +119,3 @@ int CloseDialog::size() const
 {
 	return m_widget->processTable->rowCount();
 }
-

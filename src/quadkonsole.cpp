@@ -130,7 +130,9 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	setupActions();
 	initHistory();
 	setupUi(rows, columns);
+
 	m_stacks.front()->setFocus();
+	m_activeStack = m_stacks.front();
 	slotActivePartChanged(m_stacks.front()->part());
 
 	if (cmds.size())
@@ -156,7 +158,9 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	initHistory();
 	setupUi(1, 1, parts);
 	m_stacks.front()->setHistory(history, historyPosition);
+
 	m_stacks.front()->setFocus();
+	m_activeStack = m_stacks.front();
 	slotActivePartChanged(m_stacks.front()->part());
 
 	showNormal();
@@ -208,22 +212,25 @@ void QuadKonsole::setupActions()
 	}
 
 	// Movement
-	// directions depend on main layout's orientation, so connections are made in reconnectMovement()
 	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
 	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
 	actionCollection()->addAction("go right", goRight);
+	connect(goRight, SIGNAL(triggered()), SLOT(focusKonsoleRight()));
 
 	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("Go &left"), this);
 	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
+	connect(goLeft, SIGNAL(triggered()), SLOT(focusKonsoleLeft()));
 
 	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("Go &up"), this);
 	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
+	connect(goUp, SIGNAL(triggered()), SLOT(focusKonsoleUp()));
 
 	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("Go &down"), this);
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
+	connect(goDown, SIGNAL(triggered()), SLOT(focusKonsoleDown()));
 
 	KAction* tabLeft = new KAction(i18n("&Previous tab"), this);
 	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
@@ -386,11 +393,21 @@ void QuadKonsole::focusKonsoleRight()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		++col;
-		if (col >= m_rowLayouts[row]->count())
+		if (m_rows->orientation() == Qt::Vertical)
 		{
-			row = (row +1) % m_rowLayouts.size();
-			col = 0;
+			++col;
+			if (col >= m_rowLayouts[row]->count())
+			{
+				col = 0;
+				row = (row +1) % m_rowLayouts.count();
+			}
+		}
+		else
+		{
+			++row;
+			if (row >= m_rowLayouts.count())
+				row = 0;
+			col = (col +1) % m_rowLayouts[0]->count();
 		}
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
@@ -403,11 +420,21 @@ void QuadKonsole::focusKonsoleLeft()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		--col;
-		if (col < 0)
+		if (m_rows->orientation() == Qt::Vertical)
 		{
-			row = (row + m_rowLayouts.size() -1) % m_rowLayouts.size();
-			col = m_rowLayouts[row]->count() -1;
+			--col;
+			if (col < 0)
+			{
+				row = (row + m_rowLayouts.size() -1) % m_rowLayouts.count();
+				col = m_rowLayouts[row]->count() -1;
+			}
+		}
+		else
+		{
+			--row;
+			if (row < 0)
+				row = m_rowLayouts.count() -1;
+			col = (col + m_rowLayouts[row]->count() -1) % m_rowLayouts[row]->count();
 		}
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
@@ -420,9 +447,14 @@ void QuadKonsole::focusKonsoleUp()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		row = (row + m_rowLayouts.size() -1) % m_rowLayouts.size();
-		if (col >= m_rowLayouts[row]->count())
-			col = m_rowLayouts[row]->count() -1;
+		if (m_rows->orientation() == Qt::Vertical)
+		{
+			row = (row + m_rowLayouts.size() -1) % m_rowLayouts.size();
+			if (col >= m_rowLayouts[row]->count())
+				col = m_rowLayouts[row]->count() -1;
+		}
+		else
+			col = (col + m_rowLayouts[row]->count() -1) % m_rowLayouts[row]->count();
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
@@ -434,9 +466,14 @@ void QuadKonsole::focusKonsoleDown()
 	getFocusCoords(row, col);
 	if (row >= 0 && col >= 0)
 	{
-		row = (row +1) % m_rowLayouts.size();
-		if (col >= m_rowLayouts[row]->count())
-			col = m_rowLayouts[row]->count() -1;
+		if (m_rows->orientation() == Qt::Vertical)
+		{
+			row = (row +1) % m_rowLayouts.size();
+			if (col >= m_rowLayouts[row]->count())
+				col = m_rowLayouts[row]->count() -1;
+		}
+		else
+			col = (col +1) % m_rowLayouts[row]->count();
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
 }
@@ -470,7 +507,6 @@ void QuadKonsole::resetLayout(QSplitter* layout, int targetSize)
 	{
 		if (abs(*it - targetSize) >= 10)
 		{
-			// kDebug() << "forcing resize:" << *it << "=>" << targetSize << endl;
 			resize = true;
 			break;
 		}
@@ -490,10 +526,6 @@ void QuadKonsole::fillMovementMap()
 {
 	if (movementMap.isEmpty())
 	{
-		movementMap.insert("go up",		QPair<QString, QString>(SLOT(focusKonsoleUp()), SLOT(focusKonsoleLeft())));
-		movementMap.insert("go down",		QPair<QString, QString>(SLOT(focusKonsoleDown()), SLOT(focusKonsoleRight())));
-		movementMap.insert("go left",		QPair<QString, QString>(SLOT(focusKonsoleLeft()), SLOT(focusKonsoleUp())));
-		movementMap.insert("go right",		QPair<QString, QString>(SLOT(focusKonsoleRight()), SLOT(focusKonsoleDown())));
 		movementMap.insert("insert horizontal",	QPair<QString, QString>(SLOT(insertHorizontal()), SLOT(insertVertical())));
 		movementMap.insert("insert vertical",	QPair<QString, QString>(SLOT(insertVertical()), SLOT(insertHorizontal())));
 	}
@@ -1065,11 +1097,8 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 	if (stack)
 	{
 		if (stack == m_activeStack)
-		{
-			disconnect(m_urlBar, SIGNAL(returnPressed(QString)), m_activeStack, SLOT(slotOpenUrlRequest(QString)));
-			disconnect(m_urlBar, SIGNAL(returnPressed()), m_activeStack, SLOT(setFocus()));
 			m_activeStack = 0;
-		}
+
 		m_stacks.removeAll(stack);
 		stack->deleteLater();
 

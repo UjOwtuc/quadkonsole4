@@ -99,14 +99,14 @@ QKView::~QKView()
 	delete m_updateUrlTimer;
 	if (m_part)
 	{
-		m_partManager.removePart(m_part);
 		m_part->disconnect();
-		if (m_part->widget())
-			m_part->widget()->disconnect();
-
+		m_partManager.removePart(m_part);
 		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 		if (window)
 			window->guiFactory()->removeClient(m_part);
+
+		if (m_part->widget())
+			m_part->widget()->disconnect();
 	}
 	delete m_part;
 	delete m_progress;

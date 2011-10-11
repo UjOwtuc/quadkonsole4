@@ -65,7 +65,9 @@ QKStack::~QKStack()
 	while (count())
 	{
 		QKView* view = currentWidget();
-		view->disconnect();
+		if (view)
+			view->disconnect();
+
 		removeTab(currentIndex());
 		delete view;
 	}

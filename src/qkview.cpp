@@ -50,6 +50,7 @@
 
 
 QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
+QStringList QKView::m_removeKonsoleActions;
 
 
 KService::Ptr QKPartFactory::getFactory(const QString& name)
@@ -259,6 +260,12 @@ QString QKView::closeModifiedMsg() const
 		msg = i18n("The view \"%1\" contains unsaved changes at \"%2\". Do you want to close it without saving?", partCaption(), getURL().pathOrUrl());
 
 	return msg;
+}
+
+
+const QList<QAction*>& QKView::pluggableSettingsActions() const
+{
+	return m_settingsActions;
 }
 
 
@@ -502,6 +509,8 @@ void QKView::setupPart()
 	connect(m_part, SIGNAL(completed()), m_progress, SLOT(hide()));
 	connect(m_part, SIGNAL(completed(bool)), m_progress, SLOT(hide()));
 
+	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
+
 	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 	if (t)
 	{
@@ -510,6 +519,14 @@ void QKView::setupPart()
 		m_updateUrlTimer = new QTimer;
 		m_updateUrlTimer->start(1500);
 		connect(m_updateUrlTimer, SIGNAL(timeout()), SLOT(updateUrl()));
+
+		disableKonsoleActions();
+
+		KAction* manageProfiles = new KAction(KIcon("configure"), "&Manage profiles ...", m_part);
+		connect(manageProfiles, SIGNAL(triggered()), m_part, SLOT(showManageProfilesDialog()));
+
+		m_settingsActions.clear();
+		m_settingsActions.append(manageProfiles);
 	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
@@ -533,11 +550,51 @@ void QKView::setupPart()
 	if (sb)
 	{
 		kDebug() << "part" << m_partname << "has a StatusBarExtension" << endl;
-		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 		if (window)
 			sb->setStatusBar(window->statusBar());
 	}
 	m_partManager.addPart(m_part);
 }
+
+
+void QKView::disableKonsoleActions()
+{
+	KActionCollection* ac = m_part->actionCollection();
+
+	if (m_removeKonsoleActions.isEmpty())
+	{
+		m_removeKonsoleActions << "split-view-left-right"
+			<< "split-view-top-bottom"
+			<< "close-active-view"
+			<< "close-other-views"
+			<< "detach-view"
+			<< "expand-active-view"
+			<< "shrink-active-view"
+			<< "next-view"
+			<< "previous-view"
+			<< "next-container"
+			<< "move-view-left"
+			<< "move-view-right"
+			<< "switch-to-tab-0"
+			<< "switch-to-tab-1"
+			<< "switch-to-tab-2"
+			<< "switch-to-tab-3"
+			<< "switch-to-tab-4"
+			<< "switch-to-tab-5"
+			<< "switch-to-tab-6"
+			<< "switch-to-tab-7"
+			<< "switch-to-tab-8"
+			<< "switch-to-tab-9";
+	}
+
+	QStringListIterator it(m_removeKonsoleActions);
+	while (it.hasNext())
+	{
+		QAction* action = ac->action(it.next());
+		if (action)
+			ac->removeAction(action);
+	}
+}
+
 
 #include "qkview.moc"

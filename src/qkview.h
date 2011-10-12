@@ -57,7 +57,6 @@ class QKView : public QWidget
 {
 	Q_OBJECT
 	public:
-		typedef enum { PartName=0 } userData_t;
 		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
 		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
@@ -76,6 +75,8 @@ class QKView : public QWidget
 		QString partIcon() const;
 		bool isModified() const;
 		QString closeModifiedMsg() const;
+
+		const QList<QAction*>& pluggableSettingsActions() const;
 
 	signals:
 		void partCreated();
@@ -111,6 +112,7 @@ class QKView : public QWidget
 	private:
 		void setupUi();
 		void setupPart();
+		void disableKonsoleActions();
 
 		QString m_partname;
 		QBoxLayout* m_layout;
@@ -121,12 +123,17 @@ class QKView : public QWidget
 		KParts::PartManager& m_partManager;
 		KParts::BrowserInterface* m_browserInterface;
 
+		static QStringList m_removeKonsoleActions;
+
 		// update working dir for konsolepart
 		QTimer* m_updateUrlTimer;
 		QString m_workingDir;
 
 		// job progress
 		QProgressBar* m_progress;
+
+		// additional actions for this part
+		QList<QAction*> m_settingsActions;
 };
 
 #endif // QKVIEW_H

@@ -1077,6 +1077,7 @@ void QuadKonsole::refreshHistory(const QString& item)
 void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	createGUI(part);
+	unplugActionList("view_settings");
 
 	QKStack* stack = getFocusStack();
 	if (stack)
@@ -1084,6 +1085,7 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 		m_activeStack = stack;
 		m_urlBar->lineEdit()->setText(stack->url());
 		m_urlBar->lineEdit()->setCursorPosition(0);
+		plugActionList("view_settings", stack->currentWidget()->pluggableSettingsActions());
 	}
 }
 

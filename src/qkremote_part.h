@@ -25,6 +25,8 @@
 
 #include <QtGui/QTreeWidgetItem>
 
+// dbus interface
+class DeCcchlQuadkonsole4QuadKonsoleInterface;
 namespace Ui
 {
 	class qkremoteWidget;
@@ -57,6 +59,7 @@ class QKRMainWindow : public QObject, public QTreeWidgetItem
 		QString m_name;
 		uint m_numViews;
 		QList<QTreeWidgetItem*> m_views;
+		DeCcchlQuadkonsole4QuadKonsoleInterface* m_dbusConnection;
 };
 
 class QKRInstance : public QObject, public QTreeWidgetItem

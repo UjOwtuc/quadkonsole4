@@ -23,6 +23,13 @@ kde4_add_kcfg_files(quadkonsole4_SRCS
 	settings.kcfgc
 )
 
+qt4_generate_dbus_interface(quadkonsole.h de.ccchl.quadkonsole4.QuadKonsole.xml OPTIONS -m -p)
+# qt4_add_dbus_adaptor(quadkonsole4_SRCS
+# 	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
+# 	quadkonsole.h
+# 	QuadKonsole
+# )
+
 set(quadkonsole4_LIBS ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 if (LIBKONQ_FOUND)
 	set(quadkonsole4_LIBS ${quadkonsole4_LIBS} ${LIBKONQ_LIBRARY})
@@ -38,6 +45,7 @@ install(FILES quadkonsole4.kcfg DESTINATION ${KCFG_INSTALL_DIR})
 set(qkremote_SRCS
 	qkremotemain.cpp
 	qkremote.cpp
+	${quadkonsoleadaptor_SRCS}
 )
 
 kde4_add_executable(qkremote ${qkremote_SRCS})
@@ -52,6 +60,11 @@ set(qkremote_PART_SRCS
 
 kde4_add_ui_files(qkremote_PART_SRCS
 	qkremotewidget.ui
+)
+
+qt4_add_dbus_interface(qkremote_PART_SRCS
+	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
+	quadkonsoleinterface
 )
 
 kde4_add_plugin(qkremotepart ${qkremote_PART_SRCS})

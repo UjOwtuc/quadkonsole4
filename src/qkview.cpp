@@ -382,10 +382,13 @@ void QKView::selectionInfo(const KFileItemList& items)
 }
 
 
-void QKView::openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments)
+void QKView::openUrlRequest(const KUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs)
 {
 	kDebug() << "url" << url << endl;
-	emit openUrlRequest(url);
+	if (browserArgs.newTab() || browserArgs.forcesNewWindow())
+		emit createNewWindow(url, args.mimeType(), 0);
+	else
+		emit openUrlRequest(url);
 }
 
 

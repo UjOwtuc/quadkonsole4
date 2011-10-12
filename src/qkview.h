@@ -98,7 +98,7 @@ class QKView : public QWidget
 		void slotPopupMenu(const QPoint& where, const KUrl& url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void selectionInfo(const KFileItemList& items);
-		void openUrlRequest(const KUrl& url, KParts::OpenUrlArguments, KParts::BrowserArguments);
+		void openUrlRequest(const KUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs);
 		void slotCreateNewWindow(const KUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target);
 		void enableAction(const char* action, bool enable);
 		void slotSetStatusBarText(const QString& text);

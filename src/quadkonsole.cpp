@@ -261,6 +261,11 @@ void QuadKonsole::setupActions()
 	actionCollection()->addAction("remove part", removePart);
 	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
 
+	KAction* duplicateView = new KAction(KIcon("edit-copy"), i18n("&Duplicate view"), this);
+	duplicateView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D));
+	actionCollection()->addAction("duplicate view", duplicateView);
+	connect(duplicateView, SIGNAL(triggered()), SLOT(slotDuplicateView()));
+
 	// View
 	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
@@ -1206,6 +1211,20 @@ void QuadKonsole::slotNewWindow(const KUrl& url, const QString& mimeType, KParts
 	{
 		m_activeStack->setFocus();
 		m_activeStack->slotOpenNewWindow(url, mimeType, target);
+	}
+}
+
+
+void QuadKonsole::slotDuplicateView()
+{
+	if (m_activeStack && m_activeStack->currentWidget())
+	{
+		QString url = m_activeStack->url();
+		int index = m_activeStack->addViews(QStringList(m_activeStack->currentWidget()->partName()));
+		m_activeStack->setCurrentIndex(index);
+
+		if (m_activeStack->currentWidget())
+			m_activeStack->currentWidget()->setURL(KUrl(url));
 	}
 }
 

@@ -103,6 +103,7 @@ class QuadKonsole : public KParts::MainWindow
 		void slotOpenUrl(const QString& url=QString());
 		void slotOpenUrl(const KUrl& url);
 		void slotNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
+		void slotDuplicateView();
 #ifdef DEBUG
 		void saveSession();
 		void restoreSession();

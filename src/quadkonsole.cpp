@@ -58,6 +58,7 @@
 
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
+#include "quadkonsoleadaptor.h"
 
 
 namespace
@@ -93,7 +94,8 @@ QuadKonsole::QuadKonsole()
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebar(0)
+	m_sidebar(0),
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
 	setupActions();
 	initHistory();
@@ -108,7 +110,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebar(0)
+	m_sidebar(0),
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -149,7 +152,8 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebar(0)
+	m_sidebar(0),
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);

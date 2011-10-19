@@ -24,6 +24,7 @@
 #include <KDE/KParts/ReadOnlyPart>
 
 #include <QtGui/QTreeWidgetItem>
+#include <QtCore/QThread>
 
 // dbus interface
 class DeCcchlQuadkonsole4QuadKonsoleInterface;
@@ -31,86 +32,9 @@ namespace Ui
 {
 	class qkremoteWidget;
 }
-class QWidget;
 class KAboutData;
 class QDBusConnection;
-class QTreeWidgetItem;
 class QKeyEvent;
-class QKREventFilter;
-class QHBoxLayout;
-class QLabel;
-class QKRInstance;
-
-class QKRMainWindow : public QObject, public QTreeWidgetItem
-{
-	Q_OBJECT
-	public:
-		QKRMainWindow(QKRInstance* parent, const QString& dbusName, const QString& name);
-		virtual ~QKRMainWindow();
-
-		uint numViews() const { return m_numViews; }
-
-	public slots:
-		void update();
-		void sendInput(const QString& text);
-
-	private:
-		QString m_dbusName;
-		QString m_name;
-		uint m_numViews;
-		QList<QTreeWidgetItem*> m_views;
-		DeCcchlQuadkonsole4QuadKonsoleInterface* m_dbusConnection;
-};
-
-class QKRInstance : public QObject, public QTreeWidgetItem
-{
-	Q_OBJECT
-	public:
-		QKRInstance(QTreeWidget* parent, const QString& dbusName);
-		virtual ~QKRInstance();
-
-	public slots:
-		void update();
-		void sendInput(const QString& text);
-
-	private:
-		QString m_dbusName;
-		QMap<QString, QKRMainWindow*> m_mainWindows;
-};
-
-class QKRemotePart : public KParts::ReadOnlyPart
-{
-	Q_OBJECT
-	public:
-		static const char version[];
-		static const char partName[];
-
-		QKRemotePart(QWidget *parentWidget,QObject *parent, const QStringList &);
-		virtual ~QKRemotePart();
-
-		static KAboutData *createAboutData();
-
-	protected:
-		/**
-		* This must be implemented by each part
-		*/
-		virtual bool openFile();
-
-	public slots:
-		void refreshAvailableSlaves();
-		void slotKeypress(QKeyEvent* event);
-		void sendInput(const QString& text);
-		void focusInputLine();
-		void identifyViews();
-
-	private:
-		QWidget* m_widget;
-		Ui::qkremoteWidget* m_remote;
-		QDBusConnection* m_dbusConn;
-		QKREventFilter* m_eventFilter;
-		QTimer* m_updateTimer;
-		QMap<QString, QKRInstance*> m_instances;
-};
 
 
 class QKREventFilter : public QObject
@@ -128,5 +52,46 @@ class QKREventFilter : public QObject
 	private:
 		Ui::qkremoteWidget* m_settingsWidget;
 };
+
+
+class QKRemotePart : public KParts::ReadOnlyPart
+{
+	Q_OBJECT
+	public:
+		static const char version[];
+		static const char partName[];
+		static const QString dbusInterfaceName;
+
+		QKRemotePart(QWidget* parentWidget,QObject* parent, const QStringList &);
+		virtual ~QKRemotePart();
+
+		static KAboutData *createAboutData();
+
+	protected:
+		/**
+		* This must be implemented by each part
+		*/
+		virtual bool openFile();
+
+	public slots:
+		void refreshAvailableSlaves();
+		void slotKeypress(QKeyEvent* event);
+		void sendInput(const QString& text);
+		void focusInputLine();
+		void identifyViews();
+
+	private slots:
+		void slotToggleUpdateTimer(bool state);
+
+	private:
+		void addSlave(const QString& instance, const QString& window, uint numViews, DeCcchlQuadkonsole4QuadKonsoleInterface& dbusInterface);
+
+		QWidget* m_widget;
+		Ui::qkremoteWidget* m_remote;
+		QDBusConnection* m_dbusConn;
+		QKREventFilter* m_eventFilter;
+		QTimer* m_updateTimer;
+};
+
 
 #endif // QKREMOTEPART_H

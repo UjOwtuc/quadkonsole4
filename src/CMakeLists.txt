@@ -24,11 +24,11 @@ kde4_add_kcfg_files(quadkonsole4_SRCS
 )
 
 qt4_generate_dbus_interface(quadkonsole.h de.ccchl.quadkonsole4.QuadKonsole.xml OPTIONS -m -p)
-# qt4_add_dbus_adaptor(quadkonsole4_SRCS
-# 	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
-# 	quadkonsole.h
-# 	QuadKonsole
-# )
+qt4_add_dbus_adaptor(quadkonsole4_SRCS
+	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
+	quadkonsole.h
+	QuadKonsole
+)
 
 set(quadkonsole4_LIBS ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 if (LIBKONQ_FOUND)

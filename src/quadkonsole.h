@@ -29,6 +29,8 @@
 
 #include <QtGui/QClipboard>
 
+// dbus adaptor
+class QuadKonsoleAdaptor;
 class QKStack;
 class QKView;
 class QGridLayout;
@@ -51,8 +53,8 @@ class QuadKonsole : public KParts::MainWindow
 	friend void kRestoreMainWindows<QuadKonsole>();
 
 	Q_OBJECT
-	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
 	Q_PROPERTY(uint numViews READ numViews)
+	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
 	public:
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
@@ -137,6 +139,7 @@ class QuadKonsole : public KParts::MainWindow
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
 		QKView* m_sidebar;
+		QuadKonsoleAdaptor* m_dbusAdaptor;
 };
 
 #endif // QUADKONSOLE_H

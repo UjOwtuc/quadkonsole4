@@ -53,13 +53,12 @@ class QuadKonsole : public KParts::MainWindow
 	friend void kRestoreMainWindows<QuadKonsole>();
 
 	Q_OBJECT
-	Q_PROPERTY(uint numViews READ numViews)
 	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
 	public:
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
 
-		uint numViews() const { return m_stacks.size(); }
+		Q_SCRIPTABLE uint numViews() const { return m_stacks.size(); }
 
 	public slots:
 		void resetLayouts();

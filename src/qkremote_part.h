@@ -91,6 +91,7 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		QDBusConnection* m_dbusConn;
 		QKREventFilter* m_eventFilter;
 		QTimer* m_updateTimer;
+		QThread* m_dbusThread;
 };
 
 

@@ -57,7 +57,8 @@ const QString QKRemotePart::dbusInterfaceName = "de.ccchl.quadkonsole4-%1";
 
 
 QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStringList & /*args*/ )
-	: KParts::ReadOnlyPart(parent)
+	: KParts::ReadOnlyPart(parent),
+	m_dbusThread(new QThread(this))
 {
 	// we need an instance
 	setComponentData(QKRemotePartFactory::componentData());
@@ -90,6 +91,10 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	QStringList headerLabels;
 	headerLabels << i18n("Available slaves") << i18n("Current URL");
 	m_remote->availableSlaves->setHeaderLabels(headerLabels);
+	m_remote->availableSlaves->sortByColumn(0, Qt::AscendingOrder);
+
+	// initial update of running quadkonsole4 instances
+	QTimer::singleShot(1, this, SLOT(refreshAvailableSlaves()));
 
 	qApp->installEventFilter(m_eventFilter);
 }
@@ -202,8 +207,8 @@ void QKRemotePart::refreshAvailableSlaves()
 			QString window = QString("/quadkonsole4/MainWindow_%1").arg(win);
 
 			de::ccchl::quadkonsole4::QuadKonsole qk(instance, window, *m_dbusConn);
-			uint numViews = qk.numViews();
-
+			qk.moveToThread(m_dbusThread);
+			uint numViews = QDBusReply<uint>(qk.call(QDBus::BlockWithGui, "numViews")).value();
 			if (numViews > 0)
 				addSlave(instance, window, numViews, qk);
 		}
@@ -269,6 +274,7 @@ void QKRemotePart::addSlave(const QString& instance, const QString& window, uint
 	if (! windowItem)
 	{
 		windowItem = new QTreeWidgetItem(instanceItem, QStringList(window));
+		windowItem->setIcon(0, KIcon("quadkonsole4"));
 		windowItem->setData(0, Qt::UserRole, instance);
 		windowItem->setData(1, Qt::UserRole, window);
 		m_remote->availableSlaves->expandItem(windowItem);
@@ -292,8 +298,8 @@ void QKRemotePart::addSlave(const QString& instance, const QString& window, uint
 		view->setData(2, Qt::UserRole, i);
 	}
 
-	QStringList urls = dbusInterface.urls();
-	QStringList icons = dbusInterface.partIcons();
+	QStringList urls = QDBusReply<QStringList>(dbusInterface.call(QDBus::BlockWithGui, "urls")).value();
+	QStringList icons = QDBusReply<QStringList>(dbusInterface.call(QDBus::BlockWithGui, "partIcons")).value();
 	for (int i=0; i<windowItem->childCount(); ++i)
 	{
 		QTreeWidgetItem* item = windowItem->child(i);

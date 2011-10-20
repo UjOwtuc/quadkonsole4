@@ -29,6 +29,8 @@
 
 #include <QtGui/QClipboard>
 
+// dbus adaptor
+class QuadKonsoleAdaptor;
 class QKStack;
 class QKView;
 class QGridLayout;
@@ -51,12 +53,12 @@ class QuadKonsole : public KParts::MainWindow
 	friend void kRestoreMainWindows<QuadKonsole>();
 
 	Q_OBJECT
-	Q_PROPERTY(uint numViews READ numViews)
+	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
 	public:
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
 
-		uint numViews() const { return m_stacks.size(); }
+		Q_SCRIPTABLE uint numViews() const { return m_stacks.size(); }
 
 	public slots:
 		void resetLayouts();
@@ -67,11 +69,11 @@ class QuadKonsole : public KParts::MainWindow
 		void insertHorizontal(int row, int col);
 		void insertVertical(int row, int col);
 		void sendCommands(const QStringList& cmds);
-		void sendInput(uint view, const QString& text);
+		Q_SCRIPTABLE void sendInput(uint view, const QString& text);
 		void openUrls(const QStringList& urls);
-		void identifyStacks(QString format);
-		QStringList urls() const;
-		QStringList partIcons() const;
+		Q_SCRIPTABLE void identifyStacks(QString format);
+		Q_SCRIPTABLE QStringList urls() const;
+		Q_SCRIPTABLE QStringList partIcons() const;
 		void changeLayout();
 		void slotActivateUrlBar();
 		void refreshHistory(const QString& item);
@@ -137,6 +139,7 @@ class QuadKonsole : public KParts::MainWindow
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
 		QKView* m_sidebar;
+		QuadKonsoleAdaptor* m_dbusAdaptor;
 };
 
 #endif // QUADKONSOLE_H

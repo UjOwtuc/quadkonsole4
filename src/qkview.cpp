@@ -243,6 +243,10 @@ bool QKView::isModified() const
 		if (t->foregroundProcessName().size())
 			return true;
 	}
+	else if (m_writablePart && m_writablePart->isModified())
+	{
+		return true;
+	}
 	else if (m_part && (m_part->metaObject()->indexOfProperty("modified") != 1))
 	{
 		const QVariant prop = m_part->property("modified");

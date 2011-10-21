@@ -46,10 +46,11 @@ int main(int argc, char **argv)
 	KCmdLineArgs::init(argc, argv, &about);
 
 	KCmdLineOptions options;
-	options.add("rows <rows>", ki18n("Number of rows of terminal emulators"), "2");
-	options.add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
-	options.add("cmd [number:]<command>", ki18n("Run command [in given view] (may be used multiple times)"));
-	options.add("url [number:]<url>", ki18n("Open URL [in given view] (may be used multiple times)"));
+	options.add("r").add("rows <rows>", ki18n("Number of rows of terminal emulators"), "2");
+	options.add("c").add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
+	options.add("C").add("cmd [number:]<command>", ki18n("Run command [in given view] (may be used multiple times)"));
+	options.add("u").add("url [number:]<url>", ki18n("Open URL [in given view] (may be used multiple times)"));
+	// options.add("+[URL]", ki18n("Open specified URL in a running instance of QuadKonsole4"));
 	KCmdLineArgs::addCmdLineOptions(options);
 	KApplication app;
 
@@ -69,6 +70,11 @@ int main(int argc, char **argv)
 			columns = args->getOption("columns").toInt();
 		QStringList cmds = args->getOptionList("cmd");
 		QStringList urls = args->getOptionList("url");
+
+// 		if (args->count())
+// 		{
+// 			// try to open given URLs in a running QuadKonsole4 before opening a new window
+// 		}
 
 		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds, urls);
 		app.setTopWidget(mainWin);

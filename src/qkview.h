@@ -77,6 +77,7 @@ class QKView : public QWidget
 		QString closeModifiedMsg() const;
 
 		const QList<QAction*>& pluggableSettingsActions() const;
+		const QList<QAction*>& pluggableEditActions() const;
 
 	signals:
 		void partCreated();
@@ -108,6 +109,7 @@ class QKView : public QWidget
 		void slotJobStarted(KIO::Job* job);
 		void slotProgress(KIO::Job*, ulong percent);
 		void slotJobFinished();
+		void slotToggleEditable(bool set);
 
 	private:
 		void setupUi();
@@ -118,6 +120,7 @@ class QKView : public QWidget
 		QBoxLayout* m_layout;
 		QToolBar* m_toolbar;
 		KParts::ReadOnlyPart* m_part;
+		KParts::ReadWritePart* m_writablePart;
 		QString m_statusBarText;
 		QString m_windowCaption;
 		KParts::PartManager& m_partManager;
@@ -133,6 +136,7 @@ class QKView : public QWidget
 		QProgressBar* m_progress;
 
 		// additional actions for this part
+		QList<QAction*> m_editActions;
 		QList<QAction*> m_settingsActions;
 };
 

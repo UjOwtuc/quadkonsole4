@@ -24,6 +24,7 @@
 
 #include <kdeversion.h>
 #include <KDE/KAction>
+#include <KDE/KToggleAction>
 #include <KDE/KXmlGuiWindow>
 #include <KDE/KXMLGUIFactory>
 #include <KDE/KDebug>
@@ -70,6 +71,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 	: QWidget(parent, f),
 	m_partname(partname),
 	m_part(0),
+	m_writablePart(0),
 	m_partManager(partManager),
 	m_browserInterface(browserInterface),
 	m_updateUrlTimer(0),
@@ -83,6 +85,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent, Qt::WindowFlags f)
 	: QWidget(parent, f),
 	m_part(part),
+	m_writablePart(0),
 	m_partManager(partManager),
 	m_browserInterface(browserInterface),
 	m_updateUrlTimer(0),
@@ -269,6 +272,12 @@ const QList<QAction*>& QKView::pluggableSettingsActions() const
 }
 
 
+const QList< QAction* >& QKView::pluggableEditActions() const
+{
+	return m_editActions;
+}
+
+
 void QKView::show()
 {
 	QWidget::show();
@@ -297,13 +306,28 @@ void QKView::createPart()
 		return;
 
 	QString error;
-	m_part = service->createInstance<KParts::ReadOnlyPart>(this, this, QVariantList(), &error);
+	if (service->serviceTypes().contains("KParts/ReadWritePart"))
+	{
+		kDebug() << "part" << m_partname << "has a ReadWritePart" << endl;
+
+		m_writablePart = service->createInstance<KParts::ReadWritePart>(this, this, QVariantList(), &error);
+		m_writablePart->setReadWrite(false);
+		m_part = m_writablePart;
+
+		m_editActions.clear();
+		KToggleAction* toggleEditable = new KToggleAction(KIcon("document-edit"), i18n("&Enable editing"), this);
+		connect(toggleEditable, SIGNAL(toggled(bool)), SLOT(slotToggleEditable(bool)));
+		m_editActions.append(toggleEditable);
+	}
+	else
+		m_part = service->createInstance<KParts::ReadOnlyPart>(this, this, QVariantList(), &error);
 	if (m_part == 0)
 	{
 		KMessageBox::error(this, i18n("The factory for %1 could not create a KPart: %2", m_partname, error));
 		return;
 	}
 	m_part->setProperty("QKPartName", m_partname);
+
 	setupPart();
 	emit partCreated();
 }
@@ -465,6 +489,13 @@ void QKView::slotJobFinished()
 }
 
 
+void QKView::slotToggleEditable(bool set)
+{
+	if (m_writablePart)
+		m_writablePart->setReadWrite(set);
+}
+
+
 void QKView::setupUi()
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -522,7 +553,7 @@ void QKView::setupPart()
 
 		disableKonsoleActions();
 
-		KAction* manageProfiles = new KAction(KIcon("configure"), "&Manage profiles ...", m_part);
+		KAction* manageProfiles = new KAction(KIcon("configure"), i18n("&Manage konsole profiles ..."), m_part);
 		connect(manageProfiles, SIGNAL(triggered()), m_part, SLOT(showManageProfilesDialog()));
 
 		m_settingsActions.clear();

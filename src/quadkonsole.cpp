@@ -94,6 +94,7 @@ QuadKonsole::QuadKonsole()
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
+	m_sidebarSplitter(0),
 	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
@@ -110,6 +111,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
+	m_sidebarSplitter(0),
 	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
@@ -152,6 +154,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
+	m_sidebarSplitter(0),
 	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
@@ -260,10 +263,10 @@ void QuadKonsole::setupActions()
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
 
-	KAction* removePart = new KAction(KIcon("view-left-close"), i18n("Re&move part"), this);
-	removePart->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
-	actionCollection()->addAction("remove part", removePart);
-	connect(removePart, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
+	KAction* removeStack = new KAction(KIcon("view-left-close"), i18n("Re&move stack"), this);
+	removeStack->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
+	actionCollection()->addAction("remove part", removeStack);
+	connect(removeStack, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
 
 	KAction* duplicateView = new KAction(KIcon("edit-copy"), i18n("&Duplicate view"), this);
 	duplicateView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D));
@@ -344,14 +347,15 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	QGridLayout* grid = new QGridLayout(centralWidget);
 	grid->setContentsMargins(0, 0, 0, 0);
 
-	QSplitter* sideBarSplitter = new QSplitter(Qt::Horizontal);
-	grid->addWidget(sideBarSplitter, 0, 0);
+	m_sidebarSplitter = new QSplitter(Qt::Horizontal);
+	grid->addWidget(m_sidebarSplitter, 0, 0);
 
+	// TODO search for a valid sidebar instead of hard coded name
 	m_sidebar = new QKView(m_partManager, new QKBrowserInterface(*(QKGlobalHistory::self())), "konq_sidebartng.desktop");
 	m_sidebar->setFocusPolicy(Qt::ClickFocus);
 	connect(m_sidebar, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrl(KUrl)));
 	connect(m_sidebar, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
-	sideBarSplitter->addWidget(m_sidebar);
+	m_sidebarSplitter->addWidget(m_sidebar);
 	if (Settings::showSidebar())
 		m_sidebar->show();
 	else
@@ -363,10 +367,10 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 		m_rows = new QSplitter(Qt::Horizontal);
 
 	m_rows->setChildrenCollapsible(false);
-	sideBarSplitter->addWidget(m_rows);
-	sideBarSplitter->setCollapsible(1, false);
-	sideBarSplitter->setStretchFactor(0, 1);
-	sideBarSplitter->setStretchFactor(1, 4);
+	m_sidebarSplitter->addWidget(m_rows);
+	m_sidebarSplitter->setCollapsible(1, false);
+	m_sidebarSplitter->setStretchFactor(0, 1);
+	m_sidebarSplitter->setStretchFactor(1, 4);
 
 	actionCollection()->addAssociatedWidget(centralWidget);
 
@@ -702,6 +706,7 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 	else
 		orientationVertical = false;
 	config.writeEntry("layoutOrientationVertical", orientationVertical);
+	config.writeEntry("sidebarSizes", m_sidebarSplitter->sizes());
 
 	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
@@ -739,6 +744,7 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		m_rowLayouts[i]->setSizes(sizes);
 	}
 
+	m_sidebarSplitter->setSizes(config.readEntry("sidebarSizes", QList<int>()));
 	m_rows->setSizes(rowSizes);
 
 	bool orientationVertical = config.readEntry("orientationVertical", true);
@@ -1087,6 +1093,7 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	createGUI(part);
 	unplugActionList("view_settings");
+	unplugActionList("view_edit");
 
 	QKStack* stack = getFocusStack();
 	if (stack)
@@ -1095,6 +1102,7 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 		m_urlBar->lineEdit()->setText(stack->url());
 		m_urlBar->lineEdit()->setCursorPosition(0);
 		plugActionList("view_settings", stack->currentWidget()->pluggableSettingsActions());
+		plugActionList("view_edit", stack->currentWidget()->pluggableEditActions());
 	}
 }
 

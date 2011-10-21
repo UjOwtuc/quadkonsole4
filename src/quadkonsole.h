@@ -138,6 +138,7 @@ class QuadKonsole : public KParts::MainWindow
 		KHistoryComboBox* m_urlBar;
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
+		QSplitter* m_sidebarSplitter;
 		QKView* m_sidebar;
 		QuadKonsoleAdaptor* m_dbusAdaptor;
 };

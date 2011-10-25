@@ -46,7 +46,7 @@ QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
 	m_partManager(partManager)
 {
 	setupUi();
-	m_browserInterface = new QKBrowserInterface(m_history);
+	m_browserInterface = new QKBrowserInterface(*QKHistory::self());
 }
 
 
@@ -55,7 +55,7 @@ QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, Q
 	m_partManager(partManager)
 {
 	setupUi(part);
-	m_browserInterface = new QKBrowserInterface(m_history);
+	m_browserInterface = new QKBrowserInterface(*QKHistory::self());
 }
 
 
@@ -107,20 +107,6 @@ int QKStack::addViews(const QStringList& partNames)
 		index = addTab(view, view->partCaption());
 	}
 	return index;
-}
-
-
-const QKHistory& QKStack::history() const
-{
-	return m_history;
-}
-
-
-void QKStack::setHistory(const QStringList& history, int historyPosition)
-{
-	m_history.setHistory(history);
-	m_history.setPosition(historyPosition);
-	checkEnableActions();
 }
 
 
@@ -250,7 +236,7 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (! url.isEmpty())
 	{
 		currentWidget()->setURL(url);
-		m_history.addEntry(url.pathOrUrl());
+		QKHistory::self()->addEntry(url.pathOrUrl());
 		checkEnableActions();
 	}
 }
@@ -334,12 +320,12 @@ void QKStack::goUp()
 
 void QKStack::goHistory(int steps)
 {
-	QString url = m_history.go(steps);
+	QString url = QKHistory::self()->go(steps);
 	if (! url.isEmpty())
 	{
-		m_history.lock();
+		QKHistory::self()->lock();
 		slotOpenUrlRequest(KUrl(url));
-		m_history.lock(false);
+		QKHistory::self()->lock(false);
 	}
 	checkEnableActions();
 }
@@ -427,7 +413,7 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 void QKStack::slotOpenUrlNotify()
 {
 	checkEnableActions();
-	m_history.addEntry(currentWidget()->getURL().pathOrUrl());
+	QKHistory::self()->addEntry(currentWidget()->getURL().pathOrUrl());
 	emit setLocationBarUrl(currentWidget()->getURL().pathOrUrl());
 }
 
@@ -475,10 +461,10 @@ void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts:
 #ifdef HAVE_LIBKONQ
 		KActionCollection popupActions(static_cast<QWidget*>(0));
 		KAction* back = popupActions.addAction("go_back", KStandardAction::back(this, SLOT(goBack()), &popupActions));
-		back->setEnabled(m_history.canGoBack());
+		back->setEnabled(QKHistory::self()->canGoBack());
 
 		KAction* forward = popupActions.addAction("go_forward", KStandardAction::forward(this, SLOT(goForward()), &popupActions));
-		forward->setEnabled(m_history.canGoForward());
+		forward->setEnabled(QKHistory::self()->canGoForward());
 
 		KAction* up = popupActions.addAction("go_up", KStandardAction::up(this, SLOT(goUp()), &popupActions));
 		up->setEnabled(view->getURL().upUrl() != view->getURL());
@@ -581,8 +567,8 @@ void QKStack::addViewActions(QKView* view)
 
 void QKStack::checkEnableActions()
 {
-	enableAction("go_back", m_history.canGoBack());
-	enableAction("go_forward", m_history.canGoForward());
+	enableAction("go_back", QKHistory::self()->canGoBack());
+	enableAction("go_forward", QKHistory::self()->canGoForward());
 }
 
 

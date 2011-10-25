@@ -31,12 +31,20 @@
 #include <konq_historyentry.h>
 #endif
 
-QKGlobalHistory* QKGlobalHistory::m_instace = 0;
+QKHistory* QKHistory::m_instace = 0;
 
 
-QKHistory::QKHistory(const QStringList& history, int pos)
-	: m_history(history),
-	m_historyPosition(pos),
+QKHistory* QKHistory::self()
+{
+	if (! m_instace)
+		m_instace = new QKHistory;
+
+	return m_instace;
+}
+
+
+QKHistory::QKHistory()
+	: m_historyPosition(-1),
 	m_locked(false)
 {
 	if (m_historyPosition == -1 && m_history.count())
@@ -44,24 +52,8 @@ QKHistory::QKHistory(const QStringList& history, int pos)
 }
 
 
-QKHistory::QKHistory(const QKHistory& rhs)
-	: QObject(rhs.parent()),
-	m_locked(false)
-{
-	*this = rhs;
-}
-
-
 QKHistory::~QKHistory()
 {}
-
-
-QKHistory& QKHistory::operator=(const QKHistory & rhs)
-{
-	m_history = rhs.m_history;
-	m_historyPosition = rhs.m_historyPosition;
-	return *this;
-}
 
 
 void QKHistory::setHistory(const QStringList& history)
@@ -107,7 +99,26 @@ void QKHistory::addEntry(const QString& url)
 			m_history.removeLast();
 
 		m_history.append(url);
-		QKGlobalHistory::self()->addEntry(url);
+#ifdef HAVE_LIBKONQ
+		QList<KonqHistoryEntry>::iterator it = findEntry(KUrl(url));
+		if (it!=entries().end())
+		{
+			(*it).numberOfTimesVisited += 1;
+			(*it).lastVisited = QDateTime::currentDateTime();
+		}
+		else
+		{
+			KonqHistoryEntry entry;
+			entry.firstVisited = entry.lastVisited = QDateTime::currentDateTime();
+			entry.numberOfTimesVisited = 1;
+			entry.title = url;
+			entry.typedUrl = url;
+			entry.url = KUrl(url);
+			emitAddToHistory(entry);
+		}
+#else
+		KParts::HistoryProvider::self()->insert(url);
+#endif
 		m_history.removeDuplicates();
 
 		while (static_cast<unsigned int>(m_history.count()) > Settings::historySize())
@@ -137,32 +148,4 @@ QString QKHistory::go(int steps)
 
 	m_historyPosition -= steps;
 	return m_history.at(m_historyPosition);
-}
-
-
-QKGlobalHistory::QKGlobalHistory()
-	: QKHistory()
-{}
-
-
-QKGlobalHistory::~QKGlobalHistory()
-{}
-
-
-void QKGlobalHistory::addEntry(const QString& url)
-{
-#ifdef HAVE_LIBKONQ
-	KonqHistoryProvider::self()->insert(url);
-#else
-	KParts::HistoryProvider::self()->insert(url);
-#endif
-}
-
-
-QKGlobalHistory* QKGlobalHistory::self()
-{
-	if (! m_instace)
-		m_instace = new QKGlobalHistory;
-
-	return m_instace;
 }

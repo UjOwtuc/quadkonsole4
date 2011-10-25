@@ -25,6 +25,7 @@
 #include <KDE/KComponentData>
 #include <KDE/KParts/GenericFactory>
 
+#include <qglobal.h>
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QKeyEvent>
@@ -36,6 +37,7 @@
 
 #include "ui_qkremotewidget.h"
 
+#include "qkapplicationinterface.h"
 #include "quadkonsoleinterface.h"
 
 #ifndef QUADKONSOLE4_VERSION
@@ -46,14 +48,8 @@ typedef KParts::GenericFactory<QKRemotePart> QKRemotePartFactory;
 K_EXPORT_COMPONENT_FACTORY(qkremotepart, QKRemotePartFactory)
 
 
-namespace
-{
-
-}
-
 const char QKRemotePart::version[] = QUADKONSOLE4_VERSION;
 const char QKRemotePart::partName[] = "qkremotepart";
-const QString QKRemotePart::dbusInterfaceName = "de.ccchl.quadkonsole4-%1";
 
 
 QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStringList & /*args*/ )
@@ -92,6 +88,10 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	headerLabels << i18n("Available slaves") << i18n("Current URL");
 	m_remote->availableSlaves->setHeaderLabels(headerLabels);
 	m_remote->availableSlaves->sortByColumn(0, Qt::AscendingOrder);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
+	m_remote->inputLine->setPlaceholderText(i18n("Type or paste here to broadcast"));
+#endif // Qt >= 4.7.0
 
 	// initial update of running quadkonsole4 instances
 	QTimer::singleShot(1, this, SLOT(refreshAvailableSlaves()));
@@ -195,37 +195,26 @@ void QKRemotePart::refreshAvailableSlaves()
 	m_remote->refreshButton->setEnabled(false);
 	m_updateTimer->stop();
 
-	QStringList services = m_dbusConn->interface()->registeredServiceNames();
-	services = services.filter(dbusInterfaceName.arg(""));
+	QString instance = "de.ccchl.quadkonsole4";
+	de::ccchl::quadkonsole4::QKApplication qkApp(instance, "/MainApplication", *m_dbusConn);
+	qkApp.moveToThread(m_dbusThread);
+	uint numWindows = QDBusReply<uint>(qkApp.call(QDBus::BlockWithGui, "windowCount"));
+	uint found = 0;
 
-	QStringListIterator it(services);
-	while (it.hasNext())
+	for (int win=1; found<numWindows && win<100; ++win)
 	{
-		QString instance = it.next();
-		for (int win=1; win<10; ++win)
-		{
-			QString window = QString("/quadkonsole4/MainWindow_%1").arg(win);
+		QString window = QString("/quadkonsole4/MainWindow_%1").arg(win);
 
-			de::ccchl::quadkonsole4::QuadKonsole qk(instance, window, *m_dbusConn);
-			qk.moveToThread(m_dbusThread);
-			uint numViews = QDBusReply<uint>(qk.call(QDBus::BlockWithGui, "numViews")).value();
-			if (numViews > 0)
-				addSlave(instance, window, numViews, qk);
+		de::ccchl::quadkonsole4::QuadKonsole qk(instance, window, *m_dbusConn);
+		qk.moveToThread(m_dbusThread);
+		uint numViews = QDBusReply<uint>(qk.call(QDBus::BlockWithGui, "numViews")).value();
+		if (numViews > 0)
+		{
+			addSlave(instance, window, numViews, qk);
+			++found;
 		}
 	}
 
-	QList<int> toRemove;
-	for (int i=0; i<m_remote->availableSlaves->topLevelItemCount(); ++i)
-	{
-		QTreeWidgetItem* item = m_remote->availableSlaves->topLevelItem(i);
-		if (item && ! services.contains(item->text(0)))
-			toRemove.append(i);
-	}
-	while (toRemove.size())
-	{
-		delete m_remote->availableSlaves->takeTopLevelItem(toRemove.front());
-		toRemove.removeFirst();
-	}
 	m_remote->availableSlaves->resizeColumnToContents(0);
 
 	if (m_remote->autoUpdate->isChecked())
@@ -245,35 +234,13 @@ void QKRemotePart::slotToggleUpdateTimer(bool state)
 
 void QKRemotePart::addSlave(const QString& instance, const QString& window, uint numViews, de::ccchl::quadkonsole4::QuadKonsole& dbusInterface)
 {
-	QTreeWidgetItem* instanceItem = 0;
-	QList<QTreeWidgetItem*> matches = m_remote->availableSlaves->findItems(instance, Qt::MatchExactly, 0);
-	if (matches.count())
-		instanceItem = matches.front();
-	else
-	{
-		instanceItem = new QTreeWidgetItem(m_remote->availableSlaves, QStringList(instance));
-		instanceItem->setData(0, Qt::UserRole, instance);
-		m_remote->availableSlaves->expandItem(instanceItem);
-	}
-
-	if (instance == dbusInterfaceName.arg(getpid()))
-		instanceItem->setText(1, ki18n("(this process)").toString());
-	else
-		instanceItem->setText(1, QString());
-
 	QTreeWidgetItem* windowItem = 0;
-	for (int i=0; i<instanceItem->childCount(); ++i)
+	QList<QTreeWidgetItem*> matches = m_remote->availableSlaves->findItems(window, Qt::MatchExactly, 0);
+	if (matches.size())
+		windowItem = matches.front();
+	else
 	{
-		QTreeWidgetItem* w = instanceItem->child(i);
-		if (w && w->text(0) == window)
-		{
-			windowItem = w;
-			break;
-		}
-	}
-	if (! windowItem)
-	{
-		windowItem = new QTreeWidgetItem(instanceItem, QStringList(window));
+		windowItem = new QTreeWidgetItem(m_remote->availableSlaves, QStringList(window));
 		windowItem->setIcon(0, KIcon("quadkonsole4"));
 		windowItem->setData(0, Qt::UserRole, instance);
 		windowItem->setData(1, Qt::UserRole, window);

@@ -1,3 +1,12 @@
+2011-10-25  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Added a single location bar instead of one per stack
+	* Use Konqueror's history instead of a new one per stack
+	* Added zoom feature
+	* Added Konqueror's sidebar
+	* Progress info on opening URLs
+	* Basic support for Konsole's profiles
+
 2011-10-01  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* General code cleanup

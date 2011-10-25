@@ -149,7 +149,7 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 
 
 // for detaching parts
-QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition)
+QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	: m_mouseFilter(0),
 	m_partManager(this),
 	m_activeStack(0),
@@ -164,7 +164,6 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history,
 	setupActions();
 	initHistory();
 	setupUi(1, 1, parts);
-	m_stacks.front()->setHistory(history, historyPosition);
 
 	m_stacks.front()->setFocus();
 	m_activeStack = m_stacks.front();
@@ -198,7 +197,7 @@ void QuadKonsole::initHistory()
 	connect(m_urlBar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
 
 #ifdef HAVE_LIBKONQ
-	KonqHistoryProvider* history = new KonqHistoryProvider;
+	QKHistory* history = QKHistory::self();
 	history->loadHistory();
 
 	const KonqHistoryList& historyList = history->entries();
@@ -351,7 +350,7 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	grid->addWidget(m_sidebarSplitter, 0, 0);
 
 	// TODO search for a valid sidebar instead of hard coded name
-	m_sidebar = new QKView(m_partManager, new QKBrowserInterface(*(QKGlobalHistory::self())), "konq_sidebartng.desktop");
+	m_sidebar = new QKView(m_partManager, new QKBrowserInterface(*(QKHistory::self())), "konq_sidebartng.desktop");
 	m_sidebar->setFocusPolicy(Qt::ClickFocus);
 	connect(m_sidebar, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrl(KUrl)));
 	connect(m_sidebar, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
@@ -371,6 +370,9 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	m_sidebarSplitter->setCollapsible(1, false);
 	m_sidebarSplitter->setStretchFactor(0, 1);
 	m_sidebarSplitter->setStretchFactor(1, 4);
+	KConfigGroup autoSave = autoSaveConfigGroup();
+	m_sidebarSplitter->setSizes(autoSave.readEntry("sidebarSizes", QList<int>()));
+	connect(m_sidebarSplitter, SIGNAL(splitterMoved(int,int)), SLOT(slotAutoSave()));
 
 	actionCollection()->addAssociatedWidget(centralWidget);
 
@@ -505,8 +507,10 @@ void QuadKonsole::detach(QKStack* stack, QKView* view)
 
 	KParts::ReadOnlyPart* part = view->part();
 	view->partDestroyed();
-	QuadKonsole* external = new QuadKonsole(part, stack->history().history(), stack->history().position());
+	QuadKonsole* external = new QuadKonsole(part);
 	external->setAttribute(Qt::WA_DeleteOnClose);
+	emit detached(external);
+
 	stack->switchView(KUrl("~"), "inode/directory", true);
 }
 
@@ -706,7 +710,6 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 	else
 		orientationVertical = false;
 	config.writeEntry("layoutOrientationVertical", orientationVertical);
-	config.writeEntry("sidebarSizes", m_sidebarSplitter->sizes());
 
 	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
@@ -744,7 +747,6 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		m_rowLayouts[i]->setSizes(sizes);
 	}
 
-	m_sidebarSplitter->setSizes(config.readEntry("sidebarSizes", QList<int>()));
 	m_rows->setSizes(rowSizes);
 
 	bool orientationVertical = config.readEntry("orientationVertical", true);
@@ -998,14 +1000,22 @@ void QuadKonsole::sendInput(uint view, const QString& text)
 
 void QuadKonsole::openUrls(const QStringList& urls)
 {
-	for (int i=0; i<urls.size(); ++i)
-	{
-		int index = i;
-		QString url = splitIndex(urls[i], &index);
+// 	if (urls.count() == 1 && m_zoomed.first >= 0 && m_zoomed.second >= 0)
+// 	{
+// 		QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[m_zoomed.first]->widget(m_zoomed.second));
+// 		stack->slotOpenUrlRequest(KUrl(splitIndex(urls.first(), 0)));
+// 	}
+// 	else
+// 	{
+		for (int i=0; i<urls.size(); ++i)
+		{
+			int index = i;
+			QString url = splitIndex(urls[i], &index);
 
-		if (index < m_stacks.count())
-			m_stacks[index]->slotOpenUrlRequest(KUrl(url));
-	}
+			if (index < m_stacks.count())
+				m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+		}
+// 	}
 }
 
 
@@ -1184,6 +1194,16 @@ void QuadKonsole::slotToggleSidebar()
 		m_sidebar->hide();
 	else
 		m_sidebar->show();
+}
+
+
+void QuadKonsole::slotAutoSave()
+{
+	if (autoSaveSettings())
+	{
+		KConfigGroup autoSave = autoSaveConfigGroup();
+		autoSave.writeEntry("sidebarSizes", m_sidebarSplitter->sizes());
+	}
 }
 
 

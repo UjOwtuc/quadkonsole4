@@ -60,6 +60,9 @@ class QuadKonsole : public KParts::MainWindow
 
 		Q_SCRIPTABLE uint numViews() const { return m_stacks.size(); }
 
+	signals:
+		void detached(QuadKonsole* mainWindow);
+
 	public slots:
 		void resetLayouts();
 		void toggleMenu();
@@ -79,6 +82,7 @@ class QuadKonsole : public KParts::MainWindow
 		void refreshHistory(const QString& item);
 		void zoomView(int row, int col);
 		void slotToggleSidebar();
+		void slotAutoSave();
 
 	private slots:
 		void focusKonsoleRight();
@@ -121,7 +125,7 @@ class QuadKonsole : public KParts::MainWindow
 
 	private:
 		QuadKonsole();
-		QuadKonsole(KParts::ReadOnlyPart* part, const QStringList& history, int historyPosition);
+		QuadKonsole(KParts::ReadOnlyPart* part);
 		void initHistory();
 		void setupActions();
 		void setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> parts=QList<KParts::ReadOnlyPart*>());

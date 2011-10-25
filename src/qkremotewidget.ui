@@ -85,11 +85,7 @@
     </spacer>
    </item>
    <item row="5" column="0" colspan="2">
-    <widget class="QLineEdit" name="inputLine">
-     <property name="placeholderText">
-      <string>Type or paste here to broadcast</string>
-     </property>
-    </widget>
+    <widget class="QLineEdit" name="inputLine"/>
    </item>
    <item row="1" column="1">
     <widget class="QPushButton" name="identifyButton">

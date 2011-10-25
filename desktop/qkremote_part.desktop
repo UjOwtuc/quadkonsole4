@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=qkremotepart
+Icon=qkremote
 MimeType=
 ServiceTypes=KParts/ReadOnlyPart
 X-KDE-Library=qkremotepart

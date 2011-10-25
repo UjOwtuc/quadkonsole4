@@ -18,49 +18,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef QKHISTORY_H
-#define QKHISTORY_H
+#ifndef QKAPPLICATION_H
+#define QKAPPLICATION_H
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <KDE/KUniqueApplication>
 
-#ifdef HAVE_LIBKONQ
-#include <konq_historyprovider.h>
-class QKHistory : public KonqHistoryProvider
-#else
-class QKHistory : public QObject
-#endif
+#include <QtCore/QPointer>
+
+class QuadKonsole;
+class QKApplicationAdaptor;
 
 
+class QKApplication : public KUniqueApplication
 {
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QKApplication")
 	public:
-		static QKHistory* self();
-		virtual ~QKHistory();
+		explicit QKApplication(bool GUIenabled=true, bool configUnique=false);
+		virtual ~QKApplication();
 
-		void setHistory(const QStringList& history);
-		void setPosition(int pos);
-		const QStringList& history() const { return m_history; }
-		int position() const { return m_historyPosition; }
-		int count() const { return m_history.count(); }
+		virtual int newInstance();
+		Q_SCRIPTABLE uint windowCount() const;
 
-		void lock(bool lock=true);
-
-		bool canGoBack() const;
-		bool canGoForward() const;
-		void addEntry(const QString& url);
-
-		QString goBack();
-		QString goForward();
-		QString go(int steps);
+	private slots:
+		void setupWindow(QuadKonsole* mainWindow);
+		void windowDestroyed();
 
 	private:
-		QKHistory();
-
-		static QKHistory* m_instace;
-
-		QStringList m_history;
-		int m_historyPosition;
-		bool m_locked;
+		static QKApplicationAdaptor* m_dbusAdaptor;
+		QList< QPointer<QuadKonsole> > m_mainWindows;
 };
 
-#endif // QKHISTORY_H
+
+#endif // QKAPPLICATION_H

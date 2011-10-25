@@ -21,8 +21,6 @@
 #ifndef QKSTACK_H
 #define QKSTACK_H
 
-#include "qkhistory.h"
-
 #include <KDE/KUrl>
 #include <KDE/KFileItemList>
 #include <KDE/KTabWidget>
@@ -53,8 +51,6 @@ class QKStack : public KTabWidget
 		QString foregroundProcess() const;
 		KParts::ReadOnlyPart* part() const;
 		int addViews(const QStringList& partNames);
-		const QKHistory& history() const;
-		void setHistory(const QStringList& history, int historyPosition);
 		QString url() const;
 		QString partIcon() const;
 		QList<QKView*> modifiedViews();
@@ -103,7 +99,6 @@ class QKStack : public KTabWidget
 		KParts::PartManager& m_partManager;
 		QKBrowserInterface* m_browserInterface;
 		QStringList m_loadedViews;
-		QKHistory m_history;
 };
 
 #endif // QKSTACK_H

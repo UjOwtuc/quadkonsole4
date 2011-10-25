@@ -21,13 +21,16 @@
  ***************************************************************************/
 
 #include "version.h"
-#include "quadkonsole.h"
+#include "qkapplication.h"
 #include "settings.h"
 
+#include <KDE/KUniqueApplication>
 #include <KDE/KApplication>
 #include <KDE/KAboutData>
 #include <KDE/KCmdLineArgs>
 #include <KDE/KLocale>
+
+#include <QtCore/QDir>
 
 #ifndef QUADKONSOLE4_VERSION
 #error QUADKONSOLE4_VERSION undefined
@@ -35,6 +38,7 @@
 
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
 static const char version[] = QUADKONSOLE4_VERSION;
+
 
 int main(int argc, char **argv)
 {
@@ -50,43 +54,10 @@ int main(int argc, char **argv)
 	options.add("c").add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
 	options.add("C").add("cmd [number:]<command>", ki18n("Run command [in given view] (may be used multiple times)"));
 	options.add("u").add("url [number:]<url>", ki18n("Open URL [in given view] (may be used multiple times)"));
-	// options.add("+[URL]", ki18n("Open specified URL in a running instance of QuadKonsole4"));
+	options.add("+[URL]", ki18n("Open specified URL in a running instance of QuadKonsole4"));
 	KCmdLineArgs::addCmdLineOptions(options);
-	KApplication app;
+	KUniqueApplication::addCmdLineOptions();
 
-	if (app.isSessionRestored())
-	{
-		kRestoreMainWindows<QuadKonsole>();
-	}
-	else
-	{
-		KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-		int rows = 0;
-		int columns = 0;
-
-		if (args->isSet("rows"))
-			rows = args->getOption("rows").toInt();
-		if (args->isSet("columns"))
-			columns = args->getOption("columns").toInt();
-		QStringList cmds = args->getOptionList("cmd");
-		QStringList urls = args->getOptionList("url");
-
-// 		if (args->count())
-// 		{
-// 			// try to open given URLs in a running QuadKonsole4 before opening a new window
-// 		}
-
-		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds, urls);
-		app.setTopWidget(mainWin);
-
-		if (Settings::startMaximized())
-			mainWin->showMaximized();
-		else
-			mainWin->show();
-
-		args->clear();
-	}
-
+	QKApplication app;
 	return app.exec();
 }
-

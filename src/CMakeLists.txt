@@ -1,5 +1,6 @@
 # quadkonsole4
 set(quadkonsole4_SRCS
+	qkapplication.cpp
 	quadkonsole.cpp
 	main.cpp
 	mousemovefilter.cpp
@@ -24,10 +25,16 @@ kde4_add_kcfg_files(quadkonsole4_SRCS
 )
 
 qt4_generate_dbus_interface(quadkonsole.h de.ccchl.quadkonsole4.QuadKonsole.xml OPTIONS -m -p)
+qt4_generate_dbus_interface(qkapplication.h de.ccchl.quadkonsole4.QKApplication.xml OPTIONS -m -p)
 qt4_add_dbus_adaptor(quadkonsole4_SRCS
 	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
 	quadkonsole.h
 	QuadKonsole
+)
+qt4_add_dbus_adaptor(quadkonsole4_SRCS
+	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QKApplication.xml
+	qkapplication.h
+	QKApplication
 )
 
 set(quadkonsole4_LIBS ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
@@ -65,6 +72,10 @@ kde4_add_ui_files(qkremote_PART_SRCS
 qt4_add_dbus_interface(qkremote_PART_SRCS
 	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
 	quadkonsoleinterface
+)
+qt4_add_dbus_interface(qkremote_PART_SRCS
+	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QKApplication.xml
+	qkapplicationinterface
 )
 
 kde4_add_plugin(qkremotepart ${qkremote_PART_SRCS})

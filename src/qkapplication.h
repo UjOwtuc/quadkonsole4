@@ -38,6 +38,8 @@ class QKApplication : public KUniqueApplication
 		virtual ~QKApplication();
 
 		virtual int newInstance();
+
+	public slots:
 		Q_SCRIPTABLE uint windowCount() const;
 
 	private slots:

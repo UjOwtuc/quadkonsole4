@@ -58,12 +58,11 @@ class QuadKonsole : public KParts::MainWindow
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		~QuadKonsole();
 
-		Q_SCRIPTABLE uint numViews() const { return m_stacks.size(); }
-
 	signals:
 		void detached(QuadKonsole* mainWindow);
 
 	public slots:
+		Q_SCRIPTABLE uint numViews() const { return m_stacks.size(); }
 		void resetLayouts();
 		void toggleMenu();
 		void optionsPreferences();

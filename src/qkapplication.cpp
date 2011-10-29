@@ -66,10 +66,17 @@ int QKApplication::newInstance()
 	for (it=urls.begin(); it!=urls.end(); ++it)
 		*it = KCmdLineArgs::makeURL((*it).toAscii()).pathOrUrl();
 
-	if (isSessionRestored())
+	if (restoringSession())
 	{
 		// ignore all arguments. just restore the session
-		kRestoreMainWindows<QuadKonsole>();
+		int n = 1;
+		while (KMainWindow::canBeRestored(n))
+		{
+			kDebug() << "restore window" << n << endl;
+			QuadKonsole* mainWin = new QuadKonsole;
+			mainWin->restore(n);
+			setupWindow(mainWin);
+		}
 	}
 	else if (!first && args->count())
 	{

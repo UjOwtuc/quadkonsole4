@@ -371,7 +371,10 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	m_sidebarSplitter->setStretchFactor(0, 1);
 	m_sidebarSplitter->setStretchFactor(1, 4);
 	KConfigGroup autoSave = autoSaveConfigGroup();
-	m_sidebarSplitter->setSizes(autoSave.readEntry("sidebarSizes", QList<int>()));
+	QList<int> sidebarSizes;
+	sidebarSizes << width() * 0.25;
+	sidebarSizes << width() * 0.75;
+	m_sidebarSplitter->setSizes(autoSave.readEntry("sidebarSizes", sidebarSizes));
 	connect(m_sidebarSplitter, SIGNAL(splitterMoved(int,int)), SLOT(slotAutoSave()));
 
 	actionCollection()->addAssociatedWidget(centralWidget);

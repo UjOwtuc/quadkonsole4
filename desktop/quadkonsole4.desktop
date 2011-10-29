@@ -47,3 +47,4 @@ GenericName[zh_CN]=QuadKonsole4
 GenericName[zh_TW]=QuadKonsole4
 Terminal=false
 Categories=Qt;KDE;System;TerminalEmulator;
+X-DBUS-StartupType=Unique

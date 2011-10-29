@@ -25,6 +25,7 @@
 #include "settings.h"
 
 #include <KDE/KDebug>
+#include <KDE/KRun>
 #include <KDE/KUrl>
 #include <KDE/KMimeTypeTrader>
 #include <KDE/KXmlGuiWindow>
@@ -203,6 +204,9 @@ void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurre
 
 		if (targetIndex == -1)
 		{
+			if (KRun::runUrl(url, mimeType, window(), false, false))
+				return;
+
 			// unable to open mimeType (either no KPart at all or I must not load it)
 			// if I am able to display another view, I'll just do it
 			if (count() > 1)

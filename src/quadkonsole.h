@@ -50,12 +50,11 @@ namespace KParts
  */
 class QuadKonsole : public KParts::MainWindow
 {
-	friend void kRestoreMainWindows<QuadKonsole>();
-
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
 	public:
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
+		QuadKonsole();
 		~QuadKonsole();
 
 	signals:
@@ -123,7 +122,6 @@ class QuadKonsole : public KParts::MainWindow
 		void readProperties(const KConfigGroup& config);
 
 	private:
-		QuadKonsole();
 		QuadKonsole(KParts::ReadOnlyPart* part);
 		void initHistory();
 		void setupActions();

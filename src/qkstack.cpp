@@ -113,7 +113,10 @@ int QKStack::addViews(const QStringList& partNames)
 
 QString QKStack::url() const
 {
-	return currentWidget()->getURL().pathOrUrl();
+	if (currentWidget())
+		return currentWidget()->getURL().pathOrUrl();
+
+	return "";
 }
 
 

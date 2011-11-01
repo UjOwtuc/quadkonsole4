@@ -61,7 +61,7 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 		kDebug() << "creating factory for" << name << endl;
 		m_partFactories[name] = KService::serviceByDesktopPath(name);
 		if (m_partFactories[name].isNull())
-			KMessageBox::error(0, i18n("Could not create a factory for %1.", name));
+			KMessageBox::sorry(0, i18n("Could not create a factory for %1.", name));
 	}
 	return m_partFactories[name];
 }
@@ -309,6 +309,9 @@ void QKView::createPart()
 	if (service.isNull())
 		return;
 
+	m_editActions.clear();
+	m_settingsActions.clear();
+
 	QString error;
 	if (service->serviceTypes().contains("KParts/ReadWritePart"))
 	{
@@ -318,7 +321,6 @@ void QKView::createPart()
 		m_writablePart->setReadWrite(false);
 		m_part = m_writablePart;
 
-		m_editActions.clear();
 		KToggleAction* toggleEditable = new KToggleAction(KIcon("document-edit"), i18n("&Enable editing"), this);
 		connect(toggleEditable, SIGNAL(toggled(bool)), SLOT(slotToggleEditable(bool)));
 		m_editActions.append(toggleEditable);
@@ -559,8 +561,6 @@ void QKView::setupPart()
 
 		KAction* manageProfiles = new KAction(KIcon("configure"), i18n("&Manage konsole profiles ..."), m_part);
 		connect(manageProfiles, SIGNAL(triggered()), m_part, SLOT(showManageProfilesDialog()));
-
-		m_settingsActions.clear();
 		m_settingsActions.append(manageProfiles);
 	}
 
@@ -630,6 +630,5 @@ void QKView::disableKonsoleActions()
 			ac->removeAction(action);
 	}
 }
-
 
 #include "qkview.moc"

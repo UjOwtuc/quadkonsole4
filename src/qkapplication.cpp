@@ -76,6 +76,7 @@ int QKApplication::newInstance()
 			QuadKonsole* mainWin = new QuadKonsole;
 			mainWin->restore(n);
 			setupWindow(mainWin);
+			++n;
 		}
 	}
 	else if (!first && args->count())

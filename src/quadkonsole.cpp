@@ -1112,10 +1112,14 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 	if (stack)
 	{
 		m_activeStack = stack;
-		m_urlBar->lineEdit()->setText(stack->url());
-		m_urlBar->lineEdit()->setCursorPosition(0);
-		plugActionList("view_settings", stack->currentWidget()->pluggableSettingsActions());
-		plugActionList("view_edit", stack->currentWidget()->pluggableEditActions());
+		QKView* view = stack->currentWidget();
+		if (view)
+		{
+			m_urlBar->lineEdit()->setText(stack->url());
+			m_urlBar->lineEdit()->setCursorPosition(0);
+			plugActionList("view_settings", stack->currentWidget()->pluggableSettingsActions());
+			plugActionList("view_edit", stack->currentWidget()->pluggableEditActions());
+		}
 	}
 }
 
@@ -1295,7 +1299,7 @@ void QuadKonsole::restoreSession()
 		readProperties(*sessionTest);
 	}
 	else
-		KMessageBox::error(this, "There is no session to be restored. You need to save one before restoring.", "No saved session found");
+		KMessageBox::sorry(this, "Could not find a session to restore. Use \"Save session\" to save the current one.", "No saved session found");
 }
 #endif // DEBUG
 

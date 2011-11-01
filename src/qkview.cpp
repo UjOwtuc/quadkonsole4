@@ -318,12 +318,12 @@ void QKView::createPart()
 		kDebug() << "part" << m_partname << "has a ReadWritePart" << endl;
 
 		m_writablePart = service->createInstance<KParts::ReadWritePart>(this, this, QVariantList(), &error);
-		m_writablePart->setReadWrite(false);
+		// m_writablePart->setReadWrite(false);
 		m_part = m_writablePart;
 
-		KToggleAction* toggleEditable = new KToggleAction(KIcon("document-edit"), i18n("&Enable editing"), this);
-		connect(toggleEditable, SIGNAL(toggled(bool)), SLOT(slotToggleEditable(bool)));
-		m_editActions.append(toggleEditable);
+		// KToggleAction* toggleEditable = new KToggleAction(KIcon("document-edit"), i18n("&Enable editing"), this);
+		// connect(toggleEditable, SIGNAL(toggled(bool)), SLOT(slotToggleEditable(bool)));
+		// m_editActions.append(toggleEditable);
 	}
 	else
 		m_part = service->createInstance<KParts::ReadOnlyPart>(this, this, QVariantList(), &error);

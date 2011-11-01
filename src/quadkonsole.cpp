@@ -1106,7 +1106,7 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 {
 	createGUI(part);
 	unplugActionList("view_settings");
-	unplugActionList("view_edit");
+	// unplugActionList("view_edit");
 
 	QKStack* stack = getFocusStack();
 	if (stack)
@@ -1118,7 +1118,7 @@ void QuadKonsole::slotActivePartChanged(KParts::Part* part)
 			m_urlBar->lineEdit()->setText(stack->url());
 			m_urlBar->lineEdit()->setCursorPosition(0);
 			plugActionList("view_settings", stack->currentWidget()->pluggableSettingsActions());
-			plugActionList("view_edit", stack->currentWidget()->pluggableEditActions());
+			// plugActionList("view_edit", stack->currentWidget()->pluggableEditActions());
 		}
 	}
 }

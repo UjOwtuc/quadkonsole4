@@ -707,10 +707,6 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 {
 	kDebug() << "saving session status to" << config.name() << endl;
 
-	// TODO more information:
-	// - open QKViews per stack
-	// - URL per QKView
-
 	bool orientationVertical;
 	if (m_rows->orientation() == Qt::Vertical)
 		orientationVertical = true;
@@ -726,6 +722,16 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 	{
 		kDebug() << QString("row_%1").arg(i) << "=" << m_rowLayouts[i]->sizes() << endl;
 		config.writeEntry(QString("row_%1").arg(i), m_rowLayouts[i]->sizes());
+		for (int s=0; s<m_rowLayouts[i]->count(); ++s)
+		{
+			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
+			if (stack)
+			{
+				QString groupname = QString("stack_%1_%2").arg(i).arg(s);
+				KConfigGroup group(&config, groupname);
+				stack->saveProperties(group);
+			}
+		}
 	}
 }
 
@@ -760,6 +766,24 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 		m_rowLayouts[i]->setSizes(sizes);
 	}
 
+	// read additional information (per stack, per view)
+	kDebug() << "restoring stacks ..." << endl;
+	for (int i=0; i<m_rowLayouts.count(); ++i)
+	{
+		kDebug() << "stacks row" << i << "of" << m_rowLayouts.count() << endl;
+		for (int s=0; s<m_rowLayouts.at(i)->count(); ++s)
+		{
+			kDebug() << "restore stack" << i << s << endl;
+			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
+			if (stack)
+			{
+				QString groupname = QString("stack_%1_%2").arg(i).arg(s);
+				if (config.hasGroup(groupname))
+					stack->readProperties(config.group(groupname));
+			}
+		}
+	}
+
 	m_rows->setSizes(rowSizes);
 
 	bool orientationVertical = config.readEntry("orientationVertical", true);
@@ -775,37 +799,34 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 
 QKStack* QuadKonsole::getFocusStack()
 {
-	// TODO do not rely on hasFocus(), walk the object tree instead
+	KParts::Part* activePart = m_partManager.activePart();
 	QList<QKStack*>::iterator it;
 	for (it=m_stacks.begin(); it!=m_stacks.end(); ++it)
 	{
-		if ((*it)->hasFocus())
+		QKView* view = (*it)->currentWidget();
+		if (view && view->part() == activePart)
 			return *it;
 	}
 
 	kDebug() << "could not find focus" << endl;
-
 	return 0;
 }
 
 
 void QuadKonsole::getFocusCoords(int& row, int& col)
 {
-	// TODO do not rely on hasFocus()
+	KParts::Part* activePart = m_partManager.activePart();
 	for (row=0; row<m_rowLayouts.size(); ++row)
 	{
 		for (col=0; col<m_rowLayouts[row]->count(); ++col)
 		{
 			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[row]->widget(col));
-			if (stack->hasFocus())
-			{
+			if (stack->currentWidget() && activePart == stack->currentWidget()->part())
 				return;
-			}
 		}
 	}
 
 	kDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
-
 	row = -1;
 	col = -1;
 }

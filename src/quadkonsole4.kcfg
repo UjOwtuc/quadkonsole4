@@ -70,6 +70,10 @@
 			<label>Load new views automatically for unhandles MIME types</label>
 			<default>true</default>
 		</entry>
+		<entry name="runExternal" type="bool">
+			<label>Run an external application if no view can open a given URL</label>
+			<default>true</default>
+		</entry>
 		<entry name="views" type="StringList">
 			<label>Prepare these views</label>
 			<default code="true">QStringList( KService::serviceByDesktopPath("konsolepart.desktop")->entryPath() )</default>

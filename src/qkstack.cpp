@@ -168,6 +168,45 @@ QKView* QKStack::currentWidget() const
 }
 
 
+const QKView* QKStack::view(int index) const
+{
+	QKView* view = qobject_cast<QKView*>(widget(index));
+	return view;
+}
+
+
+void QKStack::saveProperties(KConfigGroup& config)
+{
+	config.writeEntry("currentIndex", currentIndex());
+	for (int i=0; i<count(); ++i)
+	{
+		QKView* view = qobject_cast<QKView*>(widget(i));
+		if (view)
+		{
+			config.writeEntry(QString("part_%1").arg(i), view->partName());
+			config.writeEntry(QString("url_%1").arg(i), view->getURL());
+		}
+	}
+}
+
+
+void QKStack::readProperties(const KConfigGroup& config)
+{
+	int i;
+	for (i=0; config.hasKey(QString("part_%1").arg(i)); ++i)
+	{
+		int index = addViews(QStringList(config.readEntry<QString>(QString("part_%1").arg(i), "konsolepart.desktop")));
+		moveTab(index, i);
+		switchView(i, config.readEntry<KUrl>(QString("url_%1").arg(i), KUrl()));
+	}
+	setCurrentIndex(config.readEntry("currentIndex", 0));
+
+	// close all tabs that were created before readProperties()
+	for (; i<count(); ++i)
+		slotTabCloseRequested(i);
+}
+
+
 void QKStack::switchView()
 {
 	slotOpenUrlRequest(currentWidget()->getURL(), false);
@@ -207,7 +246,7 @@ void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurre
 
 		if (targetIndex == -1)
 		{
-			if (KRun::runUrl(url, mimeType, window(), false, false))
+			if (Settings::runExternal() && KRun::runUrl(url, mimeType, window(), false, false))
 				return;
 
 			// unable to open mimeType (either no KPart at all or I must not load it)

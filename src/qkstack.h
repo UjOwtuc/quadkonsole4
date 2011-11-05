@@ -54,9 +54,14 @@ class QKStack : public KTabWidget
 		QString url() const;
 		QString partIcon() const;
 		QList<QKView*> modifiedViews();
+		const QStringList& loadedViews() const { return m_loadedViews; }
 
 		virtual void setCurrentIndex(int index);
 		virtual QKView* currentWidget() const;
+		const QKView* view(int index) const;
+
+		void saveProperties(KConfigGroup& config);
+		void readProperties(const KConfigGroup& config);
 
 	signals:
 		void partCreated();

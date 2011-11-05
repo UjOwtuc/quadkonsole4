@@ -35,6 +35,23 @@ QKApplication::QKApplication(bool GUIenabled, bool configUnique)
 	: KUniqueApplication(GUIenabled, configUnique)
 {
 	KCmdLineArgs::setCwd(QDir::currentPath().toUtf8());
+
+	if (restoringSession())
+	{
+		// restore all MainWindows before forking and calling newInstance()
+		// forking seems to invalidate the session KConfigGroup
+		// called from newInstance(), QuadKonsole::readProperties() cannot find any values
+		int n = 1;
+		while (KMainWindow::canBeRestored(n))
+		{
+			kDebug() << "restore window" << n << endl;
+			QuadKonsole* mainWin = new QuadKonsole;
+			mainWin->restore(n);
+			setupWindow(mainWin);
+			++n;
+		}
+	}
+
 }
 
 
@@ -68,16 +85,7 @@ int QKApplication::newInstance()
 
 	if (restoringSession())
 	{
-		// ignore all arguments. just restore the session
-		int n = 1;
-		while (KMainWindow::canBeRestored(n))
-		{
-			kDebug() << "restore window" << n << endl;
-			QuadKonsole* mainWin = new QuadKonsole;
-			mainWin->restore(n);
-			setupWindow(mainWin);
-			++n;
-		}
+		// no need to create anything. this has been done by the original process before forking
 	}
 	else if (!first && args->count())
 	{

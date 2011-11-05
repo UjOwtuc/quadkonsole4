@@ -707,6 +707,8 @@ bool QuadKonsole::queryClose()
 
 void QuadKonsole::saveProperties(KConfigGroup& config)
 {
+	kDebug() << "saving session status to" << config.name() << endl;
+
 	bool orientationVertical;
 	if (m_rows->orientation() == Qt::Vertical)
 		orientationVertical = true;
@@ -728,15 +730,16 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 
 void QuadKonsole::readProperties(const KConfigGroup& config)
 {
+	kDebug() << "reading session status from" << config.name() << endl;
+
 	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
 	if (rowSizes.empty())
 	{
 		kDebug() << "could not read properties: empty rowSizes" << endl;
-		return;
+		rowSizes << height();
 	}
 
 	kDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size() << endl;
-	// adjust number of rows
 	while (m_rowLayouts.size() < rowSizes.size())
 		insertVertical(0, 0);
 
@@ -744,6 +747,11 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 	{
 		kDebug() << "restoring row" << i << endl;
 		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
+		if (i == 1 && sizes.empty())
+		{
+			kDebug() << "now sizes for row" << i << endl;
+			sizes << width();
+		}
 		while (m_rowLayouts[i]->count() < sizes.size())
 			insertHorizontal(i, 0);
 

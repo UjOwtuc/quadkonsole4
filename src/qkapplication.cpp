@@ -79,9 +79,18 @@ int QKApplication::newInstance()
 	for (int i=0; i<args->count(); ++i)
 		urls << args->arg(i);
 
+	// convert URLs to absolute paths but keep the specified index if given in URL
 	QStringList::iterator it;
 	for (it=urls.begin(); it!=urls.end(); ++it)
-		*it = KCmdLineArgs::makeURL((*it).toAscii()).pathOrUrl();
+	{
+		int index;
+		QString url = splitIndex(*it, &index);
+		url = KCmdLineArgs::makeURL(url.toUtf8()).pathOrUrl();
+		if (index > -1)
+			url = QString::number(index) + ":" + url;
+
+		*it = url;
+	}
 
 	if (restoringSession())
 	{
@@ -91,9 +100,24 @@ int QKApplication::newInstance()
 	{
 		// there is another window running and we got at least one url to open
 		// so we pass them on to the first running instance
-		// TODO select the MainWindow with focus for opening
-		m_mainWindows.front()->openUrls(urls);
-		m_mainWindows.front()->raise();
+		QPointer<QuadKonsole> topWindow;
+		if (focusWidget())
+		{
+			QuadKonsole* win = qobject_cast<QuadKonsole*>(focusWidget()->window());
+			if (win)
+				topWindow = win;
+			else
+				kDebug() << "found input focus, but containing window is no QuadKonsole" << endl;
+		}
+
+		if (topWindow.isNull())
+		{
+			kDebug() << "no opened window has focus, selectin the newest" << endl;
+			topWindow = m_mainWindows.back();
+		}
+
+		topWindow->openUrls(urls);
+		topWindow->raise();
 	}
 	else
 	{

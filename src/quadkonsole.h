@@ -144,4 +144,12 @@ class QuadKonsole : public KParts::MainWindow
 		QuadKonsoleAdaptor* m_dbusAdaptor;
 };
 
+
+/** Split urls of the form "<stack_number>:<url>"
+ * \param s URL to examine
+ * \param index index contained in the URL or -1
+ * \return URL part of the given string
+ */
+QString splitIndex(const QString& s, int* index);
+
 #endif // QUADKONSOLE_H

@@ -72,18 +72,16 @@ QString splitIndex(const QString& s, int* index)
 {
 	int pos = s.indexOf(':');
 	bool hasIndex = false;
-	int indexOut;
+	int indexOut = -1;
 
 	if (pos > -1)
 		indexOut = s.left(pos).toUInt(&hasIndex);
 
-	if (hasIndex)
-	{
-		if (index)
-			*index = indexOut;
+	if (index)
+		*index = indexOut;
 
+	if (hasIndex)
 		return s.mid(pos +1);
-	}
 	return s;
 }
 
@@ -709,6 +707,10 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 {
 	kDebug() << "saving session status to" << config.name() << endl;
 
+	// TODO more information:
+	// - open QKViews per stack
+	// - URL per QKView
+
 	bool orientationVertical;
 	if (m_rows->orientation() == Qt::Vertical)
 		orientationVertical = true;
@@ -773,6 +775,7 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 
 QKStack* QuadKonsole::getFocusStack()
 {
+	// TODO do not rely on hasFocus(), walk the object tree instead
 	QList<QKStack*>::iterator it;
 	for (it=m_stacks.begin(); it!=m_stacks.end(); ++it)
 	{
@@ -788,6 +791,7 @@ QKStack* QuadKonsole::getFocusStack()
 
 void QuadKonsole::getFocusCoords(int& row, int& col)
 {
+	// TODO do not rely on hasFocus()
 	for (row=0; row<m_rowLayouts.size(); ++row)
 	{
 		for (col=0; col<m_rowLayouts[row]->count(); ++col)
@@ -995,8 +999,11 @@ void QuadKonsole::sendCommands(const QStringList& cmds)
 {
 	for (int i=0; i<cmds.size(); ++i)
 	{
-		int index = i;
+		int index = -1;
 		QString cmd = splitIndex(cmds[i], &index);
+		if (index == -1)
+			index = i;
+
 		sendInput(index, cmd + "\n");
 	}
 }
@@ -1011,22 +1018,30 @@ void QuadKonsole::sendInput(uint view, const QString& text)
 
 void QuadKonsole::openUrls(const QStringList& urls)
 {
-// 	if (urls.count() == 1 && m_zoomed.first >= 0 && m_zoomed.second >= 0)
-// 	{
-// 		QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[m_zoomed.first]->widget(m_zoomed.second));
-// 		stack->slotOpenUrlRequest(KUrl(splitIndex(urls.first(), 0)));
-// 	}
-// 	else
-// 	{
-		for (int i=0; i<urls.size(); ++i)
-		{
-			int index = i;
-			QString url = splitIndex(urls[i], &index);
+	for (int i=0; i<urls.size(); ++i)
+	{
+		int index = -1;
+		QString url = splitIndex(urls[i], &index);
 
-			if (index < m_stacks.count())
-				m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+		// no index given in URL, if a stack is zoomed, use that one
+		if (index == -1 && m_zoomed.first > -1 && m_zoomed.second > -1)
+		{
+			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[m_zoomed.first]->widget(m_zoomed.second));
+			if (stack)
+				index = m_stacks.indexOf(stack);
 		}
-// 	}
+
+		// no index in URL, no zoomed stack, use the focused stack
+		if (index == -1 && m_activeStack)
+			index = m_stacks.indexOf(m_activeStack);
+
+		// no index in URL, no zoomed stack, no active stack, use the next one
+		if (index == -1)
+			index = i;
+
+		if (index < m_stacks.count())
+			m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+	}
 }
 
 

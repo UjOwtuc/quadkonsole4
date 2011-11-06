@@ -1,3 +1,10 @@
+2011-11-06  Karsten Borgwaldt  <kb@kb.ccchl.de>
+
+	* Open URLs in suitable application if there is no KPart
+	* Session management stores open views and URLs
+	* View that support editing are editable by default
+	* URLs opened from outside are displayed in a "suitable" stack (zoomed or focused)
+
 2011-10-25  Karsten Borgwaldt  <kb@kb.ccchl.de>
 
 	* Added a single location bar instead of one per stack

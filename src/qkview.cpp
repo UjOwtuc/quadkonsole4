@@ -23,6 +23,7 @@
 #include "settings.h"
 
 #include <kdeversion.h>
+#include <KDE/KStandardDirs>
 #include <KDE/KAction>
 #include <KDE/KToggleAction>
 #include <KDE/KXmlGuiWindow>
@@ -34,6 +35,7 @@
 #include <KDE/KUrl>
 #include <KDE/KFileItemList>
 #include <KDE/KStatusBar>
+#include <KDE/KShell>
 #include <KDE/KIO/Job>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
@@ -43,6 +45,7 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QTimer>
+#include <QtCore/QDir>
 #include <QtGui/QWidget>
 #include <QtGui/QBoxLayout>
 #include <QtGui/QToolBar>
@@ -52,6 +55,7 @@
 
 QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
 QStringList QKView::m_removeKonsoleActions;
+QMap<QString, QString> QKView::m_konsoleProfiles;
 
 
 KService::Ptr QKPartFactory::getFactory(const QString& name)
@@ -102,6 +106,15 @@ QKView::~QKView()
 {}
 
 
+QStringList QKView::konsoleProfiles()
+{
+	if (m_konsoleProfiles.isEmpty())
+		loadKonsoleProfiles();
+
+	return m_konsoleProfiles.keys();
+}
+
+
 KUrl QKView::getURL() const
 {
 	if (m_part)
@@ -127,21 +140,20 @@ void QKView::setURL(const KUrl& url)
 		TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 		if (t)
 		{
-			QString escaped(url.pathOrUrl());
-			escaped.replace("\"", "\\\"");
+			QString escaped = KShell::quoteArg(url.pathOrUrl());
 
 			if (! url.hasHost() && QFileInfo(url.path()).isDir())
 			{
 				if (t->foregroundProcessName().isEmpty())
 				{
-					t->sendInput(QString("cd \"%1\"\n").arg(escaped));
+					t->sendInput(QString("cd %1\n").arg(escaped));
 					slotOpenUrlNotify();
 				}
 				else
-					t->sendInput(QString("cd \"%1\"").arg(escaped));
+					t->sendInput(QString("cd %1").arg(escaped));
 			}
 			else
-				t->sendInput(QString(" \"%1\"").arg(escaped));
+				t->sendInput(QString(" %1").arg(escaped));
 		}
 		else
 			m_part->openUrl(url);
@@ -285,6 +297,8 @@ void QKView::settingsChanged()
 		m_toolbar->show();
 	else
 		m_toolbar->hide();
+
+	setProfile(Settings::konsoleProfile());
 }
 
 
@@ -368,6 +382,39 @@ void QKView::updateUrl()
 		m_workingDir = getURL().pathOrUrl();
 		emit openUrlNotify();
 	}
+}
+
+
+// HACK konsolepart does not provide an api to list/load configured profiles
+void QKView::setProfile(const QString& name)
+{
+	kDebug() << "setting to" << name << endl;
+
+	if (m_konsoleProfiles.isEmpty())
+		loadKonsoleProfiles();
+
+	if (m_konsoleProfiles.count(name))
+	{
+		kDebug() << "config path:" << m_konsoleProfiles[name] << endl;
+		KSharedConfig::Ptr config = KSharedConfig::openConfig(m_konsoleProfiles[name], KConfig::SimpleConfig);
+		QStringList groups = config->groupList();
+		QStringListIterator groupIt(groups);
+		QStringList settings;
+		while (groupIt.hasNext())
+		{
+			QMap<QString, QString> entries = config->entryMap(groupIt.next());
+			QMapIterator<QString, QString> entryIt(entries);
+			while (entryIt.hasNext())
+			{
+				entryIt.next();
+				settings << entryIt.key() + "=" + entryIt.value();
+			}
+		}
+		kDebug() << settings.join(";");
+		QMetaObject::invokeMethod(m_part, "changeSessionSettings", Q_ARG(QString, settings.join(";")));
+	}
+	else
+		kDebug() << "profile" << name << "not found" << endl;
 }
 
 
@@ -547,6 +594,9 @@ void QKView::setupPart()
 		KAction* manageProfiles = new KAction(KIcon("configure"), i18n("&Manage konsole profiles ..."), m_part);
 		connect(manageProfiles, SIGNAL(triggered()), m_part, SLOT(showManageProfilesDialog()));
 		m_settingsActions.append(manageProfiles);
+
+		if (m_konsoleProfiles.count(Settings::konsoleProfile()) || m_konsoleProfiles.isEmpty())
+			setProfile(Settings::konsoleProfile());
 	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
@@ -613,6 +663,33 @@ void QKView::disableKonsoleActions()
 		QAction* action = ac->action(it.next());
 		if (action)
 			ac->removeAction(action);
+	}
+}
+
+
+// HACK konsolepart does not provide an api to list/load configured profiles
+void QKView::loadKonsoleProfiles()
+{
+	m_konsoleProfiles.clear();
+
+	KStandardDirs dirs;
+	QStringList searchDirs = dirs.resourceDirs("data");
+	QStringListIterator it(searchDirs);
+	while (it.hasNext())
+	{
+		QDir path(it.next() + "/konsole", "*.profile");
+
+		QStringList profiles = path.entryList();
+		QStringListIterator profileIt(profiles);
+		while (profileIt.hasNext())
+		{
+			QString name = profileIt.next();
+			QString configpath = path.absolutePath() + "/" + name;
+			name = name.mid(0, name.length() -8);
+
+			if (! m_konsoleProfiles.count(name))
+				m_konsoleProfiles[name] = configpath;
+		}
 	}
 }
 

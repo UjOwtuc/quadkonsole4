@@ -37,6 +37,10 @@
 			<label>Show sidebar</label>
 			<default>true</default>
 		</entry>
+		<entry name="konsoleProfile" type="String">
+			<label>Konsole profile</label>
+			<default>Konsole's Default</default>
+		</entry>
 	</group>
 	<group name="Shutdown">
 		<entry name="queryClose" type="bool">

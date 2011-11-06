@@ -78,7 +78,7 @@ QString splitIndex(const QString& s, int* index)
 		indexOut = s.left(pos).toUInt(&hasIndex);
 
 	if (index)
-		*index = indexOut;
+		*index = hasIndex ? indexOut : -1;
 
 	if (hasIndex)
 		return s.mid(pos +1);
@@ -94,7 +94,8 @@ QuadKonsole::QuadKonsole()
 	m_zoomed(-1, -1),
 	m_sidebarSplitter(0),
 	m_sidebar(0),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
+	m_restoringSession(true)
 {
 	setupActions();
 	initHistory();
@@ -111,7 +112,8 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	m_zoomed(-1, -1),
 	m_sidebarSplitter(0),
 	m_sidebar(0),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
+	m_restoringSession(false)
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -154,7 +156,8 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	m_zoomed(-1, -1),
 	m_sidebarSplitter(0),
 	m_sidebar(0),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
+	m_restoringSession(false)
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
@@ -176,10 +179,6 @@ QuadKonsole::~QuadKonsole()
 {
 	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	m_partManager.disconnect();
-	delete m_sidebar;
-	delete m_mouseFilter;
-	while (m_stacks.count())
-		delete m_stacks.takeFirst();
 }
 
 
@@ -295,7 +294,7 @@ void QuadKonsole::setupActions()
 	KStandardAction::forward(this, SLOT(goForward()), actionCollection());
 	KStandardAction::up(this, SLOT(goUp()), actionCollection());
 	KStandardAction::preferences(this, SLOT(optionsPreferences()), actionCollection());
-	KStandardAction::quit(this, SLOT(quit()), actionCollection());
+	KStandardAction::quit(this, SLOT(deleteLater()), actionCollection());
 	KToggleAction* toggleMenu = KStandardAction::showMenubar(this, SLOT(toggleMenu()), actionCollection());
 	toggleMenu->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
 
@@ -661,12 +660,6 @@ void QuadKonsole::settingsChanged()
 }
 
 
-void QuadKonsole::quit()
-{
-	deleteLater();
-}
-
-
 bool QuadKonsole::queryClose()
 {
 	if (Settings::queryClose())
@@ -739,6 +732,7 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 void QuadKonsole::readProperties(const KConfigGroup& config)
 {
 	kDebug() << "reading session status from" << config.name() << endl;
+	m_restoringSession = true;
 
 	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
 	if (rowSizes.empty())
@@ -767,10 +761,8 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 	}
 
 	// read additional information (per stack, per view)
-	kDebug() << "restoring stacks ..." << endl;
 	for (int i=0; i<m_rowLayouts.count(); ++i)
 	{
-		kDebug() << "stacks row" << i << "of" << m_rowLayouts.count() << endl;
 		for (int s=0; s<m_rowLayouts.at(i)->count(); ++s)
 		{
 			kDebug() << "restore stack" << i << s << endl;
@@ -794,6 +786,9 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 
 	m_activeStack = m_stacks.front();
 	m_stacks.front()->setFocus();
+
+	// session restoration finished, new stacks may create views according to config now
+	m_restoringSession = false;
 }
 
 
@@ -838,7 +833,7 @@ QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 	if (part)
 		stack = new QKStack(m_partManager, part);
 	else
-		stack = new QKStack(m_partManager);
+		stack = new QKStack(m_partManager, m_restoringSession);
 
 	m_stacks.append(stack);
 	m_rowLayouts[row]->insertWidget(col, stack);
@@ -1198,7 +1193,7 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 		kDebug() << "no stack removed??" << endl;
 
 	if (m_stacks.empty())
-		quit();
+		deleteLater();
 }
 
 

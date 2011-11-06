@@ -66,7 +66,6 @@ class QuadKonsole : public KParts::MainWindow
 		void toggleMenu();
 		void optionsPreferences();
 		void settingsChanged();
-		void quit();
 		void insertHorizontal(int row, int col);
 		void insertVertical(int row, int col);
 		void sendCommands(const QStringList& cmds);
@@ -142,6 +141,7 @@ class QuadKonsole : public KParts::MainWindow
 		QSplitter* m_sidebarSplitter;
 		QKView* m_sidebar;
 		QuadKonsoleAdaptor* m_dbusAdaptor;
+		bool m_restoringSession;
 };
 
 

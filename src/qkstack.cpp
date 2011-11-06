@@ -24,6 +24,7 @@
 #include "qkurlhandler.h"
 #include "settings.h"
 
+#include <KDE/KApplication>
 #include <KDE/KDebug>
 #include <KDE/KRun>
 #include <KDE/KUrl>
@@ -42,11 +43,11 @@
 #include <KDE/KMenu>
 #endif
 
-QKStack::QKStack(KParts::PartManager& partManager, QWidget* parent)
+QKStack::QKStack(KParts::PartManager& partManager, bool restoringSession, QWidget* parent)
 	: KTabWidget(parent),
 	m_partManager(partManager)
 {
-	setupUi();
+	setupUi(0, restoringSession);
 	m_browserInterface = new QKBrowserInterface(*QKHistory::self());
 }
 
@@ -63,16 +64,6 @@ QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, Q
 QKStack::~QKStack()
 {
 	this->disconnect();
-	while (count())
-	{
-		QKView* view = currentWidget();
-		if (view)
-			view->disconnect();
-
-		removeTab(currentIndex());
-		delete view;
-	}
-	delete m_browserInterface;
 }
 
 
@@ -178,13 +169,16 @@ const QKView* QKStack::view(int index) const
 void QKStack::saveProperties(KConfigGroup& config)
 {
 	config.writeEntry("currentIndex", currentIndex());
+
+	QString part = "part_%1";
+	QString url = "url_%1";
 	for (int i=0; i<count(); ++i)
 	{
 		QKView* view = qobject_cast<QKView*>(widget(i));
 		if (view)
 		{
-			config.writeEntry(QString("part_%1").arg(i), view->partName());
-			config.writeEntry(QString("url_%1").arg(i), view->getURL());
+			config.writeEntry(part.arg(i), view->partName());
+			config.writeEntry(url.arg(i), view->getURL());
 		}
 	}
 }
@@ -192,18 +186,22 @@ void QKStack::saveProperties(KConfigGroup& config)
 
 void QKStack::readProperties(const KConfigGroup& config)
 {
-	int i;
-	for (i=0; config.hasKey(QString("part_%1").arg(i)); ++i)
+	QString part = "part_%1";
+	QString url = "url_%1";
+	for (int i=0; config.hasKey(part.arg(i)); ++i)
 	{
-		int index = addViews(QStringList(config.readEntry<QString>(QString("part_%1").arg(i), "konsolepart.desktop")));
-		moveTab(index, i);
-		switchView(i, config.readEntry<KUrl>(QString("url_%1").arg(i), KUrl()));
+		int index = addViews(QStringList(config.readEntry<QString>(part.arg(i), "konsolepart.desktop")));
+
+		// should not happen, but move tabs around to have the same order as before shutdown
+		if (index != i)
+			moveTab(index, i);
+
+		switchView(i, config.readEntry<KUrl>(url.arg(i), KUrl()));
 	}
 	setCurrentIndex(config.readEntry("currentIndex", 0));
 
-	// close all tabs that were created before readProperties()
-	for (; i<count(); ++i)
-		slotTabCloseRequested(i);
+	// for tab bar placement/visibility. might load additional views
+	settingsChanged();
 }
 
 
@@ -330,7 +328,7 @@ void QKStack::slotTabCloseRequested(int index)
 		}
 		removeTab(index);
 		m_loadedViews.removeOne(view->partName());
-		delete view;
+		view->deleteLater();
 	}
 
 	// closed last view
@@ -557,7 +555,7 @@ void QKStack::slotMiddleClick(QWidget* widget)
 }
 
 
-void QKStack::setupUi(KParts::ReadOnlyPart* part)
+void QKStack::setupUi(KParts::ReadOnlyPart* part, bool restoringSession)
 {
 	setContentsMargins(0, 0, 0, 0);
 	// do not accept focus at the tab bar. give it to the current view instead
@@ -569,24 +567,29 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part)
 
 	connect(this, SIGNAL(mouseMiddleClick(QWidget*)), SLOT(slotMiddleClick(QWidget*)));
 
-	QKView* view;
-	QStringList partNames = Settings::views();
-	if (part)
+	// do not create any views from config if session restoration is in progress
+	if (! restoringSession)
 	{
-		view = new QKView(m_partManager, m_browserInterface, part);
-		addViewActions(view);
-		partNames.removeOne(view->partName());
-		m_loadedViews << view->partName();
-		addTab(view, view->partCaption());
+		QKView* view;
+		QStringList partNames = Settings::views();
+		if (part)
+		{
+			view = new QKView(m_partManager, m_browserInterface, part);
+			addViewActions(view);
+			partNames.removeOne(view->partName());
+			m_loadedViews << view->partName();
+			addTab(view, view->partCaption());
+		}
+		addViews(partNames);
+
+		view = currentWidget();
+		view->show();
+		view->setFocus();
+		setFocusProxy(view);
+
+		settingsChanged();
 	}
-	addViews(partNames);
 
-	view = currentWidget();
-	view->show();
-	view->setFocus();
-	setFocusProxy(view);
-
-	settingsChanged();
 	connect(Settings::self(), SIGNAL(configChanged()), SLOT(settingsChanged()));
 	connect(this, SIGNAL(currentChanged(int)), SLOT(slotCurrentChanged()));
 	connect(this, SIGNAL(tabCloseRequested(int)), SLOT(slotTabCloseRequested(int)));

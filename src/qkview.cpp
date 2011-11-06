@@ -99,22 +99,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 
 
 QKView::~QKView()
-{
-	delete m_updateUrlTimer;
-	if (m_part)
-	{
-		m_part->disconnect();
-		m_partManager.removePart(m_part);
-		KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
-		if (window)
-			window->guiFactory()->removeClient(m_part);
-
-		if (m_part->widget())
-			m_part->widget()->disconnect();
-	}
-	delete m_part;
-	delete m_progress;
-}
+{}
 
 
 KUrl QKView::getURL() const
@@ -553,7 +538,7 @@ void QKView::setupPart()
 	{
 		kDebug() << "part" << m_partname << "has a TerminalInterfaceV2" << endl;
 		t->showShellInDir(QString());
-		m_updateUrlTimer = new QTimer;
+		m_updateUrlTimer = new QTimer(this);
 		m_updateUrlTimer->start(1500);
 		connect(m_updateUrlTimer, SIGNAL(timeout()), SLOT(updateUrl()));
 

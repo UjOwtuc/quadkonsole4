@@ -44,7 +44,7 @@ class QKStack : public KTabWidget
 {
 	Q_OBJECT
 	public:
-		explicit QKStack(KParts::PartManager& partManager, QWidget* parent = 0);
+		explicit QKStack(KParts::PartManager& partManager, bool restoringSession=false, QWidget* parent = 0);
 		explicit QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent = 0);
 		virtual ~QKStack();
 
@@ -96,7 +96,7 @@ class QKStack : public KTabWidget
 		void slotMiddleClick(QWidget* widget);
 
 	private:
-		void setupUi(KParts::ReadOnlyPart* part=0);
+		void setupUi(KParts::ReadOnlyPart* part=0, bool restoringSession=false);
 		void addViewActions(QKView* view);
 		void checkEnableActions();
 		int openViewByMimeType(const QString& mimeType, bool allowDuplicate=true);

@@ -116,7 +116,7 @@ int QKApplication::newInstance()
 			topWindow = m_mainWindows.back();
 		}
 
-		topWindow->openUrls(urls);
+		topWindow->openUrls(urls, true);
 		topWindow->raise();
 	}
 	else

@@ -70,7 +70,7 @@ class QuadKonsole : public KParts::MainWindow
 		void insertVertical(int row, int col);
 		void sendCommands(const QStringList& cmds);
 		Q_SCRIPTABLE void sendInput(uint view, const QString& text);
-		void openUrls(const QStringList& urls);
+		void openUrls(const QStringList& urls, bool newTab=false);
 		Q_SCRIPTABLE void identifyStacks(QString format);
 		Q_SCRIPTABLE QStringList urls() const;
 		Q_SCRIPTABLE QStringList partIcons() const;

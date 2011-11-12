@@ -421,8 +421,11 @@ void QuadKonsole::focusKonsoleRight()
 		{
 			++row;
 			if (row >= m_rowLayouts.count())
+			{
 				row = 0;
-			col = (col +1) % m_rowLayouts[0]->count();
+				++col;
+			}
+			col %= m_rowLayouts[0]->count();
 		}
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
@@ -448,8 +451,11 @@ void QuadKonsole::focusKonsoleLeft()
 		{
 			--row;
 			if (row < 0)
+			{
 				row = m_rowLayouts.count() -1;
-			col = (col + m_rowLayouts[row]->count() -1) % m_rowLayouts[row]->count();
+				col += m_rowLayouts[row]->count() -1;
+			}
+			col %= m_rowLayouts[row]->count();
 		}
 		m_rowLayouts[row]->widget(col)->setFocus();
 	}
@@ -1032,7 +1038,7 @@ void QuadKonsole::sendInput(uint view, const QString& text)
 }
 
 
-void QuadKonsole::openUrls(const QStringList& urls)
+void QuadKonsole::openUrls(const QStringList& urls, bool newTab)
 {
 	for (int i=0; i<urls.size(); ++i)
 	{
@@ -1056,7 +1062,12 @@ void QuadKonsole::openUrls(const QStringList& urls)
 			index = i;
 
 		if (index < m_stacks.count())
-			m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+		{
+			if (newTab)
+				m_stacks[index]->slotOpenNewWindow(KUrl(url), "", 0);
+			else
+				m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+		}
 	}
 }
 
@@ -1194,6 +1205,11 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 
 	if (m_stacks.empty())
 		deleteLater();
+	else
+	{
+		m_stacks.front()->setFocus();
+		slotActivePartChanged(m_stacks.front()->part());
+	}
 }
 
 

@@ -627,6 +627,7 @@ void QuadKonsole::optionsPreferences()
 	QWidget* generalSettings = new QWidget;
 	Ui::prefs_base prefs_base;
 	prefs_base.setupUi(generalSettings);
+	prefs_base.kcfg_konsoleProfile->addItems(QKView::konsoleProfiles());
 	dialog->addPage(generalSettings, i18n("General"), "quadkonsole4");
 
 	QWidget* shutdownSettings = new QWidget;

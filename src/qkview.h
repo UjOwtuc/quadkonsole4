@@ -61,6 +61,8 @@ class QKView : public QWidget
 		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
 
+		static QStringList konsoleProfiles();
+
 		KUrl getURL() const;
 		void setURL(const KUrl& url);
 		void sendInput(const QString& text);
@@ -94,6 +96,7 @@ class QKView : public QWidget
 		void settingsChanged();
 		void partDestroyed();
 		void updateUrl();
+		void setProfile(const QString& name);
 
 	protected slots:
 		void createPart();
@@ -115,6 +118,7 @@ class QKView : public QWidget
 		void setupUi();
 		void setupPart();
 		void disableKonsoleActions();
+		static void loadKonsoleProfiles();
 
 		QString m_partname;
 		QBoxLayout* m_layout;
@@ -127,6 +131,7 @@ class QKView : public QWidget
 		KParts::BrowserInterface* m_browserInterface;
 
 		static QStringList m_removeKonsoleActions;
+		static QMap<QString, QString> m_konsoleProfiles;
 
 		// update working dir for konsolepart
 		QTimer* m_updateUrlTimer;

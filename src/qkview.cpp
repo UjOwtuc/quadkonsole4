@@ -34,6 +34,7 @@
 #include <KDE/KUrl>
 #include <KDE/KFileItemList>
 #include <KDE/KStatusBar>
+#include <KDE/KShell>
 #include <KDE/KIO/Job>
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
@@ -99,7 +100,9 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 
 
 QKView::~QKView()
-{}
+{
+	emit setStatusBarText("");
+}
 
 
 KUrl QKView::getURL() const
@@ -127,21 +130,20 @@ void QKView::setURL(const KUrl& url)
 		TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
 		if (t)
 		{
-			QString escaped(url.pathOrUrl());
-			escaped.replace("\"", "\\\"");
+			QString escaped = KShell::quoteArg(url.pathOrUrl());
 
 			if (! url.hasHost() && QFileInfo(url.path()).isDir())
 			{
 				if (t->foregroundProcessName().isEmpty())
 				{
-					t->sendInput(QString("cd \"%1\"\n").arg(escaped));
+					t->sendInput(QString("cd %1\n").arg(escaped));
 					slotOpenUrlNotify();
 				}
 				else
-					t->sendInput(QString("cd \"%1\"").arg(escaped));
+					t->sendInput(QString("cd %1").arg(escaped));
 			}
 			else
-				t->sendInput(QString(" \"%1\"").arg(escaped));
+				t->sendInput(QString(" %1").arg(escaped));
 		}
 		else
 			m_part->openUrl(url);
@@ -326,6 +328,9 @@ void QKView::createPart()
 
 void QKView::partDestroyed()
 {
+	m_statusBarText.clear();
+	m_windowCaption.clear();
+
 	m_progress->hide();
 	if (m_part)
 	{

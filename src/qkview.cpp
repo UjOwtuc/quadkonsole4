@@ -103,9 +103,7 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 
 
 QKView::~QKView()
-{
-	emit setStatusBarText("");
-}
+{}
 
 
 QStringList QKView::konsoleProfiles()
@@ -552,6 +550,7 @@ void QKView::setupUi()
 	m_layout->addWidget(m_toolbar);
 
 	m_progress = new QProgressBar;
+	connect(this, SIGNAL(destroyed(QObject*)), m_progress, SLOT(deleteLater()));
 	m_progress->setRange(0, 100);
 	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 	if (window)

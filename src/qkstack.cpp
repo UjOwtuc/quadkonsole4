@@ -409,23 +409,34 @@ void QKStack::slotOpenUrlRequest(const QString& url)
 
 void QKStack::slotOpenNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
 {
-	int index = -1;
-	if (mimeType.isEmpty())
+	if (mimeType.isEmpty() && ! target)
 	{
-		index = addViews(QStringList(currentWidget()->partName()));
-		setCurrentIndex(index);
-		if (target)
-			*target = currentWidget()->part();
-		slotOpenUrlRequest(url, true);
+		// nobody is waiting for us, try to get the mimeType before opening a new view
+		QKUrlHandler* handler = new QKUrlHandler(url, this);
+		handler->setProperty("newWindow", true);
+		handler->setProperty("tryCurrent", false);
+		connect(handler, SIGNAL(finished(QKUrlHandler*)), SLOT(slotUrlFiltered(QKUrlHandler*)));
 	}
 	else
 	{
-		index = openViewByMimeType(mimeType);
-		if (index > -1)
+		int index = -1;
+		if (mimeType.isEmpty())
 		{
-			switchView(index, url);
+			index = addViews(QStringList(currentWidget()->partName()));
+			setCurrentIndex(index);
 			if (target)
 				*target = currentWidget()->part();
+			slotOpenUrlRequest(url, true);
+		}
+		else
+		{
+			index = openViewByMimeType(mimeType);
+			if (index > -1)
+			{
+				switchView(index, url);
+				if (target)
+					*target = currentWidget()->part();
+			}
 		}
 	}
 }
@@ -435,7 +446,11 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 {
 	if (handler->error().isEmpty())
 	{
-		if (handler->partName().isEmpty())
+		if (handler->property("newWindow").toBool() && handler->mimetype().length())
+		{
+			slotOpenNewWindow(handler->url(), handler->mimetype(), 0);
+		}
+		else if (handler->partName().isEmpty())
 		{
 			bool tryCurrent = handler->property("tryCurrent").toBool();
 			switchView(handler->url(), handler->mimetype(), tryCurrent);
@@ -608,6 +623,7 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
 	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 	connect(view, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotOpenNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
+	connect(view, SIGNAL(destroyed()), SLOT(slotCurrentChanged()));
 
 	// check for current widget before propagating?
 	connect(view, SIGNAL(setLocationBarUrl(QString)), SIGNAL(setLocationBarUrl(QString)));

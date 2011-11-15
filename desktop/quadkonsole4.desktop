@@ -1,14 +1,21 @@
 [Desktop Entry]
+Type=Application
+Exec=quadkonsole4
+Icon=quadkonsole4
+X-DocPath=quadkonsole4/index.html
+Terminal=false
+Categories=Qt;KDE;System;TerminalEmulator;
+X-DBUS-StartupType=Unique
+X-DBUS-ServiceName=de.ccchl.quadkonsole4
+X-KDE-StartupNotify=true
+
 Name=quadkonsole4
 Name[sr]=Четверо-конзола
 Name[sr@latin]=Četvero-konzola
 Name[sr@ijekavian]=Четверо-конзола
 Name[sr@ijekavianlatin]=Četvero-konzola
 Name[x-test]=xxquadkonsole4xx
-Exec=quadkonsole4 %i -caption "%c"
-Icon=quadkonsole4
-Type=Application
-X-DocPath=quadkonsole4/index.html
+
 GenericName=QuadKonsole4
 GenericName[ca]=QuadKonsole4
 GenericName[cs]=QuadKonsole4
@@ -45,6 +52,3 @@ GenericName[uk]=QuadKonsole4
 GenericName[x-test]=xxQuadKonsole4xx
 GenericName[zh_CN]=QuadKonsole4
 GenericName[zh_TW]=QuadKonsole4
-Terminal=false
-Categories=Qt;KDE;System;TerminalEmulator;
-X-DBUS-StartupType=Unique

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,9 +21,9 @@
 #ifndef QKSTACK_H
 #define QKSTACK_H
 
-#include <KDE/KUrl>
 #include <KDE/KFileItemList>
 #include <KDE/KTabWidget>
+#include <KDE/KConfigGroup>
 #include <KDE/KParts/BrowserExtension>
 
 class QKUrlHandler;
@@ -72,17 +72,17 @@ class QKStack : public KTabWidget
 	public slots:
 		void sendInput(const QString& text) const;
 		void switchView();
-		void switchView(const KUrl& url, const QString& mimeType, bool tryCurrent);
-		void switchView(int index, const KUrl& url);
+		void switchView(const QUrl& url, const QString& mimeType, bool tryCurrent);
+		void switchView(int index, const QUrl& url);
 		void settingsChanged();
 		void slotTabCloseRequested(int index);
 		void goBack();
 		void goForward();
 		void goUp();
 		void goHistory(int steps);
-		void slotOpenUrlRequest(const KUrl& url, bool tryCurrent=true);
+		void slotOpenUrlRequest(const QUrl& url, bool tryCurrent=true);
 		void slotOpenUrlRequest(const QString& url);
-		void slotOpenNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
+		void slotOpenNewWindow(const QUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
 
 	private slots:
 		void slotPartCreated();

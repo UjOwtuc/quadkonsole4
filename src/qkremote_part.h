@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,18 +21,18 @@
 #ifndef QKREMOTEPART_H
 #define QKREMOTEPART_H
 
-#include <KDE/KParts/ReadOnlyPart>
+#include <KParts/ReadOnlyPart>
 
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QTreeWidgetItem>
 #include <QtCore/QThread>
 
 // dbus interface
-class DeCcchlQuadkonsole4QuadKonsoleInterface;
+class DeSpambriQuadkonsole4QuadKonsoleInterface;
 namespace Ui
 {
 	class qkremoteWidget;
 }
-class KAboutData;
+class K4AboutData;
 class QDBusConnection;
 class QKeyEvent;
 
@@ -65,7 +65,7 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		QKRemotePart(QWidget* parentWidget,QObject* parent, const QStringList &);
 		virtual ~QKRemotePart();
 
-		static KAboutData *createAboutData();
+		static K4AboutData *createAboutData();
 
 	protected:
 		/**
@@ -84,7 +84,7 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		void slotToggleUpdateTimer(bool state);
 
 	private:
-		void addSlave(const QString& instance, const QString& window, uint numViews, DeCcchlQuadkonsole4QuadKonsoleInterface& dbusInterface);
+		void addSlave(const QString& instance, const QString& window, uint numViews, DeSpambriQuadkonsole4QuadKonsoleInterface& dbusInterface);
 
 		QWidget* m_widget;
 		Ui::qkremoteWidget* m_remote;

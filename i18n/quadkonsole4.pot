@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
+"Report-Msgid-Bugs-To: quadkonsole4@spambri.de\n"
 "POT-Creation-Date: 2011-11-06 12:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"

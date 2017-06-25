@@ -1,41 +1,47 @@
+quadkonsole4 (0.4.5-1) unstable; urgency=low
+
+  * Port to KF5
+
+ -- Karsten Borgwaldt <kb@spambri.de>  Tue, 20 Jun 2017 16:02:48 +0200
+
 quadkonsole4 (0.4.4-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Sun, 13 Nov 2011 12:39:58 +0100
+ -- Karsten Borgwaldt <kb@spambri.de>  Sun, 13 Nov 2011 12:39:58 +0100
 
 quadkonsole4 (0.4.3-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Sat, 01 Oct 2011 10:39:05 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Sat, 01 Oct 2011 10:39:05 +0200
 
 quadkonsole4 (0.4.2-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Sat, 10 Sep 2011 20:14:26 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Sat, 10 Sep 2011 20:14:26 +0200
 
 quadkonsole4 (0.4.1-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Thu, 18 Aug 2011 20:14:26 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Thu, 18 Aug 2011 20:14:26 +0200
 
 quadkonsole4 (0.4-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Tue, 16 Aug 2011 20:14:26 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Tue, 16 Aug 2011 20:14:26 +0200
 
 quadkonsole4 (0.3-1) unstable; urgency=low
 
   * Version bump
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Mon,  1 Aug 2011 20:14:26 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Mon,  1 Aug 2011 20:14:26 +0200
 
 quadkonsole4 (0.2.1-1) unstable; urgency=low
 
   * Initial release
 
- -- Karsten Borgwaldt <kb@kb.ccchl.de>  Sun, 24 Apr 2011 09:18:51 +0200
+ -- Karsten Borgwaldt <kb@spambri.de>  Sun, 24 Apr 2011 09:18:51 +0200

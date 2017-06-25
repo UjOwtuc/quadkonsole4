@@ -1,8 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,6 +30,8 @@
 #include <KDE/KCmdLineArgs>
 #include <KDE/KLocale>
 
+#include <K4AboutData>
+
 #include <QtCore/QDir>
 
 #ifndef QUADKONSOLE4_VERSION
@@ -42,9 +44,9 @@ static const char version[] = QUADKONSOLE4_VERSION;
 
 int main(int argc, char **argv)
 {
-	KAboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2005 Simon Perreault\n(C) 2009 - 2011 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
+	K4AboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), K4AboutData::License_GPL_V2, ki18n("(C) 2005 Simon Perreault\n(C) 2009 - 2017 Karsten Borgwaldt"), KLocalizedString(), "http://spambri.de/quadkonsole4", "quadkonsole4@spambri.de");
 	about.addAuthor(ki18n("Simon Perreault"), KLocalizedString(), "nomis80@nomis80.org");
-	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
+	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@spambri.de");
 	about.addCredit(ki18n("Michael Feige"), ki18n("Many ideas and feature requests"));
 
 	KCmdLineArgs::init(argc, argv, &about);
@@ -59,5 +61,8 @@ int main(int argc, char **argv)
 	KUniqueApplication::addCmdLineOptions();
 
 	QKApplication app;
+	app.setOrganizationDomain("spambri.de");
+	app.setDesktopFileName("de.spambri.quadkonsole4");
+	app.setApplicationVersion(version);
 	return app.exec();
 }

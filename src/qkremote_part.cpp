@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,12 +25,14 @@
 #include <KDE/KComponentData>
 #include <KDE/KParts/GenericFactory>
 
+#include <K4AboutData>
+
 #include <qglobal.h>
 #include <QtCore/QTimer>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusConnectionInterface>
 #include <QtDBus/QDBusInterface>
@@ -106,13 +108,13 @@ QKRemotePart::~QKRemotePart()
 }
 
 
-KAboutData *QKRemotePart::createAboutData()
+K4AboutData *QKRemotePart::createAboutData()
 {
 	// the non-i18n name here must be the same as the directory in
 	// which the part's rc file is installed ('partrcdir' in the
 	// Makefile)
-	KAboutData *aboutData = new KAboutData(partName, "quadkonsole4", ki18n("qkremotepart"), version);
-	aboutData->addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
+	K4AboutData *aboutData = new K4AboutData(partName, "quadkonsole4", ki18n("qkremotepart"), version);
+	aboutData->addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@spambri.de");
 	return aboutData;
 }
 
@@ -146,7 +148,7 @@ void QKRemotePart::sendInput(const QString& text)
 			QString window = (*it)->data(1, Qt::UserRole).toString();
 			uint view = (*it)->data(2, Qt::UserRole).toUInt();
 
-			de::ccchl::quadkonsole4::QuadKonsole qk(dbusName, window, QDBusConnection::sessionBus());
+			de::spambri::quadkonsole4::QuadKonsole qk(dbusName, window, QDBusConnection::sessionBus());
 			qk.sendInput(view, text);
 		}
 		++it;
@@ -179,7 +181,7 @@ void QKRemotePart::identifyViews()
 			QString format = "%1 (" + window + ")";
 			if (! sent.contains(dbusName + window))
 			{
-				de::ccchl::quadkonsole4::QuadKonsole qk(dbusName, window, QDBusConnection::sessionBus());
+				de::spambri::quadkonsole4::QuadKonsole qk(dbusName, window, QDBusConnection::sessionBus());
 				qk.identifyStacks(format);
 				sent << dbusName + window;
 			}
@@ -195,8 +197,8 @@ void QKRemotePart::refreshAvailableSlaves()
 	m_remote->refreshButton->setEnabled(false);
 	m_updateTimer->stop();
 
-	QString instance = "de.ccchl.quadkonsole4";
-	de::ccchl::quadkonsole4::QKApplication qkApp(instance, "/MainApplication", *m_dbusConn);
+	QString instance = "de.spambri.quadkonsole4";
+	de::spambri::quadkonsole4::QKApplication qkApp(instance, "/MainApplication", *m_dbusConn);
 	qkApp.moveToThread(m_dbusThread);
 	uint numWindows = QDBusReply<uint>(qkApp.call(QDBus::BlockWithGui, "windowCount"));
 	uint found = 0;
@@ -205,7 +207,7 @@ void QKRemotePart::refreshAvailableSlaves()
 	{
 		QString window = QString("/quadkonsole4/MainWindow_%1").arg(win);
 
-		de::ccchl::quadkonsole4::QuadKonsole qk(instance, window, *m_dbusConn);
+		de::spambri::quadkonsole4::QuadKonsole qk(instance, window, *m_dbusConn);
 		qk.moveToThread(m_dbusThread);
 		uint numViews = QDBusReply<uint>(qk.call(QDBus::BlockWithGui, "numViews")).value();
 		if (numViews > 0)
@@ -232,7 +234,7 @@ void QKRemotePart::slotToggleUpdateTimer(bool state)
 }
 
 
-void QKRemotePart::addSlave(const QString& instance, const QString& window, uint numViews, de::ccchl::quadkonsole4::QuadKonsole& dbusInterface)
+void QKRemotePart::addSlave(const QString& instance, const QString& window, uint numViews, de::spambri::quadkonsole4::QuadKonsole& dbusInterface)
 {
 	QTreeWidgetItem* windowItem = 0;
 	QList<QTreeWidgetItem*> matches = m_remote->availableSlaves->findItems(window, Qt::MatchExactly, 0);
@@ -241,7 +243,7 @@ void QKRemotePart::addSlave(const QString& instance, const QString& window, uint
 	else
 	{
 		windowItem = new QTreeWidgetItem(m_remote->availableSlaves, QStringList(window));
-		windowItem->setIcon(0, KIcon("quadkonsole4"));
+		windowItem->setIcon(0, QIcon("quadkonsole4"));
 		windowItem->setData(0, Qt::UserRole, instance);
 		windowItem->setData(1, Qt::UserRole, window);
 		m_remote->availableSlaves->expandItem(windowItem);
@@ -274,7 +276,7 @@ void QKRemotePart::addSlave(const QString& instance, const QString& window, uint
 		if (urls.count() > viewNumber)
 			item->setText(1, urls.at(viewNumber));
 		if (icons.count() > viewNumber)
-			item->setIcon(0, KIcon(icons.at(viewNumber)));
+			item->setIcon(0, QIcon(icons.at(viewNumber)));
 	}
 }
 

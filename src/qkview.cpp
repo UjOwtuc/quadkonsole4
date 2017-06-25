@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,9 +22,7 @@
 #include "qkstack.h"
 #include "settings.h"
 
-#include <kdeversion.h>
 #include <KDE/KStandardDirs>
-#include <KDE/KAction>
 #include <KDE/KToggleAction>
 #include <KDE/KXmlGuiWindow>
 #include <KDE/KXMLGUIFactory>
@@ -32,7 +30,6 @@
 #include <KDE/KService>
 #include <KDE/KMessageBox>
 #include <KDE/KActionCollection>
-#include <KDE/KUrl>
 #include <KDE/KFileItemList>
 #include <KDE/KStatusBar>
 #include <KDE/KShell>
@@ -41,21 +38,22 @@
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KParts/PartManager>
 #include <KDE/KParts/StatusBarExtension>
-#include <kde_terminal_interface_v2.h>
+#include <kde_terminal_interface.h>
+
+#include <KLocalizedString>
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QTimer>
 #include <QtCore/QDir>
-#include <QtGui/QWidget>
-#include <QtGui/QBoxLayout>
-#include <QtGui/QToolBar>
-#include <QtGui/QApplication>
-#include <QtGui/QProgressBar>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QBoxLayout>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QProgressBar>
 
 
 QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
 QStringList QKView::m_removeKonsoleActions;
-QMap<QString, QString> QKView::m_konsoleProfiles;
 
 
 KService::Ptr QKPartFactory::getFactory(const QString& name)
@@ -64,8 +62,11 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 	{
 		kDebug() << "creating factory for" << name << endl;
 		m_partFactories[name] = KService::serviceByDesktopPath(name);
-		if (m_partFactories[name].isNull())
+		if (! m_partFactories[name])
+		{
 			KMessageBox::sorry(0, i18n("Could not create a factory for %1.", name));
+			return QExplicitlySharedDataPointer<KService>();
+		}
 	}
 	return m_partFactories[name];
 }
@@ -106,20 +107,11 @@ QKView::~QKView()
 {}
 
 
-QStringList QKView::konsoleProfiles()
-{
-	if (m_konsoleProfiles.isEmpty())
-		loadKonsoleProfiles();
-
-	return m_konsoleProfiles.keys();
-}
-
-
-KUrl QKView::getURL() const
+QUrl QKView::getURL() const
 {
 	if (m_part)
 	{
-		TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+		TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 		if (t)
 		{
 			int pid = t->terminalProcessId();
@@ -129,20 +121,26 @@ KUrl QKView::getURL() const
 		else
 			return m_part->url();
 	}
-	return KUrl();
+	return QUrl();
 }
 
 
-void QKView::setURL(const KUrl& url)
+void QKView::setURL(const QUrl& url)
 {
 	if (m_part && getURL() != url)
 	{
-		TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+		TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 		if (t)
 		{
-			QString escaped = KShell::quoteArg(url.pathOrUrl());
+			QString path;
+			if (url.isLocalFile())
+				path = url.path();
+			else
+				path = url.url();
 
-			if (! url.hasHost() && QFileInfo(url.path()).isDir())
+			QString escaped = KShell::quoteArg(path);
+
+			if (! url.host().isEmpty() && QFileInfo(url.path()).isDir())
 			{
 				if (t->foregroundProcessName().isEmpty())
 				{
@@ -158,7 +156,7 @@ void QKView::setURL(const KUrl& url)
 		else
 			m_part->openUrl(url);
 
-		m_windowCaption = url.pathOrUrl();
+		m_windowCaption = url.url();
 		emit setWindowCaption(m_windowCaption);
 	}
 }
@@ -166,8 +164,8 @@ void QKView::setURL(const KUrl& url)
 
 void QKView::sendInput(const QString& text)
 {
-	TerminalInterfaceV2* t;
-	if (m_part && (t = qobject_cast<TerminalInterfaceV2*>(m_part)))
+	TerminalInterface* t;
+	if (m_part && (t = qobject_cast<TerminalInterface*>(m_part)))
 		t->sendInput(text);
 	else
 		kDebug() << "don't know how to send input to my part" << endl;
@@ -183,7 +181,7 @@ KParts::ReadOnlyPart* QKView::part()
 QString QKView::partCaption() const
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (! service.isNull() && ! service->name().isEmpty())
+	if (service && ! service->name().isEmpty())
 		return service->name();
 
 	// fallback to names like "konsolepart.desktop". still better than a tab without text
@@ -193,31 +191,26 @@ QString QKView::partCaption() const
 
 QString QKView::foregroundProcess() const
 {
-	TerminalInterfaceV2* t;
-	if (m_part && (t = qobject_cast<TerminalInterfaceV2*>(m_part)))
+	TerminalInterface* t;
+	if (m_part && (t = qobject_cast<TerminalInterface*>(m_part)))
 		return t->foregroundProcessName();
 
 	// emulate some kind of "process" for other KParts
-	return getURL().pathOrUrl();
+	return getURL().url();
 }
 
 
-bool QKView::hasMimeType(const QString& type, const KUrl& url)
+bool QKView::hasMimeType(const QString& type, const QUrl& url)
 {
-	if (m_partname == "konsolepart.desktop" && url.protocol() != "file")
+	if (m_partname == "konsolepart.desktop" && url.scheme() != "file")
 		return false;
 
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (service.isNull())
+	if (! service)
 		return false;
 
-#if KDE_VERSION_MINOR >= 6
 	if (service->hasMimeType(type))
 		return true;
-#else // KDE_VERSION_MINOR
-	if (service->hasMimeType(KMimeType::mimeType(type).data()))
-		return true;
-#endif // KDE_VERSION_MINOR
 	kDebug() << "KPart" << m_partname << "does not like mime type" << type << endl;
 	return false;
 }
@@ -226,7 +219,7 @@ bool QKView::hasMimeType(const QString& type, const KUrl& url)
 QString QKView::partIcon() const
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (! service.isNull())
+	if (service)
 		return service->icon();
 	return "";
 }
@@ -234,7 +227,7 @@ QString QKView::partIcon() const
 
 bool QKView::isModified() const
 {
-	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 	if (t)
 	{
 		if (t->foregroundProcessName().size())
@@ -257,11 +250,11 @@ QString QKView::closeModifiedMsg() const
 {
 	QString msg;
 
-	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 	if (t)
 		msg = i18n("The process \"%1\" is still running. Do you want to terminate it?", foregroundProcess());
 	else
-		msg = i18n("The view \"%1\" contains unsaved changes at \"%2\". Do you want to close it without saving?", partCaption(), getURL().pathOrUrl());
+		msg = i18n("The view \"%1\" contains unsaved changes at \"%2\". Do you want to close it without saving?", partCaption(), getURL().url());
 
 	return msg;
 }
@@ -297,15 +290,13 @@ void QKView::settingsChanged()
 		m_toolbar->show();
 	else
 		m_toolbar->hide();
-
-	setProfile(Settings::konsoleProfile());
 }
 
 
 void QKView::createPart()
 {
 	KService::Ptr service = QKPartFactory::getFactory(m_partname);
-	if (service.isNull())
+	if (! service)
 		return;
 
 	m_editActions.clear();
@@ -332,6 +323,7 @@ void QKView::createPart()
 		return;
 	}
 	m_part->setProperty("QKPartName", m_partname);
+	m_part->widget()->setFocusPolicy(Qt::WheelFocus);
 
 	setupPart();
 	emit partCreated();
@@ -380,48 +372,15 @@ void QKView::partDestroyed()
 
 void QKView::updateUrl()
 {
-	if (hasFocus() && m_workingDir != getURL().pathOrUrl())
+	if (hasFocus() && m_workingDir != getURL().url())
 	{
-		m_workingDir = getURL().pathOrUrl();
+		m_workingDir = getURL().url();
 		emit openUrlNotify();
 	}
 }
 
 
-// HACK konsolepart does not provide an api to list/load configured profiles
-void QKView::setProfile(const QString& name)
-{
-	kDebug() << "setting to" << name << endl;
-
-	if (m_konsoleProfiles.isEmpty())
-		loadKonsoleProfiles();
-
-	if (m_konsoleProfiles.count(name))
-	{
-		kDebug() << "config path:" << m_konsoleProfiles[name] << endl;
-		KSharedConfig::Ptr config = KSharedConfig::openConfig(m_konsoleProfiles[name], KConfig::SimpleConfig);
-		QStringList groups = config->groupList();
-		QStringListIterator groupIt(groups);
-		QStringList settings;
-		while (groupIt.hasNext())
-		{
-			QMap<QString, QString> entries = config->entryMap(groupIt.next());
-			QMapIterator<QString, QString> entryIt(entries);
-			while (entryIt.hasNext())
-			{
-				entryIt.next();
-				settings << entryIt.key() + "=" + entryIt.value();
-			}
-		}
-		kDebug() << settings.join(";");
-		QMetaObject::invokeMethod(m_part, "changeSessionSettings", Q_ARG(QString, settings.join(";")));
-	}
-	else
-		kDebug() << "profile" << name << "not found" << endl;
-}
-
-
-void QKView::slotPopupMenu(const QPoint& where, const KUrl &url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
+void QKView::slotPopupMenu(const QPoint& where, const QUrl &url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
 {
 	KFileItem item(url, args.mimeType(), mode);
 	KFileItemList list;
@@ -454,7 +413,7 @@ void QKView::selectionInfo(const KFileItemList& items)
 }
 
 
-void QKView::openUrlRequest(const KUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs)
+void QKView::openUrlRequest(const QUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs)
 {
 	kDebug() << "url" << url << endl;
 	if (browserArgs.newTab() || browserArgs.forcesNewWindow())
@@ -464,7 +423,7 @@ void QKView::openUrlRequest(const KUrl& url, const KParts::OpenUrlArguments& arg
 }
 
 
-void QKView::slotCreateNewWindow(const KUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target)
+void QKView::slotCreateNewWindow(const QUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target)
 {
 	kDebug() << "url" << url << endl;
 	emit createNewWindow(url, args.mimeType(), target);
@@ -584,23 +543,16 @@ void QKView::setupPart()
 
 	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 
-	TerminalInterfaceV2* t = qobject_cast<TerminalInterfaceV2*>(m_part);
+	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 	if (t)
 	{
-		kDebug() << "part" << m_partname << "has a TerminalInterfaceV2" << endl;
+		kDebug() << "part" << m_partname << "has a TerminalInterface" << endl;
 		t->showShellInDir(QString());
 		m_updateUrlTimer = new QTimer(this);
 		m_updateUrlTimer->start(1500);
 		connect(m_updateUrlTimer, SIGNAL(timeout()), SLOT(updateUrl()));
 
 		disableKonsoleActions();
-
-		KAction* manageProfiles = new KAction(KIcon("configure"), i18n("&Manage konsole profiles ..."), m_part);
-		connect(manageProfiles, SIGNAL(triggered()), m_part, SLOT(showManageProfilesDialog()));
-		m_settingsActions.append(manageProfiles);
-
-		if (m_konsoleProfiles.count(Settings::konsoleProfile()) || m_konsoleProfiles.isEmpty())
-			setProfile(Settings::konsoleProfile());
 	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
@@ -667,33 +619,6 @@ void QKView::disableKonsoleActions()
 		QAction* action = ac->action(it.next());
 		if (action)
 			ac->removeAction(action);
-	}
-}
-
-
-// HACK konsolepart does not provide an api to list/load configured profiles
-void QKView::loadKonsoleProfiles()
-{
-	m_konsoleProfiles.clear();
-
-	KStandardDirs dirs;
-	QStringList searchDirs = dirs.resourceDirs("data");
-	QStringListIterator it(searchDirs);
-	while (it.hasNext())
-	{
-		QDir path(it.next() + "/konsole", "*.profile");
-
-		QStringList profiles = path.entryList();
-		QStringListIterator profileIt(profiles);
-		while (profileIt.hasNext())
-		{
-			QString name = profileIt.next();
-			QString configpath = path.absolutePath() + "/" + name;
-			name = name.mid(0, name.length() -8);
-
-			if (! m_konsoleProfiles.count(name))
-				m_konsoleProfiles[name] = configpath;
-		}
 	}
 }
 

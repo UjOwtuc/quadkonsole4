@@ -1,8 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *

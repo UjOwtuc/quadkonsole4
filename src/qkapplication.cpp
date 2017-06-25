@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -44,7 +44,7 @@ QKApplication::QKApplication(bool GUIenabled, bool configUnique)
 		int n = 1;
 		while (KMainWindow::canBeRestored(n))
 		{
-			kDebug() << "restore window" << n << endl;
+			qDebug() << "restore window" << n << endl;
 			QuadKonsole* mainWin = new QuadKonsole;
 			mainWin->restore(n);
 			setupWindow(mainWin);
@@ -85,7 +85,7 @@ int QKApplication::newInstance()
 	{
 		int index;
 		QString url = splitIndex(*it, &index);
-		url = KCmdLineArgs::makeURL(url.toUtf8()).pathOrUrl();
+		url = KCmdLineArgs::makeURL(url.toUtf8()).path();
 		if (index > -1)
 			url = QString::number(index) + ":" + url;
 
@@ -107,12 +107,12 @@ int QKApplication::newInstance()
 			if (win)
 				topWindow = win;
 			else
-				kDebug() << "found input focus, but containing window is no QuadKonsole" << endl;
+				qDebug() << "found input focus, but containing window is no QuadKonsole" << endl;
 		}
 
 		if (topWindow.isNull())
 		{
-			kDebug() << "no opened window has focus, selectin the newest" << endl;
+			qDebug() << "no opened window has focus, selectin the newest" << endl;
 			topWindow = m_mainWindows.back();
 		}
 

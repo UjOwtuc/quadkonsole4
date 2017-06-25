@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,9 +21,8 @@
 #ifndef QKURLHANDLER_H
 #define QKURLHANDLER_H
 
-#include <KDE/KUrl>
-
 #include <QtCore/QObject>
+#include <QtCore/QUrl>
 
 class KJob;
 namespace KIO
@@ -35,10 +34,10 @@ class QKUrlHandler : public QObject
 {
 	Q_OBJECT
 	public:
-		explicit QKUrlHandler(const KUrl& url, bool autorun=true, QObject* parent = 0);
+		explicit QKUrlHandler(const QUrl& url, bool autorun=true, QObject* parent = 0);
 		virtual ~QKUrlHandler();
 
-		const KUrl& url() const;
+		const QUrl& url() const;
 		const QString& mimetype() const;
 		const QString& error() const;
 		const QString& partName() const;
@@ -55,7 +54,7 @@ class QKUrlHandler : public QObject
 		void slotJobFinished(KJob* job);
 
 	private:
-		KUrl m_url;
+		QUrl m_url;
 		QString m_mimetype;
 		QString m_error;
 		QString m_partName;

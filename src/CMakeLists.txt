@@ -24,15 +24,15 @@ kde4_add_kcfg_files(quadkonsole4_SRCS
 	settings.kcfgc
 )
 
-qt4_generate_dbus_interface(quadkonsole.h de.ccchl.quadkonsole4.QuadKonsole.xml OPTIONS -m -p)
-qt4_generate_dbus_interface(qkapplication.h de.ccchl.quadkonsole4.QKApplication.xml OPTIONS -m -p)
+qt4_generate_dbus_interface(quadkonsole.h de.spambri.quadkonsole4.QuadKonsole.xml OPTIONS -m -p)
+qt4_generate_dbus_interface(qkapplication.h de.spambri.quadkonsole4.QKApplication.xml OPTIONS -m -p)
 qt4_add_dbus_adaptor(quadkonsole4_SRCS
-	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
+	${CMAKE_CURRENT_BINARY_DIR}/de.spambri.quadkonsole4.QuadKonsole.xml
 	quadkonsole.h
 	QuadKonsole
 )
 qt4_add_dbus_adaptor(quadkonsole4_SRCS
-	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QKApplication.xml
+	${CMAKE_CURRENT_BINARY_DIR}/de.spambri.quadkonsole4.QKApplication.xml
 	qkapplication.h
 	QKApplication
 )
@@ -42,7 +42,7 @@ if (LIBKONQ_FOUND)
 	set(quadkonsole4_LIBS ${quadkonsole4_LIBS} ${LIBKONQ_LIBRARY})
 endif()
 
-kde4_add_executable(quadkonsole4 ${quadkonsole4_SRCS})
+add_executable(quadkonsole4 ${quadkonsole4_SRCS})
 target_link_libraries(quadkonsole4 ${quadkonsole4_LIBS})
 
 install(TARGETS quadkonsole4 ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -55,7 +55,7 @@ set(qkremote_SRCS
 	${quadkonsoleadaptor_SRCS}
 )
 
-kde4_add_executable(qkremote ${qkremote_SRCS})
+add_executable(qkremote ${qkremote_SRCS})
 target_link_libraries(qkremote ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 
 install(TARGETS qkremote ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -70,15 +70,15 @@ kde4_add_ui_files(qkremote_PART_SRCS
 )
 
 qt4_add_dbus_interface(qkremote_PART_SRCS
-	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QuadKonsole.xml
+	${CMAKE_CURRENT_BINARY_DIR}/de.spambri.quadkonsole4.QuadKonsole.xml
 	quadkonsoleinterface
 )
 qt4_add_dbus_interface(qkremote_PART_SRCS
-	${CMAKE_CURRENT_BINARY_DIR}/de.ccchl.quadkonsole4.QKApplication.xml
+	${CMAKE_CURRENT_BINARY_DIR}/de.spambri.quadkonsole4.QKApplication.xml
 	qkapplicationinterface
 )
 
-kde4_add_plugin(qkremotepart ${qkremote_PART_SRCS})
+add_library(qkremotepart MODULE ${qkremote_PART_SRCS})
 target_link_libraries(qkremotepart ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 
 install(TARGETS qkremotepart DESTINATION ${PLUGIN_INSTALL_DIR})

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,8 +28,8 @@
 #include <KDE/KConfigDialogManager>
 
 
-#include <QtGui/QWidget>
-#include <QtGui/QListWidget>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QListWidget>
 
 #include "ui_prefs_views.h"
 
@@ -57,7 +57,7 @@ PrefsViews::PrefsViews(QWidget* parent, Qt::WindowFlags f)
 	{
 		KService::Ptr s = *it;
 		if (s->serviceTypes().contains("KParts/ReadOnlyPart", Qt::CaseInsensitive))
-			m_comboBox->addItem(KIcon(s->icon()), s->entryPath());
+			m_comboBox->addItem(QIcon(s->icon()), s->entryPath());
 	}
 
 	connect(m_comboBox, SIGNAL(currentIndexChanged(QString)), SLOT(showMimeTypes(QString)));

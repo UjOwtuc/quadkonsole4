@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,7 +21,8 @@
 #ifndef QKREMOTE_H
 #define QKREMOTE_H
 
-#include <KDE/KParts/MainWindow>
+#include <KParts/MainWindow>
+#include <KParts/ReadOnlyPart>
 
 class QKRemote : public KParts::MainWindow
 {

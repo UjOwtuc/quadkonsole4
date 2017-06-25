@@ -7,6 +7,7 @@
 build/
 
 # Debian
+debian/.debhelper
 debian/files
 debian/quadkonsole4.debhelper.log
 debian/quadkonsole4.substvars

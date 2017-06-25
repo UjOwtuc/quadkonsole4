@@ -1,6 +1,6 @@
-/***************************************************************************
-*   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
-*   kb@kb.ccchl.de                                                        *
+/**************************************************************************
+*   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+*   kb@spambri.de                                                         *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -25,10 +25,10 @@
 #include <KDE/KDialog>
 #include <KDE/KPushButton>
 
-#include <QtGui/QTableWidget>
-#include <QtGui/QBoxLayout>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QBoxLayout>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QCheckBox>
 
 #include "ui_detach_processes.h"
 
@@ -40,11 +40,11 @@ CloseDialog::CloseDialog(QWidget* parent, Qt::WindowFlags f)
 
 	setButtons(Cancel | User1 | User2);
 
-	setButtonIcon(User1, KIcon("application-exit"));
+	setButtonIcon(User1, QIcon("application-exit"));
 	setButtonText(User1, i18n("Don't detach"));
 	connect(this, SIGNAL(user1Clicked()), SLOT(dontDetach()));
 
-	setButtonIcon(User2, KIcon("document-new"));
+	setButtonIcon(User2, QIcon("document-new"));
 	setButtonText(User2, i18n("Detach selected"));
 	connect(this, SIGNAL(user2Clicked()), SLOT(detach()));
 }

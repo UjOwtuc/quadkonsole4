@@ -1,15 +1,15 @@
 This work was packaged for Debian by:
 
-    Karsten Borgwaldt <kb@kb.ccchl.de> on Sun, 24 Apr 2011 09:18:51 +0200
+    Karsten Borgwaldt <kb@spambri.de> on Sun, 24 Apr 2011 09:18:51 +0200
 
 It was downloaded from:
 
-    http://kb.ccchl.de/quadkonsole4
+    http://spambri.de/quadkonsole4
 
 Upstream Author(s):
 
     Simon Perreault <nomis80@nomis80.org>
-    Karsten Borgwaldt <kb@kb.ccchl.de>
+    Karsten Borgwaldt <kb@spambri.de>
 
 Copyright:
 
@@ -22,8 +22,7 @@ License:
 
 The Debian packaging is:
 
-    Copyright (C) 2011 Karsten Borgwaldt <kb@kb.ccchl.de>
+    Copyright (C) 2011 Karsten Borgwaldt <kb@spambri.de>
 
 and is licensed under the GPL version 3,
 see "/usr/share/common-licenses/GPL-3".
-

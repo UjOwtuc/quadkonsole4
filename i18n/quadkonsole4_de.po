@@ -1,15 +1,15 @@
 # QuadKonsole4 german messages.
-# Copyright (C) 2011 Karsten Borgwaldt <kb@kb.ccchl.de>
+# Copyright (C) 2011 Karsten Borgwaldt <kb@spambri.de>
 # This file is distributed under the same license as the QuadKonsole4 package.
 #
-# Karsten Borgwaldt <kb@kb.ccchl.de>, 2011.
+# Karsten Borgwaldt <kb@spambri.de>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: quadkonsole4@kb.ccchl.de\n"
+"Report-Msgid-Bugs-To: quadkonsole4@spambri.de\n"
 "POT-Creation-Date: 2011-11-06 12:29+0100\n"
 "PO-Revision-Date: 2011-11-06 12:31+0100\n"
-"Last-Translator: Karsten Borgwaldt <kb@kb.ccchl.de>\n"
+"Last-Translator: Karsten Borgwaldt <kb@spambri.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -444,7 +444,7 @@ msgstr "Karsten Borgwaldt"
 #: i18n/rc.cpp:201 rc.cpp:201
 msgctxt "EMAIL OF TRANSLATORS"
 msgid "Your emails"
-msgstr "kb@kb.ccchl.de"
+msgstr "kb@spambri.de"
 
 #: src/closedialog.cpp:44
 msgid "Don't detach"

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,18 +24,17 @@
 #include "qkurlhandler.h"
 #include "settings.h"
 
-#include <KDE/KApplication>
 #include <KDE/KDebug>
 #include <KDE/KRun>
-#include <KDE/KUrl>
 #include <KDE/KMimeTypeTrader>
 #include <KDE/KXmlGuiWindow>
 #include <KDE/KTabWidget>
-#include <KDE/KAction>
 #include <KDE/KActionCollection>
 #include <KDE/KMessageBox>
 #include <KDE/KParts/PartManager>
 #include <KDE/KParts/HistoryProvider>
+
+#include <KLocalizedString>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_popupmenu.h>
@@ -105,7 +104,7 @@ int QKStack::addViews(const QStringList& partNames)
 QString QKStack::url() const
 {
 	if (currentWidget())
-		return currentWidget()->getURL().pathOrUrl();
+		return currentWidget()->getURL().url();
 
 	return "";
 }
@@ -178,7 +177,7 @@ void QKStack::saveProperties(KConfigGroup& config)
 		if (view)
 		{
 			config.writeEntry(part.arg(i), view->partName());
-			config.writeEntry(url.arg(i), view->getURL());
+			config.writeEntry(url.arg(i), view->getURL().toString());
 		}
 	}
 }
@@ -196,7 +195,7 @@ void QKStack::readProperties(const KConfigGroup& config)
 		if (index != i)
 			moveTab(index, i);
 
-		switchView(i, config.readEntry<KUrl>(url.arg(i), KUrl()));
+		switchView(i, config.readEntry<QUrl>(url.arg(i), QUrl()));
 	}
 	setCurrentIndex(config.readEntry("currentIndex", 0));
 
@@ -211,7 +210,7 @@ void QKStack::switchView()
 }
 
 
-void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurrent)
+void QKStack::switchView(const QUrl& url, const QString& mimeType, bool tryCurrent)
 {
 	QKView* view = currentWidget();
 
@@ -251,17 +250,24 @@ void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurre
 			// if I am able to display another view, I'll just do it
 			if (count() > 1)
 			{
-				if (url == url.upUrl())
+				// TODO check
+				if (url.path() == "/")
 				{
 					// something is really going wrong. I can't open url within any loaded/loadable KPart and it is already the root folder of that url.
 					// display the next view but don't bother to keep trying on this url
-					switchView(KUrl("~"), "inode/directory", false);
+					switchView(QUrl("~"), "inode/directory", false);
 				}
 				else
-					switchView((currentIndex() +1) % count(), url.upUrl());
+				{
+					QString path = url.path();
+					path.replace(QRegExp("/[^/][^/]*$/"), QString());
+					QUrl target = url;
+					target.setPath(path);
+					switchView((currentIndex() +1) % count(), target);
+				}
 			}
 
-			emit setStatusBarText(i18n("No view is able to open \"%1\"", url.pathOrUrl()));
+			emit setStatusBarText(i18n("No view is able to open \"%1\"", url.url()));
 		}
 		else
 		{
@@ -272,7 +278,7 @@ void QKStack::switchView(const KUrl& url, const QString& mimeType, bool tryCurre
 }
 
 
-void QKStack::switchView(int index, const KUrl& url)
+void QKStack::switchView(int index, const QUrl& url)
 {
 	if (index != currentIndex())
 		setCurrentIndex(index);
@@ -280,7 +286,7 @@ void QKStack::switchView(int index, const KUrl& url)
 	if (! url.isEmpty())
 	{
 		currentWidget()->setURL(url);
-		QKHistory::self()->addEntry(url.pathOrUrl());
+		QKHistory::self()->addEntry(url.url());
 		checkEnableActions();
 	}
 }
@@ -358,7 +364,8 @@ void QKStack::goForward()
 
 void QKStack::goUp()
 {
-	slotOpenUrlRequest(currentWidget()->getURL().upUrl());
+	// TODO
+	slotOpenUrlRequest(currentWidget()->getURL());
 }
 
 
@@ -368,7 +375,7 @@ void QKStack::goHistory(int steps)
 	if (! url.isEmpty())
 	{
 		QKHistory::self()->lock();
-		slotOpenUrlRequest(KUrl(url));
+		slotOpenUrlRequest(QUrl(url));
 		QKHistory::self()->lock(false);
 	}
 	checkEnableActions();
@@ -393,9 +400,9 @@ void QKStack::slotSetWindowCaption(const QString& text)
 }
 
 
-void QKStack::slotOpenUrlRequest(const KUrl& url, bool tryCurrent)
+void QKStack::slotOpenUrlRequest(const QUrl& url, bool tryCurrent)
 {
-	QKUrlHandler* handler = new QKUrlHandler(url, this);
+	QKUrlHandler* handler = new QKUrlHandler(url, true, this);
 	handler->setProperty("tryCurrent", tryCurrent);
 	connect(handler, SIGNAL(finished(QKUrlHandler*)), SLOT(slotUrlFiltered(QKUrlHandler*)));
 }
@@ -403,16 +410,16 @@ void QKStack::slotOpenUrlRequest(const KUrl& url, bool tryCurrent)
 
 void QKStack::slotOpenUrlRequest(const QString& url)
 {
-	slotOpenUrlRequest(KUrl(url), true);
+	slotOpenUrlRequest(QUrl(url), true);
 }
 
 
-void QKStack::slotOpenNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
+void QKStack::slotOpenNewWindow(const QUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
 {
 	if (mimeType.isEmpty() && ! target)
 	{
 		// nobody is waiting for us, try to get the mimeType before opening a new view
-		QKUrlHandler* handler = new QKUrlHandler(url, this);
+		QKUrlHandler* handler = new QKUrlHandler(url, true, this);
 		handler->setProperty("newWindow", true);
 		handler->setProperty("tryCurrent", false);
 		connect(handler, SIGNAL(finished(QKUrlHandler*)), SLOT(slotUrlFiltered(QKUrlHandler*)));
@@ -463,7 +470,7 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 	}
 	else
 	{
-		emit setStatusBarText(i18n("Could not open url '%1': %2", handler->url().pathOrUrl(), handler->error()));
+		emit setStatusBarText(i18n("Could not open url '%1': %2", handler->url().url(), handler->error()));
 	}
 	handler->deleteLater();
 }
@@ -472,8 +479,8 @@ void QKStack::slotUrlFiltered(QKUrlHandler* handler)
 void QKStack::slotOpenUrlNotify()
 {
 	checkEnableActions();
-	QKHistory::self()->addEntry(currentWidget()->getURL().pathOrUrl());
-	emit setLocationBarUrl(currentWidget()->getURL().pathOrUrl());
+	QKHistory::self()->addEntry(currentWidget()->getURL().url());
+	emit setLocationBarUrl(currentWidget()->getURL().url());
 }
 
 
@@ -488,7 +495,7 @@ void QKStack::slotCurrentChanged()
 
 		emit setStatusBarText(view->statusBarText());
 		emit setWindowCaption(view->windowCaption());
-		emit setLocationBarUrl(view->getURL().pathOrUrl());
+		emit setLocationBarUrl(view->getURL().url());
 	}
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)
@@ -619,10 +626,10 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(partCreated()), SLOT(slotPartCreated()));
 	connect(view, SIGNAL(setStatusBarText(QString)), SLOT(slotSetStatusBarText(QString)));
 	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
-	connect(view, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrlRequest(KUrl)));
+	connect(view, SIGNAL(openUrlRequest(QUrl)), SLOT(slotOpenUrlRequest(QUrl)));
 	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
 	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
-	connect(view, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotOpenNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
+	connect(view, SIGNAL(createNewWindow(QUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotOpenNewWindow(QUrl,QString,KParts::ReadOnlyPart**)));
 	connect(view, SIGNAL(destroyed()), SLOT(slotCurrentChanged()));
 
 	// check for current widget before propagating?

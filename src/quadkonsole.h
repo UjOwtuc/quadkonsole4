@@ -1,8 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -51,7 +51,7 @@ namespace KParts
 class QuadKonsole : public KParts::MainWindow
 {
 	Q_OBJECT
-	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QuadKonsole")
+	Q_CLASSINFO("D-Bus Interface", "de.spambri.quadkonsole4.QuadKonsole")
 	public:
 		QuadKonsole(int rows, int columns, const QStringList& cmds=QStringList(), const QStringList& urls=QStringList());
 		QuadKonsole();
@@ -78,8 +78,6 @@ class QuadKonsole : public KParts::MainWindow
 		void slotActivateUrlBar();
 		void refreshHistory(const QString& item);
 		void zoomView(int row, int col);
-		void slotToggleSidebar();
-		void slotAutoSave();
 
 	private slots:
 		void focusKonsoleRight();
@@ -104,8 +102,8 @@ class QuadKonsole : public KParts::MainWindow
 		void slotSetLocationBarUrl(const QString& url);
 		void zoomView();
 		void slotOpenUrl(const QString& url=QString());
-		void slotOpenUrl(const KUrl& url);
-		void slotNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
+		void slotOpenUrl(const QUrl& url);
+		void slotNewWindow(const QUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target);
 		void slotDuplicateView();
 #ifdef DEBUG
 		void saveSession();
@@ -138,8 +136,6 @@ class QuadKonsole : public KParts::MainWindow
 		KHistoryComboBox* m_urlBar;
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
-		QSplitter* m_sidebarSplitter;
-		QKView* m_sidebar;
 		QuadKonsoleAdaptor* m_dbusAdaptor;
 		bool m_restoringSession;
 };

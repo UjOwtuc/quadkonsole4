@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,6 @@
 #include <KDE/KService>
 #include <KDE/KLocale>
 #include <KDE/KFileItem>
-#include <KDE/KUrl>
 #include <KDE/KUriFilter>
 #include <KDE/KIO/StatJob>
 #include <KDE/KIO/TransferJob>
@@ -33,7 +32,7 @@
 #include <QtCore/QTimer>
 
 
-QKUrlHandler::QKUrlHandler(const KUrl& url, bool autorun, QObject* parent)
+QKUrlHandler::QKUrlHandler(const QUrl& url, bool autorun, QObject* parent)
 	: QObject(parent),
 	m_url(url)
 {
@@ -46,7 +45,7 @@ QKUrlHandler::~QKUrlHandler()
 {}
 
 
-const KUrl& QKUrlHandler::url() const
+const QUrl& QKUrlHandler::url() const
 {
 	return m_url;
 }
@@ -72,7 +71,7 @@ const QString& QKUrlHandler::partName() const
 
 void QKUrlHandler::run()
 {
-	QString rawUrl = m_url.pathOrUrl();
+	QString rawUrl = m_url.url();
 	// how about a setting for prefix?
 	if (rawUrl.startsWith("part:"))
 	{
@@ -118,7 +117,7 @@ void QKUrlHandler::run()
 		m_url = data.uri();
 
 		KIO::JobFlags flags = KIO::HideProgressInfo;
-		KIO::StatJob* stat = KIO::stat(m_url, true, 0, flags);
+		KIO::StatJob* stat = KIO::stat(m_url, KIO::StatJob::SourceSide, 0, flags);
 		connect(stat, SIGNAL(result(KJob*)), SLOT(slotStatResult(KJob*)));
 	}
 	else
@@ -162,9 +161,9 @@ void QKUrlHandler::slotStatResult(KJob* job)
 		}
 		else if (m_url.isLocalFile())
 		{
-			if (QFile(m_url.pathOrUrl()).exists())
+			if (QFile(m_url.url()).exists())
 			{
-				KFileItem item(KFileItem::Unknown, KFileItem::Unknown, m_url);
+				KFileItem item(stat->statResult(), m_url);
 				m_mimetype = item.mimetype();
 			}
 			else

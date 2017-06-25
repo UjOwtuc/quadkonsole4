@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -32,7 +32,7 @@ class QKApplicationAdaptor;
 class QKApplication : public KUniqueApplication
 {
 	Q_OBJECT
-	Q_CLASSINFO("D-Bus Interface", "de.ccchl.quadkonsole4.QKApplication")
+	Q_CLASSINFO("D-Bus Interface", "de.spambri.quadkonsole4.QKApplication")
 	public:
 		explicit QKApplication(bool GUIenabled=true, bool configUnique=false);
 		virtual ~QKApplication();

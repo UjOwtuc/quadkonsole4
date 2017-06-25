@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,6 +21,7 @@
 #ifndef QKHISTORY_H
 #define QKHISTORY_H
 
+#include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
@@ -30,8 +31,6 @@ class QKHistory : public KonqHistoryProvider
 #else
 class QKHistory : public QObject
 #endif
-
-
 {
 	public:
 		static QKHistory* self();

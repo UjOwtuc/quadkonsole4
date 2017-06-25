@@ -1,8 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Simon Perreault                                 *
  *   nomis80@nomis80.org                                                   *
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,7 +29,6 @@
 #include "qkview.h"
 #include "qkbrowseriface.h"
 
-#include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KActionCollection>
 #include <KDE/KMenuBar>
@@ -45,15 +44,18 @@
 #include <KDE/KParts/PartManager>
 #include <KDE/KParts/HistoryProvider>
 
+#include <KGlobalSettings>
+#include <KShortcut>
+
 #ifdef HAVE_LIBKONQ
 #include <konq_historyprovider.h>
 #endif
 
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
 #include <QtGui/QClipboard>
-#include <QtGui/QLayout>
-#include <QtGui/QSplitter>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QSplitter>
 #include <QtCore/QTimer>
 
 #include "ui_prefs_base.h"
@@ -92,8 +94,6 @@ QuadKonsole::QuadKonsole()
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebarSplitter(0),
-	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
 	m_restoringSession(true)
 {
@@ -110,8 +110,6 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebarSplitter(0),
-	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
 	m_restoringSession(false)
 {
@@ -122,13 +120,13 @@ QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const Q
 
 	if (rows < 1)
 	{
-		kdError() << "Number of rows must be at last one." << endl;
+		qFatal("Number of rows must be at last one.");
 		qApp->quit();
 	}
 
 	if (columns < 1)
 	{
-		kdError() << "Number of columns must be at least one." << endl;
+		qFatal("Number of columns must be at least one.");
 		qApp->quit();
 	}
 
@@ -154,8 +152,6 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_sidebarSplitter(0),
-	m_sidebar(0),
 	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
 	m_restoringSession(false)
 {
@@ -177,7 +173,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 QuadKonsole::~QuadKonsole()
 {
-	kDebug() << "deleting " << m_stacks.count() << " parts" << endl;
+	qDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	m_partManager.disconnect();
 }
 
@@ -215,76 +211,76 @@ void QuadKonsole::setupActions()
 	}
 
 	// Movement
-	KAction* goRight = new KAction(KIcon("arrow-right"), i18n("Go &right"), this);
-	goRight->setShortcut(KShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right)));
+	QAction* goRight = new QAction(QIcon("arrow-right"), i18n("Go &right"), this);
+	goRight->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right));
 	actionCollection()->addAction("go right", goRight);
 	connect(goRight, SIGNAL(triggered()), SLOT(focusKonsoleRight()));
 
-	KAction* goLeft = new KAction(KIcon("arrow-left"), i18n("Go &left"), this);
+	QAction* goLeft = new QAction(QIcon("arrow-left"), i18n("Go &left"), this);
 	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
 	connect(goLeft, SIGNAL(triggered()), SLOT(focusKonsoleLeft()));
 
-	KAction* goUp = new KAction(KIcon("arrow-up"), i18n("Go &up"), this);
+	QAction* goUp = new QAction(QIcon("arrow-up"), i18n("Go &up"), this);
 	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
 	connect(goUp, SIGNAL(triggered()), SLOT(focusKonsoleUp()));
 
-	KAction* goDown = new KAction(KIcon("arrow-down"), i18n("Go &down"), this);
+	QAction* goDown = new QAction(QIcon("arrow-down"), i18n("Go &down"), this);
 	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
 	connect(goDown, SIGNAL(triggered()), SLOT(focusKonsoleDown()));
 
-	KAction* tabLeft = new KAction(i18n("&Previous tab"), this);
+	QAction* tabLeft = new QAction(i18n("&Previous tab"), this);
 	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("tab left", tabLeft);
 	connect(tabLeft, SIGNAL(triggered(bool)), this, SLOT(tabLeft()));
 
-	KAction* tabRight = new KAction(i18n("&Next tab"), this);
+	QAction* tabRight = new QAction(i18n("&Next tab"), this);
 	tabRight->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Right));
 	actionCollection()->addAction("tab right", tabRight);
 	connect(tabRight, SIGNAL(triggered(bool)), this, SLOT(tabRight()));
 
 	// Adding and removing parts
-	KAction* detach = new KAction(KIcon("document-new"), i18n("De&tach"), this);
+	QAction* detach = new QAction(QIcon("document-new"), i18n("De&tach"), this);
 	detach->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
 	actionCollection()->addAction("detach", detach);
 	connect(detach, SIGNAL(triggered(bool)), this, SLOT(detach()));
 
-	KAction* insertHorizontal = new KAction(KIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
+	QAction* insertHorizontal = new QAction(QIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
 	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
 
-	KAction* insertVertical = new KAction(KIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
+	QAction* insertVertical = new QAction(QIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
 	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
 
-	KAction* removeStack = new KAction(KIcon("view-left-close"), i18n("Re&move stack"), this);
+	QAction* removeStack = new QAction(QIcon("view-left-close"), i18n("Re&move stack"), this);
 	removeStack->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 	actionCollection()->addAction("remove part", removeStack);
 	connect(removeStack, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
 
-	KAction* duplicateView = new KAction(KIcon("edit-copy"), i18n("&Duplicate view"), this);
+	QAction* duplicateView = new QAction(QIcon("edit-copy"), i18n("&Duplicate view"), this);
 	duplicateView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D));
 	actionCollection()->addAction("duplicate view", duplicateView);
 	connect(duplicateView, SIGNAL(triggered()), SLOT(slotDuplicateView()));
 
 	// View
-	KAction* resetLayouts = new KAction(KIcon("view-grid"), i18n("R&eset layouts"), this);
+	QAction* resetLayouts = new QAction(QIcon("view-grid"), i18n("R&eset layouts"), this);
 	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
 
-	KAction* switchView = new KAction(KIcon("document-open-folder"), i18n("S&witch view"), this);
+	QAction* switchView = new QAction(QIcon("document-open-folder"), i18n("S&witch view"), this);
 	switchView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
 	actionCollection()->addAction("switch view", switchView);
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
 
-	KAction* closeView = new KAction(KIcon("document-close"), i18n("&Close view"), this);
+	QAction* closeView = new QAction(QIcon("document-close"), i18n("&Close view"), this);
 	closeView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
 	actionCollection()->addAction("close view", closeView);
 	connect(closeView, SIGNAL(triggered(bool)), this, SLOT(closeView()));
 
-	KAction* zoomView = new KAction(KIcon("zoom-in"), i18n("&Zoom"), this);
+	QAction* zoomView = new QAction(QIcon("zoom-in"), i18n("&Zoom"), this);
 	zoomView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
 	actionCollection()->addAction("zoom view", zoomView);
 	connect(zoomView, SIGNAL(triggered(bool)), SLOT(zoomView()));
@@ -298,35 +294,27 @@ void QuadKonsole::setupActions()
 	KToggleAction* toggleMenu = KStandardAction::showMenubar(this, SLOT(toggleMenu()), actionCollection());
 	toggleMenu->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
 
-	KAction* changeLayout = new KAction(KIcon(""), i18n("C&hange layout"), this);
+	QAction* changeLayout = new QAction(QIcon(""), i18n("C&hange layout"), this);
 	changeLayout->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L));
 	actionCollection()->addAction("change layout", changeLayout);
 	connect(changeLayout, SIGNAL(triggered(bool)), SLOT(changeLayout()));
 
-
 	// Location toolbar
-	KAction* toggleUrlBar = new KAction(KIcon("document-open-remote"), i18n("&Open URL"), this);
+	QAction* toggleUrlBar = new QAction(QIcon("document-open-remote"), i18n("&Open URL"), this);
 	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
 	actionCollection()->addAction("toolbar_url_combo", toggleUrlBar);
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(slotActivateUrlBar()));
-
-
-	// sidebar
-	KAction* toggleSidebar = new KAction(KIcon("view-sidetree"), i18n("Show sidebar"), this);
-	toggleSidebar->setShortcut(Qt::Key_F9);
-	actionCollection()->addAction("toggle sidebar", toggleSidebar);
-	connect(toggleSidebar, SIGNAL(triggered()), SLOT(slotToggleSidebar()));
 
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 
 	// Debug
 #ifdef DEBUG
 	kDebug() << "adding debugging actions" << endl;
-	KAction* saveSession = new KAction(KIcon("document-save"), i18n("Save session"), this);
+	KAction* saveSession = new KAction(QIcon("document-save"), i18n("Save session"), this);
 	actionCollection()->addAction("saveSession", saveSession);
 	connect(saveSession, SIGNAL(triggered(bool)), this, SLOT(saveSession()));
 
-	KAction* restoreSession = new KAction(KIcon("document-open"), i18n("Restore session"), this);
+	KAction* restoreSession = new KAction(QIcon("document-open"), i18n("Restore session"), this);
 	actionCollection()->addAction("restoreSession", restoreSession);
 	connect(restoreSession, SIGNAL(triggered(bool)), this, SLOT(restoreSession()));
 #endif // DEBUG
@@ -343,37 +331,14 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 	QGridLayout* grid = new QGridLayout(centralWidget);
 	grid->setContentsMargins(0, 0, 0, 0);
 
-	m_sidebarSplitter = new QSplitter(Qt::Horizontal);
-	grid->addWidget(m_sidebarSplitter, 0, 0);
-
-	// TODO search for a valid sidebar instead of hard coded name
-	m_sidebar = new QKView(m_partManager, new QKBrowserInterface(*(QKHistory::self())), "konq_sidebartng.desktop");
-	m_sidebar->setFocusPolicy(Qt::ClickFocus);
-	connect(m_sidebar, SIGNAL(openUrlRequest(KUrl)), SLOT(slotOpenUrl(KUrl)));
-	connect(m_sidebar, SIGNAL(createNewWindow(KUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotNewWindow(KUrl,QString,KParts::ReadOnlyPart**)));
-	m_sidebarSplitter->addWidget(m_sidebar);
-	if (Settings::showSidebar())
-		m_sidebar->show();
-	else
-		m_sidebar->hide();
-
 	if (Settings::layoutVertical())
 		m_rows = new QSplitter(Qt::Vertical);
 	else
 		m_rows = new QSplitter(Qt::Horizontal);
 
+	grid->addWidget(m_rows, 0, 0);
 	m_rows->setChildrenCollapsible(false);
-	m_sidebarSplitter->addWidget(m_rows);
-	m_sidebarSplitter->setCollapsible(1, false);
-	m_sidebarSplitter->setStretchFactor(0, 1);
-	m_sidebarSplitter->setStretchFactor(1, 4);
 	KConfigGroup autoSave = autoSaveConfigGroup();
-	QList<int> sidebarSizes;
-	sidebarSizes << width() * 0.25;
-	sidebarSizes << width() * 0.75;
-	m_sidebarSplitter->setSizes(autoSave.readEntry("sidebarSizes", sidebarSizes));
-	connect(m_sidebarSplitter, SIGNAL(splitterMoved(int,int)), SLOT(slotAutoSave()));
-
 	actionCollection()->addAssociatedWidget(centralWidget);
 
 	for (int i=0; i<rows; ++i)
@@ -396,9 +361,9 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 			addStack(i, j, part);
 		}
 	}
-	kDebug() << "finished setting up layouts for" << m_stacks.count() << "parts" << endl;
+	qDebug() << "finished setting up layouts for" << m_stacks.count() << "parts" << endl;
 
-	setWindowIcon(KIcon("quadkonsole4"));
+	setWindowIcon(QIcon("quadkonsole4"));
 }
 
 
@@ -517,7 +482,7 @@ void QuadKonsole::detach(QKStack* stack, QKView* view)
 	external->setAttribute(Qt::WA_DeleteOnClose);
 	emit detached(external);
 
-	stack->switchView(KUrl("~"), "inode/directory", true);
+	stack->switchView(QUrl("~"), "inode/directory", true);
 }
 
 
@@ -573,7 +538,7 @@ void QuadKonsole::reconnectMovement()
 				connect(action, SIGNAL(triggered(bool)), it.value().second.toLatin1().data());
 		}
 		else
-			kDebug() << "action" << it.key() << "not in actionCollection" << endl;
+			qDebug() << "action" << it.key() << "not in actionCollection" << endl;
 	}
 }
 
@@ -627,7 +592,6 @@ void QuadKonsole::optionsPreferences()
 	QWidget* generalSettings = new QWidget;
 	Ui::prefs_base prefs_base;
 	prefs_base.setupUi(generalSettings);
-	prefs_base.kcfg_konsoleProfile->addItems(QKView::konsoleProfiles());
 	dialog->addPage(generalSettings, i18n("General"), "quadkonsole4");
 
 	QWidget* shutdownSettings = new QWidget;
@@ -659,11 +623,6 @@ void QuadKonsole::settingsChanged()
 
 	if ((m_rows->orientation() == Qt::Vertical && ! Settings::layoutVertical()) || (m_rows->orientation() == Qt::Horizontal && Settings::layoutVertical()))
 		changeLayout();
-
-	if (Settings::showSidebar())
-		m_sidebar->show();
-	else
-		m_sidebar->hide();
 }
 
 
@@ -705,7 +664,7 @@ bool QuadKonsole::queryClose()
 
 void QuadKonsole::saveProperties(KConfigGroup& config)
 {
-	kDebug() << "saving session status to" << config.name() << endl;
+	qDebug() << "saving session status to" << config.name() << endl;
 
 	bool orientationVertical;
 	if (m_rows->orientation() == Qt::Vertical)
@@ -716,11 +675,11 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 
 	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
-	kDebug() << "saving session. rowSizes =" << rowSizes << endl;
+	qDebug() << "saving session. rowSizes =" << rowSizes << endl;
 
 	for (int i=0; i<m_rowLayouts.size(); ++i)
 	{
-		kDebug() << QString("row_%1").arg(i) << "=" << m_rowLayouts[i]->sizes() << endl;
+		qDebug() << QString("row_%1").arg(i) << "=" << m_rowLayouts[i]->sizes() << endl;
 		config.writeEntry(QString("row_%1").arg(i), m_rowLayouts[i]->sizes());
 		for (int s=0; s<m_rowLayouts[i]->count(); ++s)
 		{
@@ -738,27 +697,27 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 
 void QuadKonsole::readProperties(const KConfigGroup& config)
 {
-	kDebug() << "reading session status from" << config.name() << endl;
+	qDebug() << "reading session status from" << config.name() << endl;
 	m_restoringSession = true;
 
 	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
 	if (rowSizes.empty())
 	{
-		kDebug() << "could not read properties: empty rowSizes" << endl;
+		qDebug() << "could not read properties: empty rowSizes" << endl;
 		rowSizes << height();
 	}
 
-	kDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size() << endl;
+	qDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size() << endl;
 	while (m_rowLayouts.size() < rowSizes.size())
 		insertVertical(0, 0);
 
 	for (int i=0; i<rowSizes.size(); ++i)
 	{
-		kDebug() << "restoring row" << i << endl;
+		qDebug() << "restoring row" << i << endl;
 		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
 		if (i == 1 && sizes.empty())
 		{
-			kDebug() << "now sizes for row" << i << endl;
+			qDebug() << "now sizes for row" << i << endl;
 			sizes << width();
 		}
 		while (m_rowLayouts[i]->count() < sizes.size())
@@ -772,7 +731,7 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 	{
 		for (int s=0; s<m_rowLayouts.at(i)->count(); ++s)
 		{
-			kDebug() << "restore stack" << i << s << endl;
+			qDebug() << "restore stack" << i << s << endl;
 			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
 			if (stack)
 			{
@@ -810,7 +769,7 @@ QKStack* QuadKonsole::getFocusStack()
 			return *it;
 	}
 
-	kDebug() << "could not find focus" << endl;
+	qDebug() << "could not find focus" << endl;
 	return 0;
 }
 
@@ -828,7 +787,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 		}
 	}
 
-	kDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
+	qDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
 	row = -1;
 	col = -1;
 }
@@ -925,7 +884,7 @@ void QuadKonsole::removeStack()
 					return;
 				else
 				{
-					kDebug() << "detaching" << doDetach.count() << "views" << endl;
+					qDebug() << "detaching" << doDetach.count() << "views" << endl;
 					QMapIterator<QKView*, QKStack*> it(doDetach);
 					while (it.hasNext())
 					{
@@ -1065,9 +1024,9 @@ void QuadKonsole::openUrls(const QStringList& urls, bool newTab)
 		if (index < m_stacks.count())
 		{
 			if (newTab)
-				m_stacks[index]->slotOpenNewWindow(KUrl(url), "", 0);
+				m_stacks[index]->slotOpenNewWindow(QUrl(url), "", 0);
 			else
-				m_stacks[index]->slotOpenUrlRequest(KUrl(url));
+				m_stacks[index]->slotOpenUrlRequest(QUrl(url));
 		}
 	}
 }
@@ -1202,7 +1161,7 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 		}
 	}
 	else
-		kDebug() << "no stack removed??" << endl;
+		qDebug() << "no stack removed??" << endl;
 
 	if (m_stacks.empty())
 		deleteLater();
@@ -1223,7 +1182,7 @@ void QuadKonsole::slotSetLocationBarUrl(const QString& url)
 		m_urlBar->lineEdit()->setCursorPosition(0);
 	}
 	else
-		kDebug() << "won't set location bar url for an inactive stack" << endl;
+		qDebug() << "won't set location bar url for an inactive stack" << endl;
 }
 
 
@@ -1235,37 +1194,18 @@ void QuadKonsole::zoomView(int row, int col)
 	{
 		if (row < 0 || row >= m_rowLayouts.count())
 		{
-			kDebug() << "invalid row:" << row << endl;
+			qDebug() << "invalid row:" << row << endl;
 			return;
 		}
 		if (col < 0 || col >= m_rowLayouts.at(row)->count())
 		{
-			kDebug() << "ivalid column:" << col << endl;
+			qDebug() << "ivalid column:" << col << endl;
 			return;
 		}
 
 		zoomSplitter(m_rows, row);
 		zoomSplitter(m_rowLayouts.at(row), col);
 		m_zoomed = qMakePair(row, col);
-	}
-}
-
-
-void QuadKonsole::slotToggleSidebar()
-{
-	if (m_sidebar->isVisible())
-		m_sidebar->hide();
-	else
-		m_sidebar->show();
-}
-
-
-void QuadKonsole::slotAutoSave()
-{
-	if (autoSaveSettings())
-	{
-		KConfigGroup autoSave = autoSaveConfigGroup();
-		autoSave.writeEntry("sidebarSizes", m_sidebarSplitter->sizes());
 	}
 }
 
@@ -1290,7 +1230,7 @@ void QuadKonsole::slotOpenUrl(const QString& url)
 }
 
 
-void QuadKonsole::slotOpenUrl(const KUrl& url)
+void QuadKonsole::slotOpenUrl(const QUrl& url)
 {
 	if (m_activeStack)
 	{
@@ -1300,7 +1240,7 @@ void QuadKonsole::slotOpenUrl(const KUrl& url)
 }
 
 
-void QuadKonsole::slotNewWindow(const KUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
+void QuadKonsole::slotNewWindow(const QUrl& url, const QString& mimeType, KParts::ReadOnlyPart** target)
 {
 	if (m_activeStack)
 	{
@@ -1319,7 +1259,7 @@ void QuadKonsole::slotDuplicateView()
 		m_activeStack->setCurrentIndex(index);
 
 		if (m_activeStack->currentWidget())
-			m_activeStack->currentWidget()->setURL(KUrl(url));
+			m_activeStack->currentWidget()->setURL(QUrl(url));
 	}
 }
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 BASEDIR="../"
 PROJECT="quadkonsole4"
-BUGADDR="quadkonsole4@kb.ccchl.de"
+BUGADDR="quadkonsole4@spambri.de"
 WDIR=`pwd`
 
 echo "Preparing rc files"

@@ -1,51 +1,9 @@
-DEBIAN
-
-Get the Debian package from http://kb.ccchl.de/quadkonsole4/squeeze or
-http://kb.ccchl.de/quadkonsole4/wheezy depending on your installation. The
-wheezy package should also work on other Debian based distributions like Kubutu
-that ship KDE SC > 4.6.
-
-Install the package as root with
-	dpkg -i quadkonsole4_<version>.deb
-
-Bleeding edge version from git:
-1. Clone the repository
-	git clone git://kb.ccchl.de/quadkonsole4.git
-	cd quadkonsole4
-2. Create a package
-	dpkg-buildpackage
-3. Install the new package
-	dpkg -i ../quadkonsole4_<version>.deb
-
-GENTOO
-
-Several versions of QuadKonsole4 are already in the portage tree. So the easiest
-way to install it is
-	emerge quadkonsole
-
-Bleeding edge using the live ebuild:
-1. Create a directory for the ebuild in your portage overlay
-	eval $(emerge --info | grep PORTDIR_OVERLAY)
-	cd ${PORTDIR_OVERLAY##* } || echo "PORTDIR_OVERLAY does not exist"
-	mkdir -p kde-misc/quadkonsole
-	cd kde-misc/quadkonsole
-2. Get the live ebuild and create a digest
-	wget http://kb.ccchl.de/quadkonsole4/quadkonsole-9999.ebuild
-	ebuild quadkonsole-9999.ebuild digest
-3. Unmask and install (ATTENTION: this may modify your portage configuration)
-	emerge --autounmask-write=y --autounmask=y =kde-misc/quadkonsole-9999
-
-MANDRIVA
-
-Thanks to symbianflo you can get rpms for Mandriva at
-http://mrb.mandrivausers.ro/index.php?search_for=quadkonsole4&search_submit=Search
-
 INSTALLATION FROM SOURCE TARBALL
 
-1. Get the current source tarball from http://kb.ccchl.de/quadkonsole4
-	wget http://kb.ccchl.de/quadkonsole4/quadkonsole4-<version>.tar.bz2
+1. Get the current source tarball from http://spambri.de/quadkonsole4
+	curl -O http://spambri.de/quadkonsole4/quadkonsole4-<version>.tar.xz
 2. Unpack it and change into the unpacked directory
-	tar -xzf quadkonsole4-<version>.tar.bz2
+	tar -xaf quadkonsole4-<version>.tar.xz
 	cd quadkonsole4
 3. Create a build directory to separate source from temporary files
 	mkdir build

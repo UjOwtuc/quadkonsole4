@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,10 +21,10 @@
 #include "qkremote.h"
 #include "version.h"
 
-#include <KDE/KApplication>
-#include <KDE/KAboutData>
-#include <KDE/KCmdLineArgs>
-#include <KDE/KLocale>
+#include <QtWidgets/QApplication>
+
+#include <KAboutData>
+#include <KLocalizedString>
 
 #ifndef QUADKONSOLE4_VERSION
 #error QUADKONSOLE4_VERSION undefined
@@ -35,13 +35,9 @@ static const char version[] = QUADKONSOLE4_VERSION;
 
 int main(int argc, char **argv)
 {
-	KAboutData about("qkremote", "quadkonsole4", ki18n("qkremote"), version, ki18n(description), KAboutData::License_GPL, ki18n("(C) 2009 - 2011 Karsten Borgwaldt"), KLocalizedString(), "http://kb.ccchl.de/quadkonsole4", "quadkonsole4@kb.ccchl.de");
-	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@kb.ccchl.de");
-	KCmdLineArgs::init(argc, argv, &about);
-
-// 	KCmdLineOptions options;
-// 	KCmdLineArgs::addCmdLineOptions(options);
-	KApplication app;
+	KAboutData about("qkremote", "quadkonsole4", "qkremote", version, KAboutLicense::GPL_V2, "(C) 2009 - 2017 Karsten Borgwaldt", "", "http://spambri.de/quadkonsole4", "quadkonsole4@spambri.de");
+	about.addAuthor("Karsten Borgwaldt", "", "kb@spambri.de");
+	QApplication app(argc, argv);
 
 	if (app.isSessionRestored())
 	{
@@ -49,10 +45,8 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-// 		KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 		QKRemote* widget = new QKRemote;
 		widget->show();
-// 		args->clear();
 	}
 
 	return app.exec();

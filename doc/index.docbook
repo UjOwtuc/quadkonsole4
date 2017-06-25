@@ -29,7 +29,7 @@ and use `&George.N.Ugnacious; &George.N.Ugnacious.mail;' in the author element.
 <othername></othername>
 <surname>Borgwaldt</surname>
 </personname>
-<email>kb@kb.ccchl.de</email>
+<email>kb@spambri.de</email>
 </author>
 </authorgroup>
 
@@ -68,7 +68,7 @@ Please at least include KDE, the KDE package it is in, the name
 
 <para>
 &kmyapplication; embeds multiple Konsole KParts in one window. Please report
-any problems or feature requests to quadkonsole4@kb.ccchl.de.
+any problems or feature requests to quadkonsole4@spambri.de.
 </para>
 </chapter>
 
@@ -442,7 +442,7 @@ by unmapping it.
 <para>
 	Program Copyright
 	&copy; 2005 Simon Perrault <email>nomis80@nomis80.org</email>
-	&copy; 2009 - 2011 Karsten Borgwaldt <email>kb@kb.ccchl.de</email>
+	&copy; 2009 - 2011 Karsten Borgwaldt <email>kb@spambri.de</email>
 </para>
 
 <!--
@@ -458,7 +458,7 @@ Contributors:
 -->
 
 <para>
-Documentation Copyright &copy; 2011 Karsten Borgwaldt <email>kb@kb.ccchl.de</email>
+Documentation Copyright &copy; 2011 Karsten Borgwaldt <email>kb@spambri.de</email>
 </para>
 
 <!-- TRANS:CREDIT_FOR_TRANSLATORS -->
@@ -473,7 +473,7 @@ Documentation Copyright &copy; 2011 Karsten Borgwaldt <email>kb@kb.ccchl.de</ema
 
 <sect1 id="getting-kapp">
 <title>How to obtain &kmyapplication;</title>
-<para>&kmyapplication; can be found at <ulink url="http://kb.ccchl.de/quadkonsole4">http://kb.ccchl.de/quadkonsole4</ulink>.</para>
+<para>&kmyapplication; can be found at <ulink url="http://spambri.de/quadkonsole4">http://spambri.de/quadkonsole4</ulink>.</para>
 
 </sect1>
 
@@ -502,7 +502,7 @@ in <ulink url="ftp://ftp.kapp.org">The &kde; repositories</ulink>.
 
 <para>
 You can find a list of changes at <ulink
-url="http://kb.ccchl.de/quadkonsole4/ChangeLog">http://kb.ccchl.de/quadkonsole4/ChangeLog</ulink>.
+url="http://spambri.de/quadkonsole4/ChangeLog">http://spambri.de/quadkonsole4/ChangeLog</ulink>.
 </para>
 </sect1>
 

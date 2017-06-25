@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 - 2011 by Karsten Borgwaldt                        *
- *   kb@kb.ccchl.de                                                        *
+ *   Copyright (C) 2009 - 2017 by Karsten Borgwaldt                        *
+ *   kb@spambri.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,12 +21,12 @@
 #ifndef QKVIEW_H
 #define QKVIEW_H
 
-#include <KDE/KUrl>
 #include <KDE/KService>
 #include <KDE/KFileItemList>
 #include <KDE/KParts/BrowserExtension>
+#include <KDE/KParts/ReadWritePart>
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class KMenu;
 class QToolBar;
@@ -61,10 +61,8 @@ class QKView : public QWidget
 		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
 		virtual ~QKView();
 
-		static QStringList konsoleProfiles();
-
-		KUrl getURL() const;
-		void setURL(const KUrl& url);
+		QUrl getURL() const;
+		void setURL(const QUrl& url);
 		void sendInput(const QString& text);
 		KParts::ReadOnlyPart* part();
 		const QString& partName() const { return m_partname; }
@@ -73,7 +71,7 @@ class QKView : public QWidget
 		QString foregroundProcess() const;
 		const QString& statusBarText() const { return m_statusBarText; }
 		const QString& windowCaption() const { return m_windowCaption; }
-		bool hasMimeType(const QString& type, const KUrl& url);
+		bool hasMimeType(const QString& type, const QUrl& url);
 		QString partIcon() const;
 		bool isModified() const;
 		QString closeModifiedMsg() const;
@@ -85,26 +83,25 @@ class QKView : public QWidget
 		void partCreated();
 		void setStatusBarText(QString);
 		void setWindowCaption(QString);
-		void openUrlRequest(KUrl);
+		void openUrlRequest(QUrl);
 		void openUrlNotify();
 		void popupMenu(QPoint, KFileItemList, KParts::BrowserExtension::PopupFlags flags, KParts::BrowserExtension::ActionGroupMap);
 		void setLocationBarUrl(QString);
-		void createNewWindow(KUrl, QString, KParts::ReadOnlyPart** target);
+		void createNewWindow(QUrl, QString, KParts::ReadOnlyPart** target);
 
 	public slots:
 		void show();
 		void settingsChanged();
 		void partDestroyed();
 		void updateUrl();
-		void setProfile(const QString& name);
 
 	protected slots:
 		void createPart();
-		void slotPopupMenu(const QPoint& where, const KUrl& url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
+		void slotPopupMenu(const QPoint& where, const QUrl& url, mode_t mode, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void slotPopupMenu(const QPoint& where, const KFileItemList& items, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 		void selectionInfo(const KFileItemList& items);
-		void openUrlRequest(const KUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs);
-		void slotCreateNewWindow(const KUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target);
+		void openUrlRequest(const QUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs);
+		void slotCreateNewWindow(const QUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target);
 		void enableAction(const char* action, bool enable);
 		void slotSetStatusBarText(const QString& text);
 		void slotSetWindowCaption(const QString& text);
@@ -118,7 +115,6 @@ class QKView : public QWidget
 		void setupUi();
 		void setupPart();
 		void disableKonsoleActions();
-		static void loadKonsoleProfiles();
 
 		QString m_partname;
 		QBoxLayout* m_layout;
@@ -131,7 +127,6 @@ class QKView : public QWidget
 		KParts::BrowserInterface* m_browserInterface;
 
 		static QStringList m_removeKonsoleActions;
-		static QMap<QString, QString> m_konsoleProfiles;
 
 		// update working dir for konsolepart
 		QTimer* m_updateUrlTimer;

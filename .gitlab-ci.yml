@@ -1,0 +1,24 @@
+# vim: set ft=yaml ts=2 sw=2 et :
+
+image: $CI_REGISTRY/docker/cmake/cmake:buster
+
+cache:
+  paths:
+    - .ccache
+
+build:
+  stage: build
+  tags:
+    - docker
+  script:
+    - export PATH="/usr/lib/ccache:$PATH"
+    - yes | mk-build-deps -i || true
+    - git clean -f
+    - dpkg-buildpackage
+    - mkdir dist
+    - cp ../quadkonsole4_* ../quadkonsole4-* dist/
+  artifacts:
+    paths:
+      - dist/quadkonsole4_*
+      - dist/quadkonsole4-*
+

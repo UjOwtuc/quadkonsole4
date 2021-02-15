@@ -22,8 +22,9 @@ find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS
 )
 
 find_package(KF5 REQUIRED COMPONENTS
+	Parts
+	DBusAddons
 	DocTools
-	KDELibs4Support
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "debug")

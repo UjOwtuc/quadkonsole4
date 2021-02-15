@@ -20,16 +20,16 @@
 
 #include "qkurlhandler.h"
 
-#include <KDE/KService>
-#include <KDE/KLocale>
-#include <KDE/KFileItem>
-#include <KDE/KUriFilter>
-#include <KDE/KIO/StatJob>
-#include <KDE/KIO/TransferJob>
-#include <KDE/KIO/Scheduler>
+#include <KService>
+#include <KFileItem>
+#include <KUriFilter>
+#include <KLocalizedString>
+#include <KIO/StatJob>
+#include <KIO/TransferJob>
+#include <KIO/Scheduler>
 
-#include <QtCore/QFile>
-#include <QtCore/QTimer>
+#include <QFile>
+#include <QTimer>
 
 
 QKUrlHandler::QKUrlHandler(const QUrl& url, bool autorun, QObject* parent)

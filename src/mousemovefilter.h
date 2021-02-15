@@ -24,7 +24,7 @@
 #ifndef MOUSEMOVEFILTER_H
 #define MOUSEMOVEFILTER_H
 
-#include <QtCore/QObject>
+#include <QObject>
 
 class MouseMoveFilter : public QObject
 {

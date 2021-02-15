@@ -23,7 +23,7 @@
 
 #include "qkhistory.h"
 
-#include <KDE/KParts/BrowserInterface>
+#include <KParts/BrowserInterface>
 
 class QKBrowserInterface : public KParts::BrowserInterface
 {

@@ -24,10 +24,11 @@
 #ifndef QUADKONSOLE_H
 #define QUADKONSOLE_H
 
-#include <KDE/KParts/MainWindow>
-#include <KDE/KParts/PartManager>
+#include <KParts/MainWindow>
+#include <KParts/PartManager>
 
-#include <QtGui/QClipboard>
+#include <QClipboard>
+#include <QEvent>
 
 // dbus adaptor
 class QuadKonsoleAdaptor;

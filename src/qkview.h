@@ -21,10 +21,10 @@
 #ifndef QKVIEW_H
 #define QKVIEW_H
 
-#include <KDE/KService>
-#include <KDE/KFileItemList>
-#include <KDE/KParts/BrowserExtension>
-#include <KDE/KParts/ReadWritePart>
+#include <KService>
+#include <KFileItem>
+#include <KParts/BrowserExtension>
+#include <KParts/ReadWritePart>
 
 #include <QtWidgets/QWidget>
 
@@ -64,6 +64,7 @@ class QKView : public QWidget
 		QUrl getURL() const;
 		void setURL(const QUrl& url);
 		void sendInput(const QString& text);
+		void sendKeyEvent(QEvent::Type t, int key, Qt::KeyboardModifiers mod);
 		KParts::ReadOnlyPart* part();
 		const QString& partName() const { return m_partname; }
 		QString partCaption() const;

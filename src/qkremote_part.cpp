@@ -21,21 +21,18 @@
 #include "qkremote_part.h"
 #include "version.h"
 
-#include <KDE/KLocale>
-#include <KDE/KComponentData>
-#include <KDE/KParts/GenericFactory>
-
-#include <K4AboutData>
-
 #include <qglobal.h>
-#include <QtCore/QTimer>
-#include <QtWidgets/QApplication>
-#include <QtGui/QKeyEvent>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtDBus/QDBusConnection>
-#include <QtDBus/QDBusConnectionInterface>
-#include <QtDBus/QDBusInterface>
+#include <QTimer>
+#include <QApplication>
+#include <QKeyEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
+#include <QDBusInterface>
+#include <KPluginFactory>
+#include <KAboutData>
+#include <KLocalizedString>
 
 #include "ui_qkremotewidget.h"
 
@@ -46,20 +43,19 @@
 #error QUADKONSOLE4_VERSION undefined
 #endif
 
-typedef KParts::GenericFactory<QKRemotePart> QKRemotePartFactory;
-K_EXPORT_COMPONENT_FACTORY(qkremotepart, QKRemotePartFactory)
-
+K_PLUGIN_FACTORY(QKRemotePartFactory, registerPlugin<QKRemotePart>();)
+K_EXPORT_PLUGIN(QKRemotePartFactory("qkremote"))
 
 const char QKRemotePart::version[] = QUADKONSOLE4_VERSION;
 const char QKRemotePart::partName[] = "qkremotepart";
 
 
-QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStringList & /*args*/ )
+QKRemotePart::QKRemotePart(QWidget *parentWidget, QObject *parent, const QVariantList & /*args*/)
 	: KParts::ReadOnlyPart(parent),
 	m_dbusThread(new QThread(this))
 {
 	// we need an instance
-	setComponentData(QKRemotePartFactory::componentData());
+// 	setComponentData(QKRemotePartFactory::componentData());
 
 	m_widget = new QWidget(parentWidget);
 	m_remote = new Ui::qkremoteWidget;
@@ -67,7 +63,7 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	m_widget->setFocusProxy(m_remote->inputLine);
 	setWidget(m_widget);
 
-	m_eventFilter = new QKREventFilter(m_remote, this);
+// 	m_eventFilter = new QKREventFilter(m_remote, this);
 
 	m_dbusConn = new QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SessionBus, partName));
 	m_dbusConn->registerService(partName);
@@ -81,7 +77,7 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	connect(m_remote->identifyButton, SIGNAL(clicked(bool)), SLOT(identifyViews()));
 	connect(m_remote->availableSlaves, SIGNAL(itemActivated(QTreeWidgetItem*,int)), SLOT(focusInputLine()));
 	connect(m_remote->inputLine, SIGNAL(textEdited(QString)), SLOT(sendInput(QString)));
-	connect(m_eventFilter, SIGNAL(keypress(QKeyEvent*)), SLOT(slotKeypress(QKeyEvent*)));
+// 	connect(m_eventFilter, SIGNAL(keypress(QKeyEvent*)), SLOT(slotKeypress(QKeyEvent*)));
 	connect(m_remote->autoUpdate, SIGNAL(toggled(bool)), SLOT(slotToggleUpdateTimer(bool)));
 
 	setXMLFile("qkremote_part.rc");
@@ -91,14 +87,13 @@ QKRemotePart::QKRemotePart( QWidget *parentWidget, QObject *parent, const QStrin
 	m_remote->availableSlaves->setHeaderLabels(headerLabels);
 	m_remote->availableSlaves->sortByColumn(0, Qt::AscendingOrder);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(4, 7, 0))
 	m_remote->inputLine->setPlaceholderText(i18n("Type or paste here to broadcast"));
-#endif // Qt >= 4.7.0
+// 	m_remote->inputLine->installEventFilter(m_eventFilter);
 
 	// initial update of running quadkonsole4 instances
 	QTimer::singleShot(1, this, SLOT(refreshAvailableSlaves()));
 
-	qApp->installEventFilter(m_eventFilter);
+// 	qApp->installEventFilter(m_eventFilter);
 }
 
 
@@ -108,13 +103,13 @@ QKRemotePart::~QKRemotePart()
 }
 
 
-K4AboutData *QKRemotePart::createAboutData()
+KAboutData *QKRemotePart::createAboutData()
 {
 	// the non-i18n name here must be the same as the directory in
 	// which the part's rc file is installed ('partrcdir' in the
 	// Makefile)
-	K4AboutData *aboutData = new K4AboutData(partName, "quadkonsole4", ki18n("qkremotepart"), version);
-	aboutData->addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@spambri.de");
+	KAboutData *aboutData = new KAboutData(partName, i18n("QKRemote"), version);
+	aboutData->addAuthor(i18n("Karsten Borgwaldt"), "", QStringLiteral("kb@spambri.de"));
 	return aboutData;
 }
 
@@ -139,6 +134,7 @@ void QKRemotePart::sendInput(const QString& text)
 	m_remote->inputLine->clear();
 	setStatusBarText("");
 
+	qDebug() << "sendInput:" << text;
 	QTreeWidgetItemIterator it(m_remote->availableSlaves, QTreeWidgetItemIterator::Selected);
 	while (*it)
 	{
@@ -198,7 +194,7 @@ void QKRemotePart::refreshAvailableSlaves()
 	m_updateTimer->stop();
 
 	QString instance = "de.spambri.quadkonsole4";
-	de::spambri::quadkonsole4::QKApplication qkApp(instance, "/MainApplication", *m_dbusConn);
+	de::spambri::quadkonsole4::QKApplication qkApp(instance, "/QKApplication", *m_dbusConn);
 	qkApp.moveToThread(m_dbusThread);
 	uint numWindows = QDBusReply<uint>(qkApp.call(QDBus::BlockWithGui, "windowCount"));
 	uint found = 0;

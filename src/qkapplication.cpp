@@ -22,36 +22,31 @@
 #include "quadkonsole.h"
 #include "settings.h"
 
-#include <KDE/KUniqueApplication>
-#include <KDE/KCmdLineArgs>
-
-#include <QtCore/QDir>
+#include <QDir>
 
 #include "qkapplicationadaptor.h"
 
 QKApplicationAdaptor* QKApplication::m_dbusAdaptor = 0;
 
-QKApplication::QKApplication(bool GUIenabled, bool configUnique)
-	: KUniqueApplication(GUIenabled, configUnique)
+QKApplication::QKApplication()
+	: QObject()
 {
-	KCmdLineArgs::setCwd(QDir::currentPath().toUtf8());
-
-	if (restoringSession())
-	{
-		// restore all MainWindows before forking and calling newInstance()
-		// forking seems to invalidate the session KConfigGroup
-		// called from newInstance(), QuadKonsole::readProperties() cannot find any values
-		int n = 1;
-		while (KMainWindow::canBeRestored(n))
-		{
-			qDebug() << "restore window" << n << endl;
-			QuadKonsole* mainWin = new QuadKonsole;
-			mainWin->restore(n);
-			setupWindow(mainWin);
-			++n;
-		}
-	}
-
+	// TODO
+// 	if (restoringSession())
+// 	{
+// 		// restore all MainWindows before forking and calling newInstance()
+// 		// forking seems to invalidate the session KConfigGroup
+// 		// called from newInstance(), QuadKonsole::readProperties() cannot find any values
+// 		int n = 1;
+// 		while (KMainWindow::canBeRestored(n))
+// 		{
+// 			qDebug() << "restore window" << n;
+// 			QuadKonsole* mainWin = new QuadKonsole;
+// 			mainWin->restore(n);
+// 			setupWindow(mainWin);
+// 			++n;
+// 		}
+// 	}
 }
 
 
@@ -59,26 +54,29 @@ QKApplication::~QKApplication()
 {}
 
 
-int QKApplication::newInstance()
+void QKApplication::exec()
 {
-	KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
+// 	KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
 	static bool first = true;
 
 	if (first)
+	{
 		m_dbusAdaptor = new QKApplicationAdaptor(this);
+		QDBusConnection::sessionBus().registerObject("/QKApplication", this);
+	}
 
 	int rows = 0;
 	int columns = 0;
 
-	if (args->isSet("rows"))
-		rows = args->getOption("rows").toInt();
-	if (args->isSet("columns"))
-		columns = args->getOption("columns").toInt();
-	QStringList cmds = args->getOptionList("cmd");
-	QStringList urls = args->getOptionList("url");
-	for (int i=0; i<args->count(); ++i)
-		urls << args->arg(i);
-
+// 	if (args->isSet("rows"))
+// 		rows = args->getOption("rows").toInt();
+// 	if (args->isSet("columns"))
+// 		columns = args->getOption("columns").toInt();
+// 	QStringList cmds = args->getOptionList("cmd");
+// 	QStringList urls = args->getOptionList("url");
+// 	for (int i=0; i<args->count(); ++i)
+// 		urls << args->arg(i);
+/*
 	// convert URLs to absolute paths but keep the specified index if given in URL
 	QStringList::iterator it;
 	for (it=urls.begin(); it!=urls.end(); ++it)
@@ -107,12 +105,12 @@ int QKApplication::newInstance()
 			if (win)
 				topWindow = win;
 			else
-				qDebug() << "found input focus, but containing window is no QuadKonsole" << endl;
+				qDebug() << "found input focus, but containing window is no QuadKonsole";
 		}
 
 		if (topWindow.isNull())
 		{
-			qDebug() << "no opened window has focus, selectin the newest" << endl;
+			qDebug() << "no opened window has focus, selectin the newest";
 			topWindow = m_mainWindows.back();
 		}
 
@@ -120,21 +118,22 @@ int QKApplication::newInstance()
 		topWindow->raise();
 	}
 	else
-	{
+	{*/
 		// without optionless arguments, we start a standard MainWindow
-		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds, urls);
+// 		QuadKonsole* mainWin = new QuadKonsole(rows, columns, cmds, urls);
+		QuadKonsole* mainWin = new QuadKonsole(rows, columns, QStringList(), QStringList());
 		setupWindow(mainWin);
-		setTopWidget(mainWin);
+
+// 		setTopWidget(mainWin);
 
 		if (Settings::startMaximized())
 			mainWin->showMaximized();
 		else
 			mainWin->show();
-	}
+// 	}
 
-	first = false;
-	args->clear();
-	return 0;
+// 	first = false;
+// 	args->clear();
 }
 
 

@@ -21,23 +21,23 @@
 #ifndef QKAPPLICATION_H
 #define QKAPPLICATION_H
 
-#include <KDE/KUniqueApplication>
+#include <QObject>
 
-#include <QtCore/QPointer>
+#include <QPointer>
 
 class QuadKonsole;
 class QKApplicationAdaptor;
 
 
-class QKApplication : public KUniqueApplication
+class QKApplication : public QObject
 {
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.spambri.quadkonsole4.QKApplication")
 	public:
-		explicit QKApplication(bool GUIenabled=true, bool configUnique=false);
+		QKApplication();
 		virtual ~QKApplication();
 
-		virtual int newInstance();
+		void exec();
 
 	public slots:
 		Q_SCRIPTABLE uint windowCount() const;

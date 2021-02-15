@@ -22,34 +22,33 @@
 #include "qkstack.h"
 #include "settings.h"
 
-#include <KDE/KStandardDirs>
-#include <KDE/KToggleAction>
-#include <KDE/KXmlGuiWindow>
-#include <KDE/KXMLGUIFactory>
-#include <KDE/KDebug>
-#include <KDE/KService>
-#include <KDE/KMessageBox>
-#include <KDE/KActionCollection>
-#include <KDE/KFileItemList>
-#include <KDE/KStatusBar>
-#include <KDE/KShell>
-#include <KDE/KIO/Job>
-#include <KDE/KParts/ReadOnlyPart>
-#include <KDE/KParts/BrowserExtension>
-#include <KDE/KParts/PartManager>
-#include <KDE/KParts/StatusBarExtension>
+#include <KToggleAction>
+#include <KXmlGuiWindow>
+#include <KXMLGUIFactory>
+#include <KService>
+#include <KMessageBox>
+#include <KActionCollection>
+#include <KFileItem>
+#include <KShell>
+#include <KLocalizedString>
+#include <KService>
+#include <KIO/Job>
+#include <KParts/ReadOnlyPart>
+#include <KParts/BrowserExtension>
+#include <KParts/PartManager>
+#include <KParts/StatusBarExtension>
 #include <kde_terminal_interface.h>
 
-#include <KLocalizedString>
-
-#include <QtCore/QFileInfo>
-#include <QtCore/QTimer>
-#include <QtCore/QDir>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QBoxLayout>
-#include <QtWidgets/QToolBar>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QProgressBar>
+#include <QFileInfo>
+#include <QTimer>
+#include <QDir>
+#include <QWidget>
+#include <QBoxLayout>
+#include <QToolBar>
+#include <QApplication>
+#include <QProgressBar>
+#include <QStatusBar>
+#include <QKeyEvent>
 
 
 QMap<QString, KService::Ptr> QKPartFactory::m_partFactories;
@@ -60,7 +59,7 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 {
 	if (m_partFactories.count(name) == 0)
 	{
-		kDebug() << "creating factory for" << name << endl;
+		qDebug() << "creating factory for" << name;
 		m_partFactories[name] = KService::serviceByDesktopPath(name);
 		if (! m_partFactories[name])
 		{
@@ -166,9 +165,11 @@ void QKView::sendInput(const QString& text)
 {
 	TerminalInterface* t;
 	if (m_part && (t = qobject_cast<TerminalInterface*>(m_part)))
+	{
 		t->sendInput(text);
+	}
 	else
-		kDebug() << "don't know how to send input to my part" << endl;
+		qDebug() << "don't know how to send input to my part";
 }
 
 
@@ -211,7 +212,7 @@ bool QKView::hasMimeType(const QString& type, const QUrl& url)
 
 	if (service->hasMimeType(type))
 		return true;
-	kDebug() << "KPart" << m_partname << "does not like mime type" << type << endl;
+	qDebug() << "KPart" << m_partname << "does not like mime type" << type;
 	return false;
 }
 
@@ -305,9 +306,8 @@ void QKView::createPart()
 	QString error;
 	if (service->serviceTypes().contains("KParts/ReadWritePart"))
 	{
-		kDebug() << "part" << m_partname << "has a ReadWritePart" << endl;
-
 		m_writablePart = service->createInstance<KParts::ReadWritePart>(this, this, QVariantList(), &error);
+
 		// m_writablePart->setReadWrite(false);
 		m_part = m_writablePart;
 
@@ -317,6 +317,7 @@ void QKView::createPart()
 	}
 	else
 		m_part = service->createInstance<KParts::ReadOnlyPart>(this, this, QVariantList(), &error);
+
 	if (m_part == 0)
 	{
 		KMessageBox::error(this, i18n("The factory for %1 could not create a KPart: %2", m_partname, error));
@@ -397,7 +398,7 @@ void QKView::slotPopupMenu(const QPoint& where, const KFileItemList& items, cons
 
 void QKView::selectionInfo(const KFileItemList& items)
 {
-	kDebug() << "selected items: " << items << endl;
+	qDebug() << "selected items: " << items;
 	if (items.count() == 1)
 		m_statusBarText = items.at(0).getStatusBarInfo();
 	else
@@ -415,7 +416,7 @@ void QKView::selectionInfo(const KFileItemList& items)
 
 void QKView::openUrlRequest(const QUrl& url, const KParts::OpenUrlArguments& args, const KParts::BrowserArguments& browserArgs)
 {
-	kDebug() << "url" << url << endl;
+	qDebug() << "url" << url;
 	if (browserArgs.newTab() || browserArgs.forcesNewWindow())
 		emit createNewWindow(url, args.mimeType(), 0);
 	else
@@ -425,14 +426,14 @@ void QKView::openUrlRequest(const QUrl& url, const KParts::OpenUrlArguments& arg
 
 void QKView::slotCreateNewWindow(const QUrl& url, const KParts::OpenUrlArguments& args, KParts::BrowserArguments, KParts::WindowArgs, KParts::ReadOnlyPart** target)
 {
-	kDebug() << "url" << url << endl;
+	qDebug() << "url" << url;
 	emit createNewWindow(url, args.mimeType(), target);
 }
 
 
 void QKView::enableAction(const char* action, bool enable)
 {
-	kDebug() << action << enable << endl;
+	qDebug() << action << enable;
 	KXmlGuiWindow* window = qobject_cast<KXmlGuiWindow*>(m_partManager.parent());
 	if (window)
 	{
@@ -478,7 +479,7 @@ void QKView::slotJobStarted(KIO::Job* job)
 
 void QKView::slotProgress(KIO::Job* , ulong percent)
 {
-	kDebug() << percent << "%" << endl;
+	qDebug() << percent << "%";
 	m_progress->setValue(percent);
 }
 
@@ -546,7 +547,7 @@ void QKView::setupPart()
 	TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 	if (t)
 	{
-		kDebug() << "part" << m_partname << "has a TerminalInterface" << endl;
+// 		qDebug() << "part" << m_partname << "has a TerminalInterface";
 		t->showShellInDir(QString());
 		m_updateUrlTimer = new QTimer(this);
 		m_updateUrlTimer->start(1500);
@@ -558,7 +559,7 @@ void QKView::setupPart()
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
 	if (b)
 	{
-		kDebug() << "part" << m_partname << "has a BrowserExtension" << endl;
+// 		qDebug() << "part" << m_partname << "has a BrowserExtension";
 		b->setBrowserInterface(m_browserInterface);
 
 		connect(b, SIGNAL(loadingProgress(int)), m_progress, SLOT(setValue(int)));
@@ -575,7 +576,7 @@ void QKView::setupPart()
 	KParts::StatusBarExtension* sb = KParts::StatusBarExtension::childObject(m_part);
 	if (sb)
 	{
-		kDebug() << "part" << m_partname << "has a StatusBarExtension" << endl;
+		qDebug() << "part" << m_partname << "has a StatusBarExtension";
 		if (window)
 			sb->setStatusBar(window->statusBar());
 	}

@@ -21,7 +21,8 @@
 #ifndef CLOSEDIALOG_H
 #define CLOSEDIALOG_H
 
-#include <KDE/KDialog>
+#include <QDialog>
+#include <QMap>
 
 class QKStack;
 class QKView;
@@ -30,7 +31,7 @@ namespace Ui
 	class DetachProcesses;
 }
 
-class CloseDialog : public KDialog
+class CloseDialog : public QDialog
 {
 	Q_OBJECT
 	public:
@@ -39,8 +40,9 @@ class CloseDialog : public KDialog
 
 		void addView(QKStack* stack, QKView* view);
 		void addViews(QKStack* stack, QList<QKView*> views);
-		virtual bool exec(QMap<QKView*, QKStack*>& detach);
 		int size() const;
+
+		const QMap<QKView*, QKStack*>& selectedForDetach() const;
 
 	private slots:
 		void dontDetach();

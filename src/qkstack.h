@@ -21,10 +21,12 @@
 #ifndef QKSTACK_H
 #define QKSTACK_H
 
-#include <KDE/KFileItemList>
-#include <KDE/KTabWidget>
-#include <KDE/KConfigGroup>
-#include <KDE/KParts/BrowserExtension>
+#include <KConfigGroup>
+#include <KFileItem>
+#include <KParts/BrowserExtension>
+
+#include <QTabWidget>
+#include <QEvent>
 
 class QKUrlHandler;
 class QKView;
@@ -40,7 +42,7 @@ namespace KIO
 }
 
 
-class QKStack : public KTabWidget
+class QKStack : public QTabWidget
 {
 	Q_OBJECT
 	public:
@@ -93,7 +95,6 @@ class QKStack : public KTabWidget
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);
 		void popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
-		void slotMiddleClick(QWidget* widget);
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0, bool restoringSession=false);

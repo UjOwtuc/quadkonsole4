@@ -20,19 +20,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "version.h"
 #include "qkapplication.h"
 #include "settings.h"
+#include "version.h"
 
-#include <KDE/KUniqueApplication>
-#include <KDE/KApplication>
-#include <KDE/KAboutData>
-#include <KDE/KCmdLineArgs>
-#include <KDE/KLocale>
+#include <KLocalizedString>
+#include <KAboutData>
+#include <KDBusService>
 
-#include <K4AboutData>
-
-#include <QtCore/QDir>
+#include <QApplication>
+#include <QCommandLineParser>
 
 #ifndef QUADKONSOLE4_VERSION
 #error QUADKONSOLE4_VERSION undefined
@@ -41,28 +38,35 @@
 static const char description[] = I18N_NOOP("Embeds multiple Konsoles in a grid layout");
 static const char version[] = QUADKONSOLE4_VERSION;
 
-
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
-	K4AboutData about("quadkonsole4", 0, ki18n("quadkonsole4"), version, ki18n(description), K4AboutData::License_GPL_V2, ki18n("(C) 2005 Simon Perreault\n(C) 2009 - 2017 Karsten Borgwaldt"), KLocalizedString(), "http://spambri.de/quadkonsole4", "quadkonsole4@spambri.de");
-	about.addAuthor(ki18n("Simon Perreault"), KLocalizedString(), "nomis80@nomis80.org");
-	about.addAuthor(ki18n("Karsten Borgwaldt"), KLocalizedString(), "kb@spambri.de");
-	about.addCredit(ki18n("Michael Feige"), ki18n("Many ideas and feature requests"));
+	QApplication app(argc, argv);
 
-	KCmdLineArgs::init(argc, argv, &about);
+	KLocalizedString::setApplicationDomain("quadkonsole4");
 
-	KCmdLineOptions options;
-	options.add("r").add("rows <rows>", ki18n("Number of rows of terminal emulators"), "2");
-	options.add("c").add("columns <columns>", ki18n("Number of columns of terminal emulators"), "2");
-	options.add("C").add("cmd [number:]<command>", ki18n("Run command [in given view] (may be used multiple times)"));
-	options.add("u").add("url [number:]<url>", ki18n("Open URL [in given view] (may be used multiple times)"));
-	options.add("+[URL]", ki18n("Open specified URL in a running instance of QuadKonsole4"));
-	KCmdLineArgs::addCmdLineOptions(options);
-	KUniqueApplication::addCmdLineOptions();
+	KAboutData about(QStringLiteral("quadkonsole4"), i18n("QuadKonsole4"), version, description, KAboutLicense::GPL_V2, i18n("(C) 2005 Simon Perreault\n(C) 2009 - 2017 Karsten Borgwaldt"), "", QStringLiteral("http://spambri.de/quadkonsole4"), QStringLiteral("quadkonsole4@spambri.de"));
+	about.addAuthor(i18n("Simon Perreault"), "", QStringLiteral("nomis80@nomis80.org"));
+	about.addAuthor(i18n("Karsten Borgwaldt"), "", QStringLiteral("kb@spambri.de"));
+	about.addCredit(i18n("Michael Feige"), i18n("Many ideas and feature requests"));
+	KAboutData::setApplicationData(about);
 
-	QKApplication app;
-	app.setOrganizationDomain("spambri.de");
-	app.setDesktopFileName("de.spambri.quadkonsole4");
-	app.setApplicationVersion(version);
+	QCommandLineParser parser;
+	parser.addHelpOption();
+	parser.addVersionOption();
+
+	parser.addOption(QCommandLineOption(QStringList() << "r" << "rows", i18n("Number of rows of terminal emulators"), i18n("rows"), QString::number(2)));
+	parser.addOption(QCommandLineOption(QStringList() << "c" << "columns", i18n("Number of columns of terminal emulators"), i18n("columns"), QString::number(2)));
+	parser.addOption(QCommandLineOption(QStringList() << "C" << "cmd" << i18n("Run command [in given view] (may be used multiple times)")));
+	parser.addOption(QCommandLineOption(QStringList() << "u" << "url" << i18n("Open URL [in given view] (may be used multiple times)")));
+	parser.addPositionalArgument(i18n("URL"), i18n("Open specified URL in a running instance of QuadKonsole4"));
+	about.setupCommandLine(&parser);
+	parser.process(app);
+
+	about.processCommandLine(&parser);
+
+	KDBusService service(KDBusService::Unique);
+	QKApplication qkapp;
+	qkapp.exec();
+
 	return app.exec();
 }

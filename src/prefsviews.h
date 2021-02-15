@@ -21,7 +21,7 @@
 #ifndef PREFSVIEWS_H
 #define PREFSVIEWS_H
 
-#include <QtWidgets/QWidget>
+#include <QWidget>
 
 class QListWidget;
 class KComboBox;

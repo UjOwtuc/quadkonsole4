@@ -21,9 +21,9 @@
 #ifndef QKHISTORY_H
 #define QKHISTORY_H
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <QObject>
+#include <QString>
+#include <QStringList>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_historyprovider.h>

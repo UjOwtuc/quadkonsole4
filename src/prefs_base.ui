@@ -124,33 +124,20 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="KIntNumInput" name="kcfg_historySize">
-     <property name="label">
-      <string comment="Max"/>
-     </property>
-     <property name="minimum">
-      <number>5</number>
-     </property>
+    <widget class="QSpinBox" name="kcfg_historySize">
      <property name="suffix">
       <string> Addresses</string>
      </property>
-     <property name="specialValueText">
-      <string/>
+     <property name="maximum">
+      <number>9999999</number>
      </property>
-     <property name="sliderEnabled">
-      <bool>false</bool>
+     <property name="value">
+      <number>5</number>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KIntNumInput</class>
-   <extends>QWidget</extends>
-   <header>knuminput.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

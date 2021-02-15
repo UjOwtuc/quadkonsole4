@@ -24,26 +24,26 @@
 #include "qkurlhandler.h"
 #include "settings.h"
 
-#include <KDE/KDebug>
-#include <KDE/KRun>
-#include <KDE/KMimeTypeTrader>
-#include <KDE/KXmlGuiWindow>
-#include <KDE/KTabWidget>
-#include <KDE/KActionCollection>
-#include <KDE/KMessageBox>
-#include <KDE/KParts/PartManager>
-#include <KDE/KParts/HistoryProvider>
-
+#include <KRun>
+#include <KMimeTypeTrader>
+#include <KXmlGuiWindow>
+#include <KActionCollection>
+#include <KMessageBox>
 #include <KLocalizedString>
+#include <KParts/PartManager>
+#include <KParts/HistoryProvider>
+
+#include <QTabBar>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_popupmenu.h>
 #else
-#include <KDE/KMenu>
+// TODO?
 #endif
 
+
 QKStack::QKStack(KParts::PartManager& partManager, bool restoringSession, QWidget* parent)
-	: KTabWidget(parent),
+	: QTabWidget(parent),
 	m_partManager(partManager)
 {
 	setupUi(0, restoringSession);
@@ -52,7 +52,7 @@ QKStack::QKStack(KParts::PartManager& partManager, bool restoringSession, QWidge
 
 
 QKStack::QKStack(KParts::PartManager& partManager, KParts::ReadOnlyPart* part, QWidget* parent)
-	: KTabWidget(parent),
+	: QTabWidget(parent),
 	m_partManager(partManager)
 {
 	setupUi(part);
@@ -74,7 +74,10 @@ QString QKStack::foregroundProcess() const
 
 KParts::ReadOnlyPart* QKStack::part() const
 {
-	return currentWidget()->part();
+	auto w = currentWidget();
+	if (w)
+		return w->part();
+	return 0;
 }
 
 
@@ -134,7 +137,7 @@ QList<QKView*> QKStack::modifiedViews()
 
 void QKStack::setCurrentIndex(int index)
 {
-	static_cast<KTabWidget*>(this)->setCurrentIndex(index);
+	static_cast<QTabWidget*>(this)->setCurrentIndex(index);
 
 	QKView* view = currentWidget();
 	if (view)
@@ -147,10 +150,10 @@ void QKStack::setCurrentIndex(int index)
 
 QKView* QKStack::currentWidget() const
 {
-	QKView* view = qobject_cast<QKView*>( static_cast<const KTabWidget*>(this)->currentWidget() );
+	QKView* view = qobject_cast<QKView*>( static_cast<const QTabWidget*>(this)->currentWidget() );
 	if (! view)
 	{
-		kDebug() << "could not get current QKView" << endl;
+		qDebug() << "could not get current QKView";
 		return 0;
 	}
 
@@ -189,12 +192,7 @@ void QKStack::readProperties(const KConfigGroup& config)
 	QString url = "url_%1";
 	for (int i=0; config.hasKey(part.arg(i)); ++i)
 	{
-		int index = addViews(QStringList(config.readEntry<QString>(part.arg(i), "konsolepart.desktop")));
-
-		// should not happen, but move tabs around to have the same order as before shutdown
-		if (index != i)
-			moveTab(index, i);
-
+		addViews(QStringList(config.readEntry<QString>(part.arg(i), "konsolepart.desktop")));
 		switchView(i, config.readEntry<QUrl>(url.arg(i), QUrl()));
 	}
 	setCurrentIndex(config.readEntry("currentIndex", 0));
@@ -226,7 +224,7 @@ void QKStack::switchView(const QUrl& url, const QString& mimeType, bool tryCurre
 			view = qobject_cast<QKView*>(widget((currentIndex() +i) % count()));
 			if (view->hasMimeType(mimeType, url))
 			{
-				kDebug() << "switching to" << view->partName() << "for mime type" << mimeType << endl;
+				qDebug() << "switching to" << view->partName() << "for mime type" << mimeType;
 				targetIndex = (currentIndex() +i) % count();
 				break;
 			}
@@ -234,7 +232,7 @@ void QKStack::switchView(const QUrl& url, const QString& mimeType, bool tryCurre
 
 		if (targetIndex == -1)
 		{
-			kDebug() << "no other loaded KPart want's to handle" << url << endl;
+			qDebug() << "no other loaded KPart want's to handle" << url;
 
 			// load a new KPart to display mimeType
 			if (Settings::autoloadView())
@@ -304,14 +302,14 @@ void QKStack::settingsChanged()
 	switch (Settings::showTabBar())
 	{
 		case Settings::EnumShowTabBar::always :
-			setTabBarHidden(false);
+			tabBar()->setVisible(true);
 			break;
 		case Settings::EnumShowTabBar::whenNeeded :
-			setTabBarHidden(count() <= 1);
+			tabBar()->setVisible(count() > 1);
 			break;
 		case Settings::EnumShowTabBar::never :
 		default:
-			setTabBarHidden(true);
+			tabBar()->setVisible(false);
 			break;
 	}
 
@@ -346,7 +344,7 @@ void QKStack::slotTabCloseRequested(int index)
 	}
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded && count() <= 1)
-		setTabBarHidden(true);
+		tabBar()->setVisible(false);
 }
 
 
@@ -500,7 +498,7 @@ void QKStack::slotCurrentChanged()
 
 	if (Settings::showTabBar() == Settings::EnumShowTabBar::whenNeeded)
 	{
-		setTabBarHidden(count() <= 1);
+		tabBar()->setVisible(count() > 1);
 	}
 
 	checkEnableActions();
@@ -545,35 +543,25 @@ void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts:
 		KonqPopupMenu::Flags konqFlags = 0;
 		KonqPopupMenu* menu = new KonqPopupMenu(items, view->getURL(), popupActions, 0, konqFlags, flags, view->part()->widget(), 0, map);
 #else // HAVE_LIBKONQ
-		KMenu* menu = new KMenu(this);
-		QList<QActionGroup*> groups = view->part()->actionCollection()->actionGroups();
-		QListIterator<QActionGroup*> it(groups);
-		while (it.hasNext())
-		{
-			QActionGroup* group = it.next();
-			if (group->isVisible() && group->isEnabled())
-			{
-				KMenu* submenu = new KMenu;
-				submenu->addActions(group->actions());
-				menu->addMenu(submenu);
-			}
-		}
-		menu->addActions(view->part()->actionCollection()->actionsWithoutGroup());
+		// TODO
+// 		KMenu* menu = new KMenu(this);
+// 		QList<QActionGroup*> groups = view->part()->actionCollection()->actionGroups();
+// 		QListIterator<QActionGroup*> it(groups);
+// 		while (it.hasNext())
+// 		{
+// 			QActionGroup* group = it.next();
+// 			if (group->isVisible() && group->isEnabled())
+// 			{
+// 				KMenu* submenu = new KMenu;
+// 				submenu->addActions(group->actions());
+// 				menu->addMenu(submenu);
+// 			}
+// 		}
+// 		menu->addActions(view->part()->actionCollection()->actionsWithoutGroup());
 #endif // HAVE_LIBKONQ
-		menu->exec(where);
-		delete menu;
+// 		menu->exec(where);
+// 		delete menu;
 	}
-}
-
-
-void QKStack::slotMiddleClick(QWidget* widget)
-{
-	int index;
-	index = indexOf(widget);
-	if (index < 0)
-		kDebug() << "unable to find widget for removal by MMB" << endl;
-
-	slotTabCloseRequested(index);
 }
 
 
@@ -586,8 +574,6 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part, bool restoringSession)
 	setDocumentMode(true);
 	setTabsClosable(true);
 	setMovable(true);
-
-	connect(this, SIGNAL(mouseMiddleClick(QWidget*)), SLOT(slotMiddleClick(QWidget*)));
 
 	// do not create any views from config if session restoration is in progress
 	if (! restoringSession)
@@ -605,9 +591,12 @@ void QKStack::setupUi(KParts::ReadOnlyPart* part, bool restoringSession)
 		addViews(partNames);
 
 		view = currentWidget();
-		view->show();
-		view->setFocus();
-		setFocusProxy(view);
+		if (view)
+		{
+			view->show();
+			view->setFocus();
+			setFocusProxy(view);
+		}
 
 		settingsChanged();
 	}
@@ -659,12 +648,12 @@ int QKStack::openViewByMimeType(const QString& mimeType, bool allowDuplicate)
 		}
 		else
 		{
-			kDebug() << "loading KPart" << name << "for mime type" << mimeType << endl;
+			qDebug() << "loading KPart" << name << "for mime type" << mimeType;
 			openedIndex = addViews(QStringList(name));
 		}
 	}
 	else
-		kDebug() << "unable to find a service for mime type" << mimeType << endl;
+		qDebug() << "unable to find a service for mime type" << mimeType;
 
 	return openedIndex;
 }

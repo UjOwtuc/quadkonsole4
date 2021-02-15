@@ -20,24 +20,26 @@
 
 #include "qkremote.h"
 
-#include <KDE/KActionCollection>
-#include <KDE/KLibLoader>
-#include <KDE/KMessageBox>
-#include <KDE/KStandardAction>
-#include <KDE/KStatusBar>
-#include <KDE/KLocale>
+#include <KActionCollection>
+#include <KMessageBox>
+#include <KStandardAction>
+#include <KLocalizedString>
+#include <KService>
 
-#include <QtWidgets/QApplication>
+#include <QApplication>
+
+const QString partname = QStringLiteral("qkremote_part");
+
 
 QKRemote::QKRemote()
 	: KParts::MainWindow()
 {
 	setupActions();
 
-	KLibFactory *factory = KLibLoader::self()->factory("qkremotepart");
-	if (factory)
+	KService::Ptr sp = KService::serviceByDesktopName(partname);
+	if (sp)
 	{
-		m_part = static_cast<KParts::ReadOnlyPart*>(factory->create(this));
+		m_part = sp->createInstance<KParts::ReadOnlyPart>(nullptr, QVariantList(), nullptr);
 		if (m_part)
 		{
 			setCentralWidget(m_part->widget());
@@ -46,7 +48,7 @@ QKRemote::QKRemote()
 	}
 	else
 	{
-		KMessageBox::error(this, i18n("Could not create a factory for %1.", QString("qkremotepart")));
+		KMessageBox::error(this, i18n("Could not create a factory for %1.", partname));
 		deleteLater();
 		return;
 	}

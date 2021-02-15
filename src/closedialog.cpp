@@ -22,31 +22,28 @@
 #include "qkstack.h"
 #include "qkview.h"
 
-#include <KDE/KDialog>
-#include <KDE/KPushButton>
-
-#include <QtWidgets/QTableWidget>
-#include <QtWidgets/QBoxLayout>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QCheckBox>
+#include <QPushButton>
+#include <QTableWidget>
+#include <QBoxLayout>
+#include <QDialogButtonBox>
+#include <QCheckBox>
+#include <QDialog>
 
 #include "ui_detach_processes.h"
 
 CloseDialog::CloseDialog(QWidget* parent, Qt::WindowFlags f)
-	: KDialog(parent, f)
+	: QDialog(parent, f)
 {
 	m_widget = new Ui::DetachProcesses;
-	m_widget->setupUi(mainWidget());
+	m_widget->setupUi(this);
 
-	setButtons(Cancel | User1 | User2);
+	QPushButton* dont = new QPushButton(QIcon("application-exit"), i18n("Don't detach"));
+	connect(dont, SIGNAL(clicked()), SLOT(dontDetach()));
+	m_widget->buttonBox->addButton(dont, QDialogButtonBox::ActionRole);
 
-	setButtonIcon(User1, QIcon("application-exit"));
-	setButtonText(User1, i18n("Don't detach"));
-	connect(this, SIGNAL(user1Clicked()), SLOT(dontDetach()));
-
-	setButtonIcon(User2, QIcon("document-new"));
-	setButtonText(User2, i18n("Detach selected"));
-	connect(this, SIGNAL(user2Clicked()), SLOT(detach()));
+	QPushButton* detachBtn = new QPushButton(QIcon("document-new"), i18n("Detach selected"));
+	connect(detachBtn, SIGNAL(clicked()), SLOT(detach()));
+	m_widget->buttonBox->addButton(detachBtn, QDialogButtonBox::ActionRole);
 }
 
 
@@ -107,15 +104,13 @@ void CloseDialog::detach()
 }
 
 
-bool CloseDialog::exec(QMap<QKView*, QKStack*>& detach)
-{
-	qobject_cast<QDialog*>(this)->exec();
-	detach = m_viewStackMap;
-	return result();
-}
-
-
 int CloseDialog::size() const
 {
 	return m_widget->processTable->rowCount();
+}
+
+
+const QMap<QKView *, QKStack *> & CloseDialog::selectedForDetach() const
+{
+	return m_viewStackMap;
 }

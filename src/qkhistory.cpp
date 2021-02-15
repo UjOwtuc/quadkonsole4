@@ -21,10 +21,10 @@
 #include "qkhistory.h"
 #include "settings.h"
 
-#include <KDE/KParts/HistoryProvider>
+#include <KParts/HistoryProvider>
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <QString>
+#include <QStringList>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_historyprovider.h>

@@ -23,8 +23,9 @@
 
 #include <KParts/ReadOnlyPart>
 
-#include <QtWidgets/QTreeWidgetItem>
-#include <QtCore/QThread>
+#include <QTreeWidgetItem>
+#include <QThread>
+#include <QVariantList>
 
 // dbus interface
 class DeSpambriQuadkonsole4QuadKonsoleInterface;
@@ -62,10 +63,10 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		static const char partName[];
 		static const QString dbusInterfaceName;
 
-		QKRemotePart(QWidget* parentWidget,QObject* parent, const QStringList &);
+		QKRemotePart(QWidget* parentWidget, QObject* parent, const QVariantList &);
 		virtual ~QKRemotePart();
 
-		static K4AboutData *createAboutData();
+		static KAboutData *createAboutData();
 
 	protected:
 		/**
@@ -93,6 +94,5 @@ class QKRemotePart : public KParts::ReadOnlyPart
 		QTimer* m_updateTimer;
 		QThread* m_dbusThread;
 };
-
 
 #endif // QKREMOTEPART_H

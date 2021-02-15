@@ -23,9 +23,9 @@
 
 #include "mousemovefilter.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QEvent>
-#include <QtWidgets/QWidget>
+#include <QObject>
+#include <QEvent>
+#include <QWidget>
 
 
 MouseMoveFilter::MouseMoveFilter(QObject* parent)

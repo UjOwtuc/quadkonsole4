@@ -21,9 +21,9 @@
 #include "qkbrowseriface.h"
 #include "qkhistory.h"
 
-#include <KDE/KDebug>
-#include <KDE/KParts/BrowserInterface>
+#include <KParts/BrowserInterface>
 
+#include <QDebug>
 
 QKBrowserInterface::QKBrowserInterface(QKHistory& parent)
 	: BrowserInterface(&parent),
@@ -39,5 +39,5 @@ uint QKBrowserInterface::historyLength() const
 
 void QKBrowserInterface::goHistory(int /*steps*/)
 {
-	kDebug() << "don't know how to _change_ anything" << endl;
+	qDebug() << "don't know how to _change_ anything";
 }

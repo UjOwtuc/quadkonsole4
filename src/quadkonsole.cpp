@@ -29,34 +29,30 @@
 #include "qkview.h"
 #include "qkbrowseriface.h"
 
-#include <KDE/KLocale>
-#include <KDE/KActionCollection>
-#include <KDE/KMenuBar>
-#include <KDE/KStandardAction>
-#include <KDE/KToggleAction>
-#include <KDE/KStatusBar>
-#include <KDE/KToolBar>
-#include <KDE/KConfigDialog>
-#include <KDE/KMessageBox>
-#include <KDE/KHistoryComboBox>
-#include <KDE/KLineEdit>
-#include <KDE/KParts/ReadOnlyPart>
-#include <KDE/KParts/PartManager>
-#include <KDE/KParts/HistoryProvider>
-
-#include <KGlobalSettings>
-#include <KShortcut>
+#include <KActionCollection>
+#include <KStandardAction>
+#include <KToggleAction>
+#include <KToolBar>
+#include <KConfigDialog>
+#include <KMessageBox>
+#include <KHistoryComboBox>
+#include <KLineEdit>
+#include <KParts/ReadOnlyPart>
+#include <KParts/PartManager>
+#include <KParts/HistoryProvider>
 
 #ifdef HAVE_LIBKONQ
 #include <konq_historyprovider.h>
 #endif
 
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtGui/QClipboard>
-#include <QtWidgets/QLayout>
-#include <QtWidgets/QSplitter>
-#include <QtCore/QTimer>
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
+#include <QLayout>
+#include <QSplitter>
+#include <QTimer>
+#include <QStatusBar>
+#include <QMenuBar>
 
 #include "ui_prefs_base.h"
 #include "ui_prefs_shutdown.h"
@@ -173,7 +169,6 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 
 QuadKonsole::~QuadKonsole()
 {
-	qDebug() << "deleting " << m_stacks.count() << " parts" << endl;
 	m_partManager.disconnect();
 }
 
@@ -184,7 +179,6 @@ void QuadKonsole::initHistory()
 	toolBar("locationToolBar")->addWidget(m_urlBar);
 	m_urlBar->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
 	m_urlBar->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
-	m_urlBar->setFont(KGlobalSettings::generalFont());
 	m_urlBar->setFocusPolicy(Qt::ClickFocus);
 	connect(m_urlBar, SIGNAL(returnPressed()), SLOT(slotOpenUrl()));
 	connect(m_urlBar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
@@ -212,77 +206,77 @@ void QuadKonsole::setupActions()
 
 	// Movement
 	QAction* goRight = new QAction(QIcon("arrow-right"), i18n("Go &right"), this);
-	goRight->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right));
 	actionCollection()->addAction("go right", goRight);
+	actionCollection()->setDefaultShortcut(goRight, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Right));
 	connect(goRight, SIGNAL(triggered()), SLOT(focusKonsoleRight()));
 
 	QAction* goLeft = new QAction(QIcon("arrow-left"), i18n("Go &left"), this);
-	goLeft->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("go left", goLeft);
+	actionCollection()->setDefaultShortcut(goLeft, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Left));
 	connect(goLeft, SIGNAL(triggered()), SLOT(focusKonsoleLeft()));
 
 	QAction* goUp = new QAction(QIcon("arrow-up"), i18n("Go &up"), this);
-	goUp->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	actionCollection()->addAction("go up", goUp);
+	actionCollection()->setDefaultShortcut(goUp, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Up));
 	connect(goUp, SIGNAL(triggered()), SLOT(focusKonsoleUp()));
 
 	QAction* goDown = new QAction(QIcon("arrow-down"), i18n("Go &down"), this);
-	goDown->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	actionCollection()->addAction("go down", goDown);
+	actionCollection()->setDefaultShortcut(goDown, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Down));
 	connect(goDown, SIGNAL(triggered()), SLOT(focusKonsoleDown()));
 
 	QAction* tabLeft = new QAction(i18n("&Previous tab"), this);
-	tabLeft->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
 	actionCollection()->addAction("tab left", tabLeft);
+	actionCollection()->setDefaultShortcut(tabLeft, QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Left));
 	connect(tabLeft, SIGNAL(triggered(bool)), this, SLOT(tabLeft()));
 
 	QAction* tabRight = new QAction(i18n("&Next tab"), this);
-	tabRight->setShortcut(QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Right));
 	actionCollection()->addAction("tab right", tabRight);
+	actionCollection()->setDefaultShortcut(tabRight, QKeySequence(Qt::ALT + Qt::SHIFT + Qt::Key_Right));
 	connect(tabRight, SIGNAL(triggered(bool)), this, SLOT(tabRight()));
 
 	// Adding and removing parts
 	QAction* detach = new QAction(QIcon("document-new"), i18n("De&tach"), this);
-	detach->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
 	actionCollection()->addAction("detach", detach);
+	actionCollection()->setDefaultShortcut(detach, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Return));
 	connect(detach, SIGNAL(triggered(bool)), this, SLOT(detach()));
 
 	QAction* insertHorizontal = new QAction(QIcon("view-split-left-right"), i18n("Insert &horizontal"), this);
-	insertHorizontal->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 	actionCollection()->addAction("insert horizontal", insertHorizontal);
+	actionCollection()->setDefaultShortcut(insertHorizontal, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
 
 	QAction* insertVertical = new QAction(QIcon("view-split-top-bottom"), i18n("Insert &vertical"), this);
-	insertVertical->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 	actionCollection()->addAction("insert vertical", insertVertical);
+	actionCollection()->setDefaultShortcut(insertVertical, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_K));
 
 	QAction* removeStack = new QAction(QIcon("view-left-close"), i18n("Re&move stack"), this);
-	removeStack->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 	actionCollection()->addAction("remove part", removeStack);
+	actionCollection()->setDefaultShortcut(removeStack, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 	connect(removeStack, SIGNAL(triggered(bool)), this, SLOT(removeStack()));
 
 	QAction* duplicateView = new QAction(QIcon("edit-copy"), i18n("&Duplicate view"), this);
-	duplicateView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D));
 	actionCollection()->addAction("duplicate view", duplicateView);
+	actionCollection()->setDefaultShortcut(duplicateView, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D));
 	connect(duplicateView, SIGNAL(triggered()), SLOT(slotDuplicateView()));
 
 	// View
 	QAction* resetLayouts = new QAction(QIcon("view-grid"), i18n("R&eset layouts"), this);
-	actionCollection()->addAction("reset layouts", resetLayouts);
 	connect(resetLayouts, SIGNAL(triggered(bool)), this, SLOT(resetLayouts()));
+	actionCollection()->addAction("reset layouts", resetLayouts);
 
 	QAction* switchView = new QAction(QIcon("document-open-folder"), i18n("S&witch view"), this);
-	switchView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
 	actionCollection()->addAction("switch view", switchView);
+	actionCollection()->setDefaultShortcut(switchView, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O));
 	connect(switchView, SIGNAL(triggered(bool)), this, SLOT(switchView()));
 
 	QAction* closeView = new QAction(QIcon("document-close"), i18n("&Close view"), this);
-	closeView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
 	actionCollection()->addAction("close view", closeView);
+	actionCollection()->setDefaultShortcut(closeView, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Q));
 	connect(closeView, SIGNAL(triggered(bool)), this, SLOT(closeView()));
 
 	QAction* zoomView = new QAction(QIcon("zoom-in"), i18n("&Zoom"), this);
-	zoomView->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
 	actionCollection()->addAction("zoom view", zoomView);
+	actionCollection()->setDefaultShortcut(zoomView, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
 	connect(zoomView, SIGNAL(triggered(bool)), SLOT(zoomView()));
 
 	// Standard actions
@@ -295,26 +289,26 @@ void QuadKonsole::setupActions()
 	toggleMenu->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M));
 
 	QAction* changeLayout = new QAction(QIcon(""), i18n("C&hange layout"), this);
-	changeLayout->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L));
 	actionCollection()->addAction("change layout", changeLayout);
+	actionCollection()->setDefaultShortcut(changeLayout, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L));
 	connect(changeLayout, SIGNAL(triggered(bool)), SLOT(changeLayout()));
 
 	// Location toolbar
 	QAction* toggleUrlBar = new QAction(QIcon("document-open-remote"), i18n("&Open URL"), this);
-	toggleUrlBar->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
 	actionCollection()->addAction("toolbar_url_combo", toggleUrlBar);
+	actionCollection()->setDefaultShortcut(toggleUrlBar, QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_G));
 	connect(toggleUrlBar, SIGNAL(triggered(bool)), this, SLOT(slotActivateUrlBar()));
 
 	connect(&m_partManager, SIGNAL(activePartChanged(KParts::Part*)), SLOT(slotActivePartChanged(KParts::Part*)));
 
 	// Debug
 #ifdef DEBUG
-	kDebug() << "adding debugging actions" << endl;
-	KAction* saveSession = new KAction(QIcon("document-save"), i18n("Save session"), this);
+	qDebug() << "adding debugging actions";
+	QAction* saveSession = new QAction(QIcon("document-save"), i18n("Save session"), this);
 	actionCollection()->addAction("saveSession", saveSession);
 	connect(saveSession, SIGNAL(triggered(bool)), this, SLOT(saveSession()));
 
-	KAction* restoreSession = new KAction(QIcon("document-open"), i18n("Restore session"), this);
+	QAction* restoreSession = new QAction(QIcon("document-open"), i18n("Restore session"), this);
 	actionCollection()->addAction("restoreSession", restoreSession);
 	connect(restoreSession, SIGNAL(triggered(bool)), this, SLOT(restoreSession()));
 #endif // DEBUG
@@ -361,8 +355,6 @@ void QuadKonsole::setupUi(int rows, int columns, QList<KParts::ReadOnlyPart*> pa
 			addStack(i, j, part);
 		}
 	}
-	qDebug() << "finished setting up layouts for" << m_stacks.count() << "parts" << endl;
-
 	setWindowIcon(QIcon("quadkonsole4"));
 }
 
@@ -538,7 +530,7 @@ void QuadKonsole::reconnectMovement()
 				connect(action, SIGNAL(triggered(bool)), it.value().second.toLatin1().data());
 		}
 		else
-			qDebug() << "action" << it.key() << "not in actionCollection" << endl;
+			qDebug() << "action" << it.key() << "not in actionCollection";
 	}
 }
 
@@ -641,11 +633,11 @@ bool QuadKonsole::queryClose()
 
 		if (dialog.size())
 		{
-			QMap<QKView*, QKStack*> doDetach;
-			if (! dialog.exec(doDetach))
+			if (! dialog.exec())
 				return false;
 			else
 			{
+				QMap<QKView*, QKStack*> doDetach = dialog.selectedForDetach();
 				QMapIterator<QKView*, QKStack*> it(doDetach);
 				while (it.hasNext())
 				{
@@ -664,7 +656,7 @@ bool QuadKonsole::queryClose()
 
 void QuadKonsole::saveProperties(KConfigGroup& config)
 {
-	qDebug() << "saving session status to" << config.name() << endl;
+	qDebug() << "saving session status to" << config.name();
 
 	bool orientationVertical;
 	if (m_rows->orientation() == Qt::Vertical)
@@ -675,11 +667,9 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 
 	QList<int> rowSizes = m_rows->sizes();
 	config.writeEntry("rowSizes", rowSizes);
-	qDebug() << "saving session. rowSizes =" << rowSizes << endl;
 
 	for (int i=0; i<m_rowLayouts.size(); ++i)
 	{
-		qDebug() << QString("row_%1").arg(i) << "=" << m_rowLayouts[i]->sizes() << endl;
 		config.writeEntry(QString("row_%1").arg(i), m_rowLayouts[i]->sizes());
 		for (int s=0; s<m_rowLayouts[i]->count(); ++s)
 		{
@@ -697,27 +687,27 @@ void QuadKonsole::saveProperties(KConfigGroup& config)
 
 void QuadKonsole::readProperties(const KConfigGroup& config)
 {
-	qDebug() << "reading session status from" << config.name() << endl;
+	qDebug() << "reading session status from" << config.name();
 	m_restoringSession = true;
 
 	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
 	if (rowSizes.empty())
 	{
-		qDebug() << "could not read properties: empty rowSizes" << endl;
+		qDebug() << "could not read properties: empty rowSizes";
 		rowSizes << height();
 	}
 
-	qDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size() << endl;
+	qDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size();
 	while (m_rowLayouts.size() < rowSizes.size())
 		insertVertical(0, 0);
 
 	for (int i=0; i<rowSizes.size(); ++i)
 	{
-		qDebug() << "restoring row" << i << endl;
+		qDebug() << "restoring row" << i;
 		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
 		if (i == 1 && sizes.empty())
 		{
-			qDebug() << "now sizes for row" << i << endl;
+			qDebug() << "now sizes for row" << i;
 			sizes << width();
 		}
 		while (m_rowLayouts[i]->count() < sizes.size())
@@ -731,7 +721,7 @@ void QuadKonsole::readProperties(const KConfigGroup& config)
 	{
 		for (int s=0; s<m_rowLayouts.at(i)->count(); ++s)
 		{
-			qDebug() << "restore stack" << i << s << endl;
+			qDebug() << "restore stack" << i << s;
 			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
 			if (stack)
 			{
@@ -769,7 +759,6 @@ QKStack* QuadKonsole::getFocusStack()
 			return *it;
 	}
 
-	qDebug() << "could not find focus" << endl;
 	return 0;
 }
 
@@ -787,7 +776,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 		}
 	}
 
-	qDebug() << "could not find focus in" << m_stacks.count() << "parts" << endl;
+	qDebug() << "could not find focus in" << m_stacks.count() << "parts";
 	row = -1;
 	col = -1;
 }
@@ -879,12 +868,11 @@ void QuadKonsole::removeStack()
 
 			if (dialog.size())
 			{
-				QMap<QKView*, QKStack*> doDetach;
-				if (! dialog.exec(doDetach))
+				if (! dialog.exec())
 					return;
 				else
 				{
-					qDebug() << "detaching" << doDetach.count() << "views" << endl;
+					QMap<QKView*, QKStack*> doDetach = dialog.selectedForDetach();
 					QMapIterator<QKView*, QKStack*> it(doDetach);
 					while (it.hasNext())
 					{
@@ -1161,7 +1149,7 @@ void QuadKonsole::slotStackDestroyed(QKStack* removed)
 		}
 	}
 	else
-		qDebug() << "no stack removed??" << endl;
+		qDebug() << "no stack removed??";
 
 	if (m_stacks.empty())
 		deleteLater();
@@ -1182,7 +1170,7 @@ void QuadKonsole::slotSetLocationBarUrl(const QString& url)
 		m_urlBar->lineEdit()->setCursorPosition(0);
 	}
 	else
-		qDebug() << "won't set location bar url for an inactive stack" << endl;
+		qDebug() << "won't set location bar url for an inactive stack";
 }
 
 
@@ -1194,12 +1182,12 @@ void QuadKonsole::zoomView(int row, int col)
 	{
 		if (row < 0 || row >= m_rowLayouts.count())
 		{
-			qDebug() << "invalid row:" << row << endl;
+			qDebug() << "invalid row:" << row;
 			return;
 		}
 		if (col < 0 || col >= m_rowLayouts.at(row)->count())
 		{
-			qDebug() << "ivalid column:" << col << endl;
+			qDebug() << "ivalid column:" << col;
 			return;
 		}
 

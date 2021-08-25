@@ -116,8 +116,6 @@ class QuadKonsole : public KParts::MainWindow
 		QKStack* getFocusStack();
 		void getFocusCoords(int& row, int& col);
 		QKStack* addStack(int row, int col, KParts::ReadOnlyPart* part=0);
-		void saveProperties(KConfigGroup& config);
-		void readProperties(const KConfigGroup& config);
 
 	private:
 		QuadKonsole(KParts::ReadOnlyPart* part);
@@ -138,7 +136,6 @@ class QuadKonsole : public KParts::MainWindow
 		QKStack* m_activeStack;
 		QPair<int, int> m_zoomed;
 		QuadKonsoleAdaptor* m_dbusAdaptor;
-		bool m_restoringSession;
 };
 
 

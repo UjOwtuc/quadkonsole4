@@ -45,5 +45,3 @@ bool MouseMoveFilter::eventFilter(QObject* o, QEvent* e)
 	// do not suppress event
 	return false;
 }
-
-#include "mousemovefilter.moc"

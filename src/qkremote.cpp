@@ -68,5 +68,3 @@ void QKRemote::setupActions()
 	createStandardStatusBarAction();
 	setStandardToolBarMenuEnabled(true);
 }
-
-#include "qkremote.moc"

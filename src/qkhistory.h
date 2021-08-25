@@ -25,12 +25,7 @@
 #include <QString>
 #include <QStringList>
 
-#ifdef HAVE_LIBKONQ
-#include <konq_historyprovider.h>
-class QKHistory : public KonqHistoryProvider
-#else
 class QKHistory : public QObject
-#endif
 {
 	public:
 		static QKHistory* self();

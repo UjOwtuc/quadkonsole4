@@ -35,12 +35,6 @@
 
 #include <QTabBar>
 
-#ifdef HAVE_LIBKONQ
-#include <konq_popupmenu.h>
-#else
-// TODO?
-#endif
-
 
 QKStack::QKStack(KParts::PartManager& partManager, bool restoringSession, QWidget* parent)
 	: QTabWidget(parent),
@@ -165,40 +159,6 @@ const QKView* QKStack::view(int index) const
 {
 	QKView* view = qobject_cast<QKView*>(widget(index));
 	return view;
-}
-
-
-void QKStack::saveProperties(KConfigGroup& config)
-{
-	config.writeEntry("currentIndex", currentIndex());
-
-	QString part = "part_%1";
-	QString url = "url_%1";
-	for (int i=0; i<count(); ++i)
-	{
-		QKView* view = qobject_cast<QKView*>(widget(i));
-		if (view)
-		{
-			config.writeEntry(part.arg(i), view->partName());
-			config.writeEntry(url.arg(i), view->getURL().toString());
-		}
-	}
-}
-
-
-void QKStack::readProperties(const KConfigGroup& config)
-{
-	QString part = "part_%1";
-	QString url = "url_%1";
-	for (int i=0; config.hasKey(part.arg(i)); ++i)
-	{
-		addViews(QStringList(config.readEntry<QString>(part.arg(i), "konsolepart.desktop")));
-		switchView(i, config.readEntry<QUrl>(url.arg(i), QUrl()));
-	}
-	setCurrentIndex(config.readEntry("currentIndex", 0));
-
-	// for tab bar placement/visibility. might load additional views
-	settingsChanged();
 }
 
 
@@ -517,54 +477,6 @@ void QKStack::enableAction(const char* action, bool enable)
 }
 
 
-void QKStack::popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map)
-{
-	QKView* view = currentWidget();
-	if (view)
-	{
-#ifdef HAVE_LIBKONQ
-		KActionCollection popupActions(static_cast<QWidget*>(0));
-		KAction* back = popupActions.addAction("go_back", KStandardAction::back(this, SLOT(goBack()), &popupActions));
-		back->setEnabled(QKHistory::self()->canGoBack());
-
-		KAction* forward = popupActions.addAction("go_forward", KStandardAction::forward(this, SLOT(goForward()), &popupActions));
-		forward->setEnabled(QKHistory::self()->canGoForward());
-
-		KAction* up = popupActions.addAction("go_up", KStandardAction::up(this, SLOT(goUp()), &popupActions));
-		up->setEnabled(view->getURL().upUrl() != view->getURL());
-
-		popupActions.addAction("cut", KStandardAction::cut(0, 0, this));
-		popupActions.addAction("copy", KStandardAction::copy(0, 0, this));
-		popupActions.addAction("paste", KStandardAction::paste(0, 0, this));
-		QAction* separator = new QAction(&popupActions);
-		separator->setSeparator(true);
-		popupActions.addAction("separator", separator);
-
-		KonqPopupMenu::Flags konqFlags = 0;
-		KonqPopupMenu* menu = new KonqPopupMenu(items, view->getURL(), popupActions, 0, konqFlags, flags, view->part()->widget(), 0, map);
-#else // HAVE_LIBKONQ
-		// TODO
-// 		KMenu* menu = new KMenu(this);
-// 		QList<QActionGroup*> groups = view->part()->actionCollection()->actionGroups();
-// 		QListIterator<QActionGroup*> it(groups);
-// 		while (it.hasNext())
-// 		{
-// 			QActionGroup* group = it.next();
-// 			if (group->isVisible() && group->isEnabled())
-// 			{
-// 				KMenu* submenu = new KMenu;
-// 				submenu->addActions(group->actions());
-// 				menu->addMenu(submenu);
-// 			}
-// 		}
-// 		menu->addActions(view->part()->actionCollection()->actionsWithoutGroup());
-#endif // HAVE_LIBKONQ
-// 		menu->exec(where);
-// 		delete menu;
-	}
-}
-
-
 void QKStack::setupUi(KParts::ReadOnlyPart* part, bool restoringSession)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -617,7 +529,6 @@ void QKStack::addViewActions(QKView* view)
 	connect(view, SIGNAL(setWindowCaption(QString)), SLOT(slotSetWindowCaption(QString)));
 	connect(view, SIGNAL(openUrlRequest(QUrl)), SLOT(slotOpenUrlRequest(QUrl)));
 	connect(view, SIGNAL(openUrlNotify()), SLOT(slotOpenUrlNotify()));
-	connect(view, SIGNAL(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)), SLOT(popupMenu(QPoint,KFileItemList,KParts::BrowserExtension::PopupFlags,KParts::BrowserExtension::ActionGroupMap)));
 	connect(view, SIGNAL(createNewWindow(QUrl,QString,KParts::ReadOnlyPart**)), SLOT(slotOpenNewWindow(QUrl,QString,KParts::ReadOnlyPart**)));
 	connect(view, SIGNAL(destroyed()), SLOT(slotCurrentChanged()));
 
@@ -658,4 +569,4 @@ int QKStack::openViewByMimeType(const QString& mimeType, bool allowDuplicate)
 	return openedIndex;
 }
 
-#include "qkstack.moc"
+// #include "qkstack.moc"

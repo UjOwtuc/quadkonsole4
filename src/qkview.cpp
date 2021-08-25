@@ -71,8 +71,8 @@ KService::Ptr QKPartFactory::getFactory(const QString& name)
 }
 
 
-QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent, Qt::WindowFlags f)
-	: QWidget(parent, f),
+QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent)
+	: QWidget(parent),
 	m_partname(partname),
 	m_part(0),
 	m_writablePart(0),
@@ -86,8 +86,8 @@ QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* brows
 }
 
 
-QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent, Qt::WindowFlags f)
-	: QWidget(parent, f),
+QKView::QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent)
+	: QWidget(parent),
 	m_part(part),
 	m_writablePart(0),
 	m_partManager(partManager),
@@ -574,5 +574,3 @@ void QKView::setupPart()
 	}
 	m_partManager.addPart(m_part);
 }
-
-#include "qkview.moc"

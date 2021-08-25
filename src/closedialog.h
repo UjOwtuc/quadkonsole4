@@ -35,7 +35,7 @@ class CloseDialog : public QDialog
 {
 	Q_OBJECT
 	public:
-		explicit CloseDialog(QWidget* parent = 0, Qt::WindowFlags f = 0);
+		explicit CloseDialog(QWidget* parent = 0);
 		virtual ~CloseDialog();
 
 		void addView(QKStack* stack, QKView* view);

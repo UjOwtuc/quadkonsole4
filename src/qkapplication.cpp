@@ -159,5 +159,3 @@ void QKApplication::windowDestroyed()
 {
 	m_mainWindows.removeAll(0);
 }
-
-#include "qkapplication.moc"

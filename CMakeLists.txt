@@ -11,12 +11,6 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
 include(FeatureSummary)
 
-# macro_optional_find_package(LibKonq)
-# macro_log_feature(LIBKONQ_FOUND "LibKonq" "Konqueror's context menu" "http://www.kde.org" FALSE "" "")
-# if (LIBKONQ_FOUND)
-# 	add_definitions(-DHAVE_LIBKONQ)
-# endif()
-
 find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS
 	Widgets
 )

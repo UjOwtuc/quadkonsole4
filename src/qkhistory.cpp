@@ -26,11 +26,6 @@
 #include <QString>
 #include <QStringList>
 
-#ifdef HAVE_LIBKONQ
-#include <konq_historyprovider.h>
-#include <konq_historyentry.h>
-#endif
-
 QKHistory* QKHistory::m_instace = 0;
 
 
@@ -99,26 +94,7 @@ void QKHistory::addEntry(const QString& url)
 			m_history.removeLast();
 
 		m_history.append(url);
-#ifdef HAVE_LIBKONQ
-		QList<KonqHistoryEntry>::iterator it = findEntry(KUrl(url));
-		if (it!=entries().end())
-		{
-			(*it).numberOfTimesVisited += 1;
-			(*it).lastVisited = QDateTime::currentDateTime();
-		}
-		else
-		{
-			KonqHistoryEntry entry;
-			entry.firstVisited = entry.lastVisited = QDateTime::currentDateTime();
-			entry.numberOfTimesVisited = 1;
-			entry.title = url;
-			entry.typedUrl = url;
-			entry.url = KUrl(url);
-			emitAddToHistory(entry);
-		}
-#else
 		KParts::HistoryProvider::self()->insert(url);
-#endif
 		m_history.removeDuplicates();
 
 		while (static_cast<unsigned int>(m_history.count()) > Settings::historySize())

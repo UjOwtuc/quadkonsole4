@@ -31,8 +31,8 @@
 
 #include "ui_detach_processes.h"
 
-CloseDialog::CloseDialog(QWidget* parent, Qt::WindowFlags f)
-	: QDialog(parent, f)
+CloseDialog::CloseDialog(QWidget* parent)
+	: QDialog(parent)
 {
 	m_widget = new Ui::DetachProcesses;
 	m_widget->setupUi(this);

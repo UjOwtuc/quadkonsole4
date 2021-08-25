@@ -62,9 +62,6 @@ class QKStack : public QTabWidget
 		virtual QKView* currentWidget() const;
 		const QKView* view(int index) const;
 
-		void saveProperties(KConfigGroup& config);
-		void readProperties(const KConfigGroup& config);
-
 	signals:
 		void partCreated();
 		void setStatusBarText(QString);
@@ -94,7 +91,6 @@ class QKStack : public QTabWidget
 		void slotOpenUrlNotify();
 		void slotCurrentChanged();
 		void enableAction(const char* action, bool enable);
-		void popupMenu(const QPoint& where, const KFileItemList& items, KParts::BrowserExtension::PopupFlags flags, const KParts::BrowserExtension::ActionGroupMap& map);
 
 	private:
 		void setupUi(KParts::ReadOnlyPart* part=0, bool restoringSession=false);

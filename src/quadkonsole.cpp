@@ -41,10 +41,6 @@
 #include <KParts/PartManager>
 #include <KParts/HistoryProvider>
 
-#ifdef HAVE_LIBKONQ
-#include <konq_historyprovider.h>
-#endif
-
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
@@ -84,30 +80,12 @@ QString splitIndex(const QString& s, int* index)
 }
 
 
-// Only for restoring a session.
-QuadKonsole::QuadKonsole()
-	: m_mouseFilter(0),
-	m_partManager(this),
-	m_activeStack(0),
-	m_zoomed(-1, -1),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
-	m_restoringSession(true)
-{
-	setupActions();
-	initHistory();
-	setupUi(0, 0);
-
-	reconnectMovement();
-}
-
-
 QuadKonsole::QuadKonsole(int rows, int columns, const QStringList& cmds, const QStringList& urls)
 	: m_mouseFilter(0),
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
-	m_restoringSession(false)
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
 	if (rows == 0)
 		rows = Settings::numRows();
@@ -148,8 +126,7 @@ QuadKonsole::QuadKonsole(KParts::ReadOnlyPart* part)
 	m_partManager(this),
 	m_activeStack(0),
 	m_zoomed(-1, -1),
-	m_dbusAdaptor(new QuadKonsoleAdaptor(this)),
-	m_restoringSession(false)
+	m_dbusAdaptor(new QuadKonsoleAdaptor(this))
 {
 	QList<KParts::ReadOnlyPart*> parts;
 	parts.append(part);
@@ -183,15 +160,6 @@ void QuadKonsole::initHistory()
 	connect(m_urlBar, SIGNAL(returnPressed()), SLOT(slotOpenUrl()));
 	connect(m_urlBar, SIGNAL(returnPressed(QString)), SLOT(slotOpenUrl(QString)));
 
-#ifdef HAVE_LIBKONQ
-	QKHistory* history = QKHistory::self();
-	history->loadHistory();
-
-	const KonqHistoryList& historyList = history->entries();
-	QListIterator<KonqHistoryEntry> it(historyList);
-	while (it.hasNext())
-		m_urlBar->addToHistory(it.next().typedUrl);
-#endif
 	connect(KParts::HistoryProvider::self(), SIGNAL(inserted(QString)), SLOT(refreshHistory(QString)));
 }
 
@@ -654,100 +622,6 @@ bool QuadKonsole::queryClose()
 }
 
 
-void QuadKonsole::saveProperties(KConfigGroup& config)
-{
-	qDebug() << "saving session status to" << config.name();
-
-	bool orientationVertical;
-	if (m_rows->orientation() == Qt::Vertical)
-		orientationVertical = true;
-	else
-		orientationVertical = false;
-	config.writeEntry("layoutOrientationVertical", orientationVertical);
-
-	QList<int> rowSizes = m_rows->sizes();
-	config.writeEntry("rowSizes", rowSizes);
-
-	for (int i=0; i<m_rowLayouts.size(); ++i)
-	{
-		config.writeEntry(QString("row_%1").arg(i), m_rowLayouts[i]->sizes());
-		for (int s=0; s<m_rowLayouts[i]->count(); ++s)
-		{
-			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
-			if (stack)
-			{
-				QString groupname = QString("stack_%1_%2").arg(i).arg(s);
-				KConfigGroup group(&config, groupname);
-				stack->saveProperties(group);
-			}
-		}
-	}
-}
-
-
-void QuadKonsole::readProperties(const KConfigGroup& config)
-{
-	qDebug() << "reading session status from" << config.name();
-	m_restoringSession = true;
-
-	QList<int> rowSizes = config.readEntry("rowSizes", QList<int>());
-	if (rowSizes.empty())
-	{
-		qDebug() << "could not read properties: empty rowSizes";
-		rowSizes << height();
-	}
-
-	qDebug() << "adjusting number of rows:" << m_rowLayouts.size() << "=>" << rowSizes.size();
-	while (m_rowLayouts.size() < rowSizes.size())
-		insertVertical(0, 0);
-
-	for (int i=0; i<rowSizes.size(); ++i)
-	{
-		qDebug() << "restoring row" << i;
-		QList<int> sizes = config.readEntry(QString("row_%1").arg(i), QList<int>());
-		if (i == 1 && sizes.empty())
-		{
-			qDebug() << "now sizes for row" << i;
-			sizes << width();
-		}
-		while (m_rowLayouts[i]->count() < sizes.size())
-			insertHorizontal(i, 0);
-
-		m_rowLayouts[i]->setSizes(sizes);
-	}
-
-	// read additional information (per stack, per view)
-	for (int i=0; i<m_rowLayouts.count(); ++i)
-	{
-		for (int s=0; s<m_rowLayouts.at(i)->count(); ++s)
-		{
-			qDebug() << "restore stack" << i << s;
-			QKStack* stack = qobject_cast<QKStack*>(m_rowLayouts[i]->widget(s));
-			if (stack)
-			{
-				QString groupname = QString("stack_%1_%2").arg(i).arg(s);
-				if (config.hasGroup(groupname))
-					stack->readProperties(config.group(groupname));
-			}
-		}
-	}
-
-	m_rows->setSizes(rowSizes);
-
-	bool orientationVertical = config.readEntry("orientationVertical", true);
-	if (orientationVertical && m_rows->orientation() == Qt::Horizontal)
-		changeLayout();
-	else if (! orientationVertical && m_rows->orientation() == Qt::Vertical)
-		changeLayout();
-
-	m_activeStack = m_stacks.front();
-	m_stacks.front()->setFocus();
-
-	// session restoration finished, new stacks may create views according to config now
-	m_restoringSession = false;
-}
-
-
 QKStack* QuadKonsole::getFocusStack()
 {
 	KParts::Part* activePart = m_partManager.activePart();
@@ -785,10 +659,7 @@ void QuadKonsole::getFocusCoords(int& row, int& col)
 QKStack* QuadKonsole::addStack(int row, int col, KParts::ReadOnlyPart* part)
 {
 	QKStack* stack;
-	if (part)
-		stack = new QKStack(m_partManager, part);
-	else
-		stack = new QKStack(m_partManager, m_restoringSession);
+	stack = new QKStack(m_partManager, part);
 
 	m_stacks.append(stack);
 	m_rowLayouts[row]->insertWidget(col, stack);
@@ -1286,5 +1157,3 @@ void QuadKonsole::restoreSession()
 		KMessageBox::sorry(this, "Could not find a session to restore. Use \"Save session\" to save the current one.", "No saved session found");
 }
 #endif // DEBUG
-
-#include "quadkonsole.moc"

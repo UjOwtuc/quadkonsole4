@@ -57,8 +57,8 @@ class QKView : public QWidget
 {
 	Q_OBJECT
 	public:
-		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent=0, Qt::WindowFlags f=0);
-		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0, Qt::WindowFlags f=0);
+		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, const QString& partname, QWidget* parent=0);
+		explicit QKView(KParts::PartManager& partManager, KParts::BrowserInterface* browserInterface, KParts::ReadOnlyPart* part, QWidget* parent=0);
 		virtual ~QKView();
 
 		QUrl getURL() const;

@@ -115,7 +115,7 @@ QUrl QKView::getURL() const
 		{
 			int pid = t->terminalProcessId();
 			QFileInfo info(QString("/proc/%1/cwd").arg(pid));
-			return info.readLink();
+			return info.symLinkTarget();
 		}
 		else
 			return m_part->url();
@@ -131,15 +131,10 @@ void QKView::setURL(const QUrl& url)
 		TerminalInterface* t = qobject_cast<TerminalInterface*>(m_part);
 		if (t)
 		{
-			QString path;
-			if (url.isLocalFile())
-				path = url.path();
-			else
-				path = url.url();
-
+			QString path = url.url();
 			QString escaped = KShell::quoteArg(path);
 
-			if (! url.host().isEmpty() && QFileInfo(url.path()).isDir())
+			if (url.host().isEmpty() && QFileInfo(path).isDir())
 			{
 				if (t->foregroundProcessName().isEmpty())
 				{
@@ -280,7 +275,6 @@ void QKView::show()
 	{
 		createPart();
 		m_partManager.setActivePart(m_part);
-		m_partManager.setSelectedPart(m_part);
 	}
 }
 
@@ -552,8 +546,6 @@ void QKView::setupPart()
 		m_updateUrlTimer = new QTimer(this);
 		m_updateUrlTimer->start(1500);
 		connect(m_updateUrlTimer, SIGNAL(timeout()), SLOT(updateUrl()));
-
-		disableKonsoleActions();
 	}
 
 	KParts::BrowserExtension* b = KParts::BrowserExtension::childObject(m_part);
@@ -581,46 +573,6 @@ void QKView::setupPart()
 			sb->setStatusBar(window->statusBar());
 	}
 	m_partManager.addPart(m_part);
-}
-
-
-void QKView::disableKonsoleActions()
-{
-	KActionCollection* ac = m_part->actionCollection();
-
-	if (m_removeKonsoleActions.isEmpty())
-	{
-		m_removeKonsoleActions << "split-view-left-right"
-			<< "split-view-top-bottom"
-			<< "close-active-view"
-			<< "close-other-views"
-			<< "detach-view"
-			<< "expand-active-view"
-			<< "shrink-active-view"
-			<< "next-view"
-			<< "previous-view"
-			<< "next-container"
-			<< "move-view-left"
-			<< "move-view-right"
-			<< "switch-to-tab-0"
-			<< "switch-to-tab-1"
-			<< "switch-to-tab-2"
-			<< "switch-to-tab-3"
-			<< "switch-to-tab-4"
-			<< "switch-to-tab-5"
-			<< "switch-to-tab-6"
-			<< "switch-to-tab-7"
-			<< "switch-to-tab-8"
-			<< "switch-to-tab-9";
-	}
-
-	QStringListIterator it(m_removeKonsoleActions);
-	while (it.hasNext())
-	{
-		QAction* action = ac->action(it.next());
-		if (action)
-			ac->removeAction(action);
-	}
 }
 
 #include "qkview.moc"

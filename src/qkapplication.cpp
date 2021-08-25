@@ -22,6 +22,7 @@
 #include "quadkonsole.h"
 #include "settings.h"
 
+#include <QApplication>
 #include <QDir>
 
 #include "qkapplicationadaptor.h"
@@ -31,6 +32,9 @@ QKApplicationAdaptor* QKApplication::m_dbusAdaptor = 0;
 QKApplication::QKApplication()
 	: QObject()
 {
+	qDebug() << "theme" << QIcon::themeName();
+	qDebug() << "search paths" << QIcon::themeSearchPaths();
+	QApplication::setWindowIcon(QIcon::fromTheme(QStringLiteral("quadkonsole4"), QApplication::windowIcon()));
 	// TODO
 // 	if (restoringSession())
 // 	{

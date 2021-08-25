@@ -115,7 +115,6 @@ class QKView : public QWidget
 	private:
 		void setupUi();
 		void setupPart();
-		void disableKonsoleActions();
 
 		QString m_partname;
 		QBoxLayout* m_layout;
